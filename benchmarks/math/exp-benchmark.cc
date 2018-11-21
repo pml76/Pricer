@@ -14,7 +14,7 @@
 static void BM_IEEE754_Exp(benchmark::State &state) {
 
 
-    std::vector<double> dbls(1024);
+    std::vector<double> dbls(state.range(0));
 
     // First create an instance of an engine.
     std::random_device rnd_device;
@@ -40,12 +40,12 @@ static void BM_IEEE754_Exp(benchmark::State &state) {
 
         state.ResumeTiming();
 
-        for (int j = 0; j < state.range(1); ++j) {
-            ieee754_exp(dbls[j]);
+        for (int j = 0; j < state.range(0); ++j) {
+            benchmark::DoNotOptimize(ieee754_exp(dbls[j]));
         }
 
     }
 
 }
 // Register the function as a benchmark
-BENCHMARK(BM_IEEE754_Exp)->Arg(1024);
+BENCHMARK(BM_IEEE754_Exp)->Arg(1 << 10)->Arg(1 << 11)->Arg(1 << 12);
