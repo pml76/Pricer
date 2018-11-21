@@ -1,0 +1,9 @@
+[submodule "googletest"]
+	path = googletest
+	url = https://github.com/abseil/googletest.git
+[submodule "googlebenchmark"]
+	path = googlebenchmark
+	url = https://github.com/google/benchmark.git
+[submodule "catch2"]
+	path = catch2
+	url = https://github.com/catchorg/Catch2.git

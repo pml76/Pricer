@@ -4,7 +4,18 @@ project(Pricer)
 set(CMAKE_CXX_STANDARD 17)
 
 
-include_directories(./)
+# build google benchmark (target: benchmark)
+# do not build tests of benchmarking lib
+set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "Suppressing benchmark's tests" FORCE)
+add_subdirectory(googlebenchmark)
+
+# build tests (targets: gtest_main, gtest)
+add_subdirectory(googletest)
+
+# build catch2
+add_subdirectory(catch2)
+
+include_directories(./ ${CMAKE_SOURCE_DIR}/catch2/include)
 
 add_executable(Pricer src/main.cpp src/math/erf_wrapper.c src/math/exp_wrapper.c src/math/exp_wrapper.h src/math/log_wrapper.c src/math/log_wrapper.h src/math/sqrt_wrapper.c src/math/erf_wrapper.c src/math/erf_wrapper.h src/math/sqrt_wrapper.h)
 
