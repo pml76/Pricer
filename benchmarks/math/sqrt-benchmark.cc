@@ -91,3 +91,5 @@ static void BM_Sqrt_Default(benchmark::State &state) {
 }
 // Register the function as a benchmark
 BENCHMARK(BM_Sqrt_Default)->Arg(1 << 10)->Arg(1 << 11)->Arg(1 << 12);
+
+

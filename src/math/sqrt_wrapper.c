@@ -3,6 +3,10 @@
 //
 
 
+#include <src/math/sqrt_wrapper.h>
+
+#if SQRT_VERSION == 1
+
 typedef struct {
     unsigned short int __control_word;
     unsigned short int __glibc_reserved1;
@@ -188,3 +192,5 @@ double ieee754_sqrt(double x) {
         return 0x1p-256 * ieee754_sqrt(x * 0x1p512);
     }
 }
+
+#endif
