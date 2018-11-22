@@ -1,9 +1,10 @@
 //
-// Created by peter on 11/21/18.
+// Created by peter on 11/22/18.
 //
 
+
 #include <benchmark/benchmark.h>
-#include <src/math/exp_wrapper.h>
+#include <src/math/erf_wrapper.h>
 #include <vector>
 #include <random>
 #include <algorithm>
@@ -12,7 +13,7 @@
 #include <functional>
 #include <cmath>
 
-static void BM_Exp_IEEE754(benchmark::State &state) {
+static void BM_Erf_IEEE754(benchmark::State &state) {
 
 
     std::vector<double> dbls(state.range(0));
@@ -42,17 +43,17 @@ static void BM_Exp_IEEE754(benchmark::State &state) {
         state.ResumeTiming();
 
         for (int j = 0; j < state.range(0); ++j) {
-            benchmark::DoNotOptimize(ieee754_exp(dbls[j]));
+            benchmark::DoNotOptimize(ieee754_erf(dbls[j]));
         }
 
     }
 
 }
 // Register the function as a benchmark
-BENCHMARK(BM_Exp_IEEE754)->Arg(1 << 10)->Arg(1 << 11)->Arg(1 << 12);
+BENCHMARK(BM_Erf_IEEE754)->Arg(1 << 10)->Arg(1 << 11)->Arg(1 << 12);
 
 
-static void BM_Exp_Default(benchmark::State &state) {
+static void BM_Erf_Default(benchmark::State &state) {
 
 
     std::vector<double> dbls(state.range(0));
@@ -82,11 +83,11 @@ static void BM_Exp_Default(benchmark::State &state) {
         state.ResumeTiming();
 
         for (int j = 0; j < state.range(0); ++j) {
-            benchmark::DoNotOptimize(exp(dbls[j]));
+            benchmark::DoNotOptimize(erf(dbls[j]));
         }
 
     }
 
 }
 // Register the function as a benchmark
-BENCHMARK(BM_Exp_Default)->Arg(1 << 10)->Arg(1 << 11)->Arg(1 << 12);
+BENCHMARK(BM_Erf_Default)->Arg(1 << 10)->Arg(1 << 11)->Arg(1 << 12);

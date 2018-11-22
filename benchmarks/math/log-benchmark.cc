@@ -1,9 +1,9 @@
 //
-// Created by peter on 11/21/18.
+// Created by peter on 11/22/18.
 //
 
 #include <benchmark/benchmark.h>
-#include <src/math/exp_wrapper.h>
+#include <src/math/log_wrapper.h>
 #include <vector>
 #include <random>
 #include <algorithm>
@@ -12,7 +12,7 @@
 #include <functional>
 #include <cmath>
 
-static void BM_Exp_IEEE754(benchmark::State &state) {
+static void BM_Log_IEEE754(benchmark::State &state) {
 
 
     std::vector<double> dbls(state.range(0));
@@ -23,7 +23,7 @@ static void BM_Exp_IEEE754(benchmark::State &state) {
     // Specify the engine and distribution.
     std::mt19937 mersenne_engine{rnd_device()};  // Generates random integers
 
-    std::uniform_real_distribution<double> dist{-52, 52};
+    std::uniform_real_distribution<double> dist{0.01, 52};
 
 
     auto gen = [&dist, &mersenne_engine]() {
@@ -42,17 +42,17 @@ static void BM_Exp_IEEE754(benchmark::State &state) {
         state.ResumeTiming();
 
         for (int j = 0; j < state.range(0); ++j) {
-            benchmark::DoNotOptimize(ieee754_exp(dbls[j]));
+            benchmark::DoNotOptimize(ieee754_log(dbls[j]));
         }
 
     }
 
 }
 // Register the function as a benchmark
-BENCHMARK(BM_Exp_IEEE754)->Arg(1 << 10)->Arg(1 << 11)->Arg(1 << 12);
+BENCHMARK(BM_Log_IEEE754)->Arg(1 << 10)->Arg(1 << 11)->Arg(1 << 12);
 
 
-static void BM_Exp_Default(benchmark::State &state) {
+static void BM_Log_Default(benchmark::State &state) {
 
 
     std::vector<double> dbls(state.range(0));
@@ -63,7 +63,7 @@ static void BM_Exp_Default(benchmark::State &state) {
     // Specify the engine and distribution.
     std::mt19937 mersenne_engine{rnd_device()};  // Generates random integers
 
-    std::uniform_real_distribution<double> dist{-52, 52};
+    std::uniform_real_distribution<double> dist{0.01, 52};
 
 
     auto gen = [&dist, &mersenne_engine]() {
@@ -82,11 +82,11 @@ static void BM_Exp_Default(benchmark::State &state) {
         state.ResumeTiming();
 
         for (int j = 0; j < state.range(0); ++j) {
-            benchmark::DoNotOptimize(exp(dbls[j]));
+            benchmark::DoNotOptimize(log(dbls[j]));
         }
 
     }
 
 }
 // Register the function as a benchmark
-BENCHMARK(BM_Exp_Default)->Arg(1 << 10)->Arg(1 << 11)->Arg(1 << 12);
+BENCHMARK(BM_Log_Default)->Arg(1 << 10)->Arg(1 << 11)->Arg(1 << 12);

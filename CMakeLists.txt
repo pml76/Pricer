@@ -16,8 +16,8 @@ include(ExternalProject)
 
 set(CMAKE_PREFIX_PATH "S{CMAKE_PREFIX_PATH} S{CMAKE_SOURCE_DIR}/cmake/")
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-omit-frame-pointer")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-omit-frame-pointer")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=ivybridge -fno-omit-frame-pointer")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=ivybridge -fno-omit-frame-pointer")
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
@@ -60,7 +60,7 @@ set(PROJECT_HEADERS src/math/erf_wrapper.h src/math/exp_wrapper.h src/math/log_w
 
 set(PROJECT_TEST_SOURCES tests/math/exp-test.cc tests/math/log-test.cc tests/math/erf-test.cc tests/math/sqrt-test.cc)
 
-set(PROJECT_BENCHMARK_SOURCES benchmarks/main.cc benchmarks/math/exp-benchmark.cc)
+set(PROJECT_BENCHMARK_SOURCES benchmarks/main.cc benchmarks/math/exp-benchmark.cc benchmarks/math/erf-benchmark.cc benchmarks/math/log-benchmark.cc benchmarks/math/sqrt-benchmark.cc)
 
 include_directories(./ ${CMAKE_BINARY_DIR}/catch2-install/include ${CMAKE_BINARY_DIR}/googlebenchmark-install/include)
 add_executable(Pricer ${PROJECT_SOURCES} ${PROJECT_HEADERS} src/main.cpp)
