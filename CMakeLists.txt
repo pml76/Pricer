@@ -16,6 +16,11 @@ include(ExternalProject)
 
 set(CMAKE_PREFIX_PATH "S{CMAKE_PREFIX_PATH} S{CMAKE_SOURCE_DIR}/cmake/")
 
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-omit-frame-pointer")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-omit-frame-pointer")
+
+set(CMAKE_VERBOSE_MAKEFILE ON)
+
 # Download and unpack googlebenchmark at configure time
 configure_file(cmake/googlebenchmark.cmake.in googlebenchmark-download/CMakeLists.txt)
 execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
