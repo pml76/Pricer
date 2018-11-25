@@ -55,6 +55,22 @@ if (result)
 endif ()
 
 
+# Download and unpack batch2 at configure time
+configure_file(cmake/trompeloeil.cmake.in trompeloeil-download/CMakeLists.txt)
+execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+        RESULT_VARIABLE result
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/trompeloeil-download)
+if (result)
+    message(FATAL_ERROR "CMake step for googletest failed: ${result}")
+endif ()
+execute_process(COMMAND ${CMAKE_COMMAND} --build .
+        RESULT_VARIABLE result
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/trompeloeil-download)
+if (result)
+    message(FATAL_ERROR "Build step for googletest failed: ${result}")
+endif ()
+
+
 set(PROJECT_SOURCES src/math/erf_wrapper.c src/math/exp_wrapper.c src/math/log_wrapper.c src/math/sqrt_wrapper.c src/math/erf_wrapper.c)
 set(PROJECT_HEADERS src/math/erf_wrapper.h src/math/exp_wrapper.h src/math/log_wrapper.h src/math/sqrt_wrapper.h src/math/erf_wrapper.h)
 
@@ -62,7 +78,11 @@ set(PROJECT_TEST_SOURCES tests/math/exp-test.cc tests/math/log-test.cc tests/mat
 
 set(PROJECT_BENCHMARK_SOURCES benchmarks/main.cc benchmarks/math/exp-benchmark.cc benchmarks/math/erf-benchmark.cc benchmarks/math/log-benchmark.cc benchmarks/math/sqrt-benchmark.cc)
 
-include_directories(./ ${CMAKE_BINARY_DIR}/catch2-install/include ${CMAKE_BINARY_DIR}/googlebenchmark-install/include)
+include_directories(./
+        ${CMAKE_BINARY_DIR}/catch2-install/include
+        ${CMAKE_BINARY_DIR}/googlebenchmark-install/include
+        ${CMAKE_BINARY_DIR}/trompeloeil-install/include
+        )
 add_executable(Pricer ${PROJECT_SOURCES} ${PROJECT_HEADERS} src/main.cpp)
 
 add_executable(Pricer-Tests tests/main.cc ${PROJECT_TEST_SOURCES} ${PROJECT_SOURCES} ${PROJECT_HEADERS})

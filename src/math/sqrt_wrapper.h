@@ -36,7 +36,7 @@ ieee754_sqrt (double d)
 #endif
 
 
-#if SQRT_VERSION = 3
+#if SQRT_VERSION == 3
 
 #define ieee754_sqrt(x) sqrt(x)
 
