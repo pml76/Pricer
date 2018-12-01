@@ -3,8 +3,6 @@ project(Pricer)
 
 set(CMAKE_CXX_STANDARD 17)
 
-include(ExternalProject)
-
 # build google benchmark (target: benchmark)
 # do not build tests of benchmarking lib
 # set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "Suppressing benchmark's tests" FORCE)
@@ -19,57 +17,12 @@ set(CMAKE_PREFIX_PATH "S{CMAKE_PREFIX_PATH} S{CMAKE_SOURCE_DIR}/cmake/")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=ivybridge -fno-omit-frame-pointer")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=ivybridge -fno-omit-frame-pointer")
 
+
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+find_package(GoogleBenchmark REQUIRED)
+
+
 set(CMAKE_VERBOSE_MAKEFILE ON)
-
-# Download and unpack googlebenchmark at configure time
-configure_file(cmake/googlebenchmark.cmake.in googlebenchmark-download/CMakeLists.txt)
-execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-        RESULT_VARIABLE result
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googlebenchmark-download)
-if (result)
-    message(FATAL_ERROR "CMake step for googletest failed: ${result}")
-endif ()
-execute_process(COMMAND ${CMAKE_COMMAND} --build .
-        RESULT_VARIABLE result
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googlebenchmark-download)
-if (result)
-    message(FATAL_ERROR "Build step for googletest failed: ${result}")
-endif ()
-
-find_library(GOOGLE_BENCHMARK_LIB NAMES benchmark PATHS "${CMAKE_BINARY_DIR}/googlebenchmark-install/lib")
-
-
-# Download and unpack batch2 at configure time
-configure_file(cmake/catch2.cmake.in catch2-download/CMakeLists.txt)
-execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-        RESULT_VARIABLE result
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/catch2-download)
-if (result)
-    message(FATAL_ERROR "CMake step for googletest failed: ${result}")
-endif ()
-execute_process(COMMAND ${CMAKE_COMMAND} --build .
-        RESULT_VARIABLE result
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/catch2-download)
-if (result)
-    message(FATAL_ERROR "Build step for googletest failed: ${result}")
-endif ()
-
-
-# Download and unpack batch2 at configure time
-configure_file(cmake/trompeloeil.cmake.in trompeloeil-download/CMakeLists.txt)
-execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-        RESULT_VARIABLE result
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/trompeloeil-download)
-if (result)
-    message(FATAL_ERROR "CMake step for googletest failed: ${result}")
-endif ()
-execute_process(COMMAND ${CMAKE_COMMAND} --build .
-        RESULT_VARIABLE result
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/trompeloeil-download)
-if (result)
-    message(FATAL_ERROR "Build step for googletest failed: ${result}")
-endif ()
-
 
 set(PROJECT_SOURCES src/math/erf_wrapper.c src/math/exp_wrapper.c src/math/log_wrapper.c src/math/sqrt_wrapper.c src/math/erf_wrapper.c)
 set(PROJECT_HEADERS src/math/erf_wrapper.h src/math/exp_wrapper.h src/math/log_wrapper.h src/math/sqrt_wrapper.h src/math/erf_wrapper.h)
