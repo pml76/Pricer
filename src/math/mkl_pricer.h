@@ -7,6 +7,13 @@
 
 #define FLOAT double
 
+#include <mkl.h>
+
+#ifdef __cplusplus
+extern "C"
+#define restrict
+#endif
+
 void init_mkl_pricer();
 
 void prepare_mkl_pricer(
@@ -41,5 +48,6 @@ void mkl_pricer(
         FLOAT *__attribute__((aligned(32))) restrict d1,               /// [out] d1
         FLOAT *__attribute__((aligned(32))) restrict d2,
         FLOAT *__attribute__((aligned(32))) restrict price);
+
 
 #endif //PRICER_MKL_PRICER_H

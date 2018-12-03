@@ -33,7 +33,7 @@ ENDIF ("${isSystemDir}" STREQUAL "-1")
 
 set(CMAKE_PREFIX_PATH "S{CMAKE_PREFIX_PATH} S{CMAKE_SOURCE_DIR}/cmake/")
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=ivybridge -fno-omit-frame-pointer -fopt-info-vec-optimized ")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=ivybridge -fno-omit-frame-pointer -fopt-info-vec-optimized -std=gnu17")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=ivybridge -fno-omit-frame-pointer -fopt-info-vec-optimized ")
 
 
@@ -44,14 +44,14 @@ find_package(Catch2 REQUIRED)
 find_package(MKL REQUIRED)
 
 
-set(CMAKE_VERBOSE_MAKEFILE OFF)
+set(CMAKE_VERBOSE_MAKEFILE ON)
 
 set(PROJECT_SOURCES src/math/erf_wrapper.c src/math/exp_wrapper.c src/math/log_wrapper.c src/math/sqrt_wrapper.c src/math/erf_wrapper.c src/math/mkl_pricer.c)
 set(PROJECT_HEADERS src/math/erf_wrapper.h src/math/exp_wrapper.h src/math/log_wrapper.h src/math/sqrt_wrapper.h src/math/erf_wrapper.h src/math/mkl_pricer.c)
 
 set(PROJECT_TEST_SOURCES tests/math/exp-test.cc tests/math/log-test.cc tests/math/erf-test.cc tests/math/sqrt-test.cc)
 
-set(PROJECT_BENCHMARK_SOURCES benchmarks/main.cc benchmarks/math/exp-benchmark.cc benchmarks/math/erf-benchmark.cc benchmarks/math/log-benchmark.cc benchmarks/math/sqrt-benchmark.cc)
+set(PROJECT_BENCHMARK_SOURCES benchmarks/main.cc benchmarks/math/exp-benchmark.cc benchmarks/math/erf-benchmark.cc benchmarks/math/log-benchmark.cc benchmarks/math/sqrt-benchmark.cc benchmarks/math/mkl-pricer-benchmark.cc)
 
 include_directories(./ $ENV{SPACK_TRANSITIVE_INCLUDE_PATH} ${MKL_INCLUDE_DIRS})
 

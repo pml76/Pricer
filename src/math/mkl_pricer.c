@@ -128,19 +128,15 @@ void mkl_pricer(
         FLOAT *__attribute__((aligned(32))) restrict d2,
         FLOAT *__attribute__((aligned(32))) restrict price) {            /// [out] d2
 
-    compute_d_values(
-            n,
-            s,
-            x,
-            sigmaA2T2,
-            sigmaAsqrtT,
-            tmp1,
-            tmp2,
-            d1,
-            d2);
+    compute_d_values(n, s, x, sigmaA2T2,
+                     sigmaAsqrtT,
+                     tmp1,
+                     tmp2,
+                     d1,
+                     d2);
 
     for (MKL_INT64 i = 0; i < n; ++i) {
-        if (flags[i] != 0) {
+        if ((flags[i] & 1) != 0) {
             d1[i] = -d1[i];
             d2[i] = -d2[i];
         }
@@ -152,7 +148,7 @@ void mkl_pricer(
 
     double sx1, sx2;
     for (MKL_INT64 i = 0; i < n; ++i) {
-        if (flags[i] != 0) {
+        if ((flags[i] & 1) != 0) {
             sx1 = x[i];
             sx2 = s[i];
         } else {
@@ -161,6 +157,10 @@ void mkl_pricer(
         }
         price[i] = sx1 * tmp1[i] - sx2 * tmp2[i];
         price[i] *= emrt[i];
+
+        if ((flags[i] & 2) != 0) {
+            price[i] = -price[i];
+        }
     }
 
 }
