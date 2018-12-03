@@ -13,6 +13,54 @@
 #include <functional>
 #include <cmath>
 
+#include <mkl.h>
+
+
+static void BM_Erf_MKL(benchmark::State &state) {
+
+
+    vmlSetMode(VML_EP);
+    vmlSetMode(VML_FTZDAZ_OFF);
+    vmlSetMode(VML_ERRMODE_NOERR);
+
+
+    std::vector<double> dbls(state.range(0));
+    std::vector<double> results(state.range(0));
+
+    // First create an instance of an engine.
+    std::random_device rnd_device;
+
+    // Specify the engine and distribution.
+    std::mt19937 mersenne_engine{rnd_device()};  // Generates random integers
+
+    std::uniform_real_distribution<double> dist{-52, 52};
+
+
+    auto gen = [&dist, &mersenne_engine]() {
+
+        return dist(mersenne_engine);
+
+    };
+
+
+    for (auto _ : state) {
+
+        state.PauseTiming();
+        dbls.data()[0] = results.data()[0];
+        std::generate(dbls.begin(), dbls.end(), gen);
+
+        state.ResumeTiming();
+
+        vdErf(state.range(0), dbls.data(), results.data());
+
+    }
+
+}
+// Register the function as a benchmark
+BENCHMARK(BM_Erf_MKL)->Arg(1 << 10)->Arg(1 << 11)->Arg(1 << 12)->Arg(1 << 20)->Arg(1 << 21)->Arg(1 << 22);
+
+
+
 static void BM_Erf_IEEE754(benchmark::State &state) {
 
 
@@ -50,7 +98,7 @@ static void BM_Erf_IEEE754(benchmark::State &state) {
 
 }
 // Register the function as a benchmark
-BENCHMARK(BM_Erf_IEEE754)->Arg(1 << 10)->Arg(1 << 11)->Arg(1 << 12);
+BENCHMARK(BM_Erf_IEEE754)->Arg(1 << 10)->Arg(1 << 11)->Arg(1 << 12)->Arg(1 << 20)->Arg(1 << 21)->Arg(1 << 22);
 
 
 static void BM_Erf_Default(benchmark::State &state) {
@@ -90,4 +138,4 @@ static void BM_Erf_Default(benchmark::State &state) {
 
 }
 // Register the function as a benchmark
-BENCHMARK(BM_Erf_Default)->Arg(1 << 10)->Arg(1 << 11)->Arg(1 << 12);
+BENCHMARK(BM_Erf_Default)->Arg(1 << 10)->Arg(1 << 11)->Arg(1 << 12)->Arg(1 << 20)->Arg(1 << 21)->Arg(1 << 22);

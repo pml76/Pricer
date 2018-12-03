@@ -33,8 +33,8 @@ ENDIF ("${isSystemDir}" STREQUAL "-1")
 
 set(CMAKE_PREFIX_PATH "S{CMAKE_PREFIX_PATH} S{CMAKE_SOURCE_DIR}/cmake/")
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=ivybridge -fno-omit-frame-pointer")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=ivybridge -fno-omit-frame-pointer")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=ivybridge -fno-omit-frame-pointer -fopt-info-vec-optimized ")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=ivybridge -fno-omit-frame-pointer -fopt-info-vec-optimized ")
 
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
@@ -44,25 +44,25 @@ find_package(Catch2 REQUIRED)
 find_package(MKL REQUIRED)
 
 
-set(CMAKE_VERBOSE_MAKEFILE ON)
+set(CMAKE_VERBOSE_MAKEFILE OFF)
 
-set(PROJECT_SOURCES src/math/erf_wrapper.c src/math/exp_wrapper.c src/math/log_wrapper.c src/math/sqrt_wrapper.c src/math/erf_wrapper.c)
-set(PROJECT_HEADERS src/math/erf_wrapper.h src/math/exp_wrapper.h src/math/log_wrapper.h src/math/sqrt_wrapper.h src/math/erf_wrapper.h)
+set(PROJECT_SOURCES src/math/erf_wrapper.c src/math/exp_wrapper.c src/math/log_wrapper.c src/math/sqrt_wrapper.c src/math/erf_wrapper.c src/math/mkl_pricer.c)
+set(PROJECT_HEADERS src/math/erf_wrapper.h src/math/exp_wrapper.h src/math/log_wrapper.h src/math/sqrt_wrapper.h src/math/erf_wrapper.h src/math/mkl_pricer.c)
 
 set(PROJECT_TEST_SOURCES tests/math/exp-test.cc tests/math/log-test.cc tests/math/erf-test.cc tests/math/sqrt-test.cc)
 
 set(PROJECT_BENCHMARK_SOURCES benchmarks/main.cc benchmarks/math/exp-benchmark.cc benchmarks/math/erf-benchmark.cc benchmarks/math/log-benchmark.cc benchmarks/math/sqrt-benchmark.cc)
 
-include_directories(./ $ENV{SPACK_TRANSITIVE_INCLUDE_PATH})
+include_directories(./ $ENV{SPACK_TRANSITIVE_INCLUDE_PATH} ${MKL_INCLUDE_DIRS})
 
 add_executable(Pricer ${PROJECT_SOURCES} ${PROJECT_HEADERS} src/main.cpp)
-target_link_libraries(Pricer pthread ${MKL_LIBRARIES})
+target_link_libraries(Pricer pthread dl ${MKL_LIBRARIES})
 
 add_executable(Pricer-Tests tests/main.cc ${PROJECT_TEST_SOURCES} ${PROJECT_SOURCES} ${PROJECT_HEADERS})
-target_link_libraries(Pricer-Tests pthread ${MKL_LIBRARIES})
+target_link_libraries(Pricer-Tests pthread dl ${MKL_LIBRARIES})
 
 add_executable(Pricer-Benchmark benchmarks/main.cc ${PROJECT_BENCHMARK_SOURCES} ${PROJECT_SOURCES} ${PROJECT_HEADERS})
-target_link_libraries(Pricer-Benchmark pthread ${MKL_LIBRARIES} ${benchmark_LIBRARIES})
+target_link_libraries(Pricer-Benchmark pthread dl ${MKL_LIBRARIES} ${benchmark_LIBRARIES})
 
 if ("${CMAKE_SYSTEM_NAME}" MATCHES "Windows")
     target_link_libraries(Pricer-Benchmark Shlwapi)
