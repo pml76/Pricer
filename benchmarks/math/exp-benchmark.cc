@@ -3,7 +3,7 @@
 //
 
 #include <benchmark/benchmark.h>
-#include <src/math/exp_wrapper.h>
+#include <src/math/glibc-2.28_exp.h>
 #include <vector>
 #include <random>
 #include <algorithm>

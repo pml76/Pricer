@@ -4,7 +4,7 @@
 
 
 #include <benchmark/benchmark.h>
-#include <src/math/sqrt_wrapper.h>
+#include <src/math/glibc-2.28_sqrt.h>
 #include <vector>
 #include <random>
 #include <algorithm>
@@ -43,7 +43,7 @@ static void BM_Sqrt_IEEE754(benchmark::State &state) {
         state.ResumeTiming();
 
         for (int j = 0; j < state.range(0); ++j) {
-            benchmark::DoNotOptimize(ieee754_sqrt(dbls[j]));
+            benchmark::DoNotOptimize(glibc_sqrt(dbls[j]));
         }
 
     }

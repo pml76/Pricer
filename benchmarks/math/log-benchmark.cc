@@ -3,7 +3,7 @@
 //
 
 #include <benchmark/benchmark.h>
-#include <src/math/log_wrapper.h>
+#include <src/math/glibc-2.28_log.h>
 #include <vector>
 #include <random>
 #include <algorithm>

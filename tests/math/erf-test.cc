@@ -5,24 +5,24 @@
 #include <catch2/catch.hpp>
 
 #include <math.h>
-#include <src/math/erf_wrapper.h>
+#include <src/math/glibc-2.28_erf.h>
 #include <string>
 #include <iostream>
 
 #include <mkl.h>
 
 
-TEST_CASE("ieee754_erf(x) == erf(x)", "[erf]") {
+TEST_CASE("glibc_erf(x) == erf(x)", "[erf]") {
 
     for (double x = -10.; x <= 10.; x += 0.01) {
-        REQUIRE(fabs(erf(x) - ieee754_erf(x)) < 1.0e-12);
+        REQUIRE(fabs(erf(x) - glibc_erf(x)) < 1.0e-12);
     }
 }
 
-TEST_CASE("ieee754_erfc(x) == erfc(x)", "[erf]") {
+TEST_CASE("glibc_erfc(x) == erfc(x)", "[erf]") {
 
     for (double x = -10.; x <= 10.; x += 0.01) {
-        REQUIRE(fabs(erfc(x) - ieee754_erfc(x)) < 1.0e-12);
+        REQUIRE(fabs(erfc(x) - glibc_erfc(x)) < 1.0e-12);
     }
 }
 

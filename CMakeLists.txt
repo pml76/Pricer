@@ -43,13 +43,18 @@ find_package(GoogleBenchmark REQUIRED)
 find_package(Catch2 REQUIRED)
 find_package(MKL REQUIRED)
 
+find_package(ARB REQUIRED)
+find_package(FLINT REQUIRED)
+find_package(GMP REQUIRED)
+find_package(MPFR REQUIRED)
+
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
-set(PROJECT_SOURCES src/math/erf_wrapper.c src/math/exp_wrapper.c src/math/log_wrapper.c src/math/sqrt_wrapper.c src/math/erf_wrapper.c src/math/mkl_pricer.c)
-set(PROJECT_HEADERS src/math/erf_wrapper.h src/math/exp_wrapper.h src/math/log_wrapper.h src/math/sqrt_wrapper.h src/math/erf_wrapper.h src/math/mkl_pricer.c)
+set(PROJECT_SOURCES src/math/glibc-2.28_erf.c src/math/glibc-2.28_exp.c src/math/glibc-2.28_log.c src/math/glibc-2.28_sqrt.c src/math/glibc-2.28_erf.c src/math/pricers/mkl_pricer.c)
+set(PROJECT_HEADERS src/math/glibc-2.28_erf.h src/math/glibc-2.28_exp.h src/math/glibc-2.28_log.h src/math/glibc-2.28_sqrt.h src/math/glibc-2.28_erf.h src/math/pricers/mkl_pricer.c)
 
-set(PROJECT_TEST_SOURCES tests/math/exp-test.cc tests/math/log-test.cc tests/math/erf-test.cc tests/math/sqrt-test.cc)
+set(PROJECT_TEST_SOURCES tests/math/exp-test.cc tests/math/log-test.cc tests/math/erf-test.cc tests/math/sqrt-test.cc tests/math/pricers/Pricer.h tests/math/pricers/mkl-pricer-test.cc )
 
 set(PROJECT_BENCHMARK_SOURCES benchmarks/main.cc benchmarks/math/exp-benchmark.cc benchmarks/math/erf-benchmark.cc benchmarks/math/log-benchmark.cc benchmarks/math/sqrt-benchmark.cc benchmarks/math/mkl-pricer-benchmark.cc)
 
@@ -59,7 +64,7 @@ add_executable(Pricer ${PROJECT_SOURCES} ${PROJECT_HEADERS} src/main.cpp)
 target_link_libraries(Pricer pthread dl ${MKL_LIBRARIES})
 
 add_executable(Pricer-Tests tests/main.cc ${PROJECT_TEST_SOURCES} ${PROJECT_SOURCES} ${PROJECT_HEADERS})
-target_link_libraries(Pricer-Tests pthread dl ${MKL_LIBRARIES})
+target_link_libraries(Pricer-Tests pthread dl ${MKL_LIBRARIES} ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${FLINT_LIBRARIES} ${Arb_LIBRARIES})
 
 add_executable(Pricer-Benchmark benchmarks/main.cc ${PROJECT_BENCHMARK_SOURCES} ${PROJECT_SOURCES} ${PROJECT_HEADERS})
 target_link_libraries(Pricer-Benchmark pthread dl ${MKL_LIBRARIES} ${benchmark_LIBRARIES})
