@@ -41,6 +41,8 @@ static void BM_Pricer_MKL(benchmark::State &state) {
     std::vector<double> d1(state.range(0));
     std::vector<double> d2(state.range(0));
 
+    std::vector<double> d2dx2_prep(state.range(0));
+
 
     // First create an instance of an engine.
     std::random_device rnd_device;
@@ -114,7 +116,8 @@ static void BM_Pricer_MKL(benchmark::State &state) {
                 sigmaA.data(),
                 sigmaA2T2.data(),
                 sigmaAsqrtT.data(),
-                emrt.data());
+                emrt.data(),
+                d2dx2_prep.data());
 
         state.ResumeTiming();
 

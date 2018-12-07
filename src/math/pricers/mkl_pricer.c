@@ -114,7 +114,8 @@ void prepare_mkl_pricer(
         FLOAT *restrict sigmaA,           /// [out] adjusted vola
         FLOAT *restrict sigmaA2T2,        /// [out] sigmaA^2t/2
         FLOAT *restrict sigmaAsqrtT,      /// [out] sigmaA*sqrt(t)
-        FLOAT *restrict emrt) {          /// [out] exp(-rt)/2
+        FLOAT *restrict emrt,             /// [out] exp(-rt)/2
+        FLOAT *restrict d2dx2_prep) {
 
     FLOAT tt1;
     for (MKL_INT64 i = 0; i < n; ++i) {
@@ -147,9 +148,22 @@ void prepare_mkl_pricer(
         sigmaA2T2[i] = sigmaA[i] * sigmaA[i] * t[i] / 2.;
         sigmaAsqrtT[i] = sigmaA[i] * tmp1[i];
         tmp2[i] = -r[i] * t[i] - ln_of_2;
+        tmp3[i] = -sigmaA2T2[i] / 4;
     }
 
     vdExp(n, tmp2, emrt);
+    vdExp(n, tmp3, tmp2);
+
+    for (MKL_INT64 i = 0; i < n; ++i) {
+        tmp1[i] = 2. * s[i] / (2. * M_PI * sigmaA2T2[i]);
+    }
+
+    vdSqrt(n, tmp1, d2dx2_prep);
+
+    for (MKL_INT64 i = 0; i < n; ++i) {
+        d2dx2_prep[i] *= tmp2[i] * emrt[i];
+    }
+
 
 }
 
@@ -278,6 +292,44 @@ void ddx_mkl_pricer(
         if ((flags[i] & 2) != 0) {
             ddx_price[i] = -ddx_price[i];
         }
+    }
+
+}
+
+
+void d2dx2_mkl_pricer(
+        MKL_INT64 n,
+        MKL_INT64 *restrict flags,
+        FLOAT *restrict s,
+        FLOAT *restrict x,
+        FLOAT *restrict d2dx2_prep,
+        FLOAT *restrict sigmaA2T2,
+        FLOAT *restrict tmp1,
+        FLOAT *restrict tmp2,
+        FLOAT *restrict d2dx2
+) {
+
+
+    for (MKL_INT64 i = 0; i < n; ++i) {
+        tmp1[i] = s[i] / x[i];
+    }
+
+    vdLn(n, tmp1, d2dx2);
+
+    for (MKL_INT64 i = 0; i < n; ++i) {
+        tmp1[i] = -d2dx2[i] * d2dx2[i] / (4. * sigmaA2T2[i]);
+    }
+
+    vdExp(n, tmp1, d2dx2);
+
+    for (MKL_INT64 i = 0; i < n; ++i) {
+        tmp1[i] = x[i] * x[i] * x[i];
+    }
+
+    vdSqrt(n, tmp1, tmp2);
+
+    for (MKL_INT64 i = 0; i < n; ++i) {
+        d2dx2[i] = d2dx2[i] * d2dx2_prep[i] / tmp2[i];
     }
 
 }

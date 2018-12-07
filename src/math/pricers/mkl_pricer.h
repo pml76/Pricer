@@ -31,7 +31,8 @@ void prepare_mkl_pricer(
         FLOAT * restrict sigmaA,           /// [out] adjusted vola
         FLOAT * restrict sigmaA2T2,        /// [out] sigmaA^2t/2
         FLOAT * restrict sigmaAsqrtT,      /// [out] sigmaA*sqrt(t)
-        FLOAT * restrict emrt);
+        FLOAT *restrict emrt,
+        FLOAT *restrict d2dx2_prep);
 
 
 void mkl_pricer(

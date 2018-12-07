@@ -19,7 +19,7 @@ TEST_CASE("pricer-class equals mkl-pricer", "[pricer]") {
     double sigma = 0.3;     // vola
     double x     = 72;      // strike
 
-    double tmp1, tmp2, tmp3, tmp4, tmp5, sigmaA, sigmaA2T2,sigmaAsqrtT,emrt;
+    double tmp1, tmp2, tmp3, tmp4, tmp5, sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep;
     double d1,d2;
     double price;
     MKL_INT64 flags = 0;
@@ -30,7 +30,8 @@ TEST_CASE("pricer-class equals mkl-pricer", "[pricer]") {
     p.set_market_data(sigma,t,tau,r,s);
 
     init_mkl_pricer();
-    prepare_mkl_pricer(1,&s,&sigma,&t,&tau,&r,&tmp1,&tmp2,&tmp3,&tmp4,&tmp5,&sigmaA,&sigmaA2T2,&sigmaAsqrtT,&emrt);
+    prepare_mkl_pricer(1, &s, &sigma, &t, &tau, &r, &tmp1, &tmp2, &tmp3, &tmp4, &tmp5,
+                       &sigmaA, &sigmaA2T2, &sigmaAsqrtT, &emrt, &d2dx2_prep);
 
 
     // test long call price
@@ -67,7 +68,7 @@ TEST_CASE("pricer-class equals ddx-mkl-pricer", "[pricer]") {
     double sigma = 0.3;     // vola
     double x     = 72;      // strike
 
-    double tmp1, tmp2, tmp3, tmp4, tmp5, sigmaA, sigmaA2T2,sigmaAsqrtT,emrt;
+    double tmp1, tmp2, tmp3, tmp4, tmp5, sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep;
     double d1,d2;
     double price, ddx_price;
     const double eps = 1.0e-10;
@@ -77,7 +78,8 @@ TEST_CASE("pricer-class equals ddx-mkl-pricer", "[pricer]") {
     p.set_market_data(sigma,t,tau,r,s);
 
     init_mkl_pricer();
-    prepare_mkl_pricer(1,&s,&sigma,&t,&tau,&r,&tmp1,&tmp2,&tmp3,&tmp4,&tmp5,&sigmaA,&sigmaA2T2,&sigmaAsqrtT,&emrt);
+    prepare_mkl_pricer(1, &s, &sigma, &t, &tau, &r, &tmp1, &tmp2, &tmp3, &tmp4, &tmp5,
+                       &sigmaA, &sigmaA2T2, &sigmaAsqrtT, &emrt, &d2dx2_prep);
 
 
     // test long call price
