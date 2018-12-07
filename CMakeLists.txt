@@ -33,8 +33,8 @@ ENDIF ("${isSystemDir}" STREQUAL "-1")
 
 set(CMAKE_PREFIX_PATH "S{CMAKE_PREFIX_PATH} S{CMAKE_SOURCE_DIR}/cmake/")
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=ivybridge -fno-omit-frame-pointer -fopt-info-vec-optimized -std=gnu17")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=ivybridge -fno-omit-frame-pointer -fopt-info-vec-optimized ")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=ivybridge -fno-omit-frame-pointer -fopt-info-vec-optimized -fPIC ")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=ivybridge -fno-omit-frame-pointer -fopt-info-vec-optimized -fPIC")
 
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
@@ -51,10 +51,10 @@ find_package(MPFR REQUIRED)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
-set(PROJECT_SOURCES src/math/glibc-2.28_erf.c src/math/glibc-2.28_exp.c src/math/glibc-2.28_log.c src/math/glibc-2.28_sqrt.c src/math/glibc-2.28_erf.c src/math/pricers/mkl_pricer.c)
-set(PROJECT_HEADERS src/math/glibc-2.28_erf.h src/math/glibc-2.28_exp.h src/math/glibc-2.28_log.h src/math/glibc-2.28_sqrt.h src/math/glibc-2.28_erf.h src/math/pricers/mkl_pricer.c)
+set(PROJECT_SOURCES src/math/pricers/mkl_pricer.c)
+set(PROJECT_HEADERS src/math/pricers/mkl_pricer.c)
 
-set(PROJECT_TEST_SOURCES tests/math/exp-test.cc tests/math/log-test.cc tests/math/erf-test.cc tests/math/sqrt-test.cc tests/math/pricers/Pricer.h tests/math/pricers/mkl-pricer-test.cc )
+set(PROJECT_TEST_SOURCES tests/math/pricers/Pricer.h tests/math/pricers/mkl-pricer-test.cc)
 
 set(PROJECT_BENCHMARK_SOURCES benchmarks/main.cc benchmarks/math/exp-benchmark.cc benchmarks/math/erf-benchmark.cc benchmarks/math/log-benchmark.cc benchmarks/math/sqrt-benchmark.cc benchmarks/math/mkl-pricer-benchmark.cc)
 

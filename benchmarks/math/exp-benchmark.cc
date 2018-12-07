@@ -3,7 +3,6 @@
 //
 
 #include <benchmark/benchmark.h>
-#include <src/math/glibc-2.28_exp.h>
 #include <vector>
 #include <random>
 #include <algorithm>
@@ -57,48 +56,6 @@ static void BM_Exp_MKL(benchmark::State &state) {
 }
 // Register the function as a benchmark
 BENCHMARK(BM_Exp_MKL)->Arg(1 << 10)->Arg(1 << 11)->Arg(1 << 12);
-
-
-
-static void BM_Exp_IEEE754(benchmark::State &state) {
-
-
-    std::vector<double> dbls(state.range(0));
-
-    // First create an instance of an engine.
-    std::random_device rnd_device;
-
-    // Specify the engine and distribution.
-    std::mt19937 mersenne_engine{rnd_device()};  // Generates random integers
-
-    std::uniform_real_distribution<double> dist{-52, 52};
-
-
-    auto gen = [&dist, &mersenne_engine]() {
-
-        return dist(mersenne_engine);
-
-    };
-
-
-    for (auto _ : state) {
-
-        state.PauseTiming();
-
-        std::generate(dbls.begin(), dbls.end(), gen);
-
-        state.ResumeTiming();
-
-        for (int j = 0; j < state.range(0); ++j) {
-            benchmark::DoNotOptimize(ieee754_exp(dbls[j]));
-        }
-
-    }
-
-}
-// Register the function as a benchmark
-BENCHMARK(BM_Exp_IEEE754)->Arg(1 << 10)->Arg(1 << 11)->Arg(1 << 12);
-
 
 static void BM_Exp_Default(benchmark::State &state) {
 
