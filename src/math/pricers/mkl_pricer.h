@@ -58,6 +58,18 @@ void ddx_mkl_pricer(
         FLOAT *restrict emrt,
         FLOAT *restrict ddx_price);
 
+
+void d2dx2_mkl_pricer(
+        MKL_INT64 n,
+        MKL_INT64 *restrict flags,
+        FLOAT *restrict s,
+        FLOAT *restrict x,
+        FLOAT *restrict d2dx2_prep,
+        FLOAT *restrict sigmaA2T2,
+        FLOAT *restrict tmp1,
+        FLOAT *restrict tmp2,
+        FLOAT *restrict d2dx2);
+
 #ifdef __cplusplus
 };
 #endif

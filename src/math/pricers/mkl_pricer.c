@@ -330,6 +330,10 @@ void d2dx2_mkl_pricer(
 
     for (MKL_INT64 i = 0; i < n; ++i) {
         d2dx2[i] = d2dx2[i] * d2dx2_prep[i] / tmp2[i];
+
+        if ((flags[i] & 2) != 0) {
+            d2dx2[i] = -d2dx2[i];
+        }
     }
 
 }
