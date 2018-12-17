@@ -33,7 +33,7 @@ ENDIF ("${isSystemDir}" STREQUAL "-1")
 
 set(CMAKE_PREFIX_PATH "S{CMAKE_PREFIX_PATH} S{CMAKE_SOURCE_DIR}/cmake/")
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=ivybridge -fno-omit-frame-pointer -fopt-info-vec-optimized -fPIC ")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=ivybridge -fno-omit-frame-pointer -fopt-info-vec-optimized -fPIC")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=ivybridge -fno-omit-frame-pointer -fopt-info-vec-optimized -fPIC")
 
 
@@ -47,6 +47,8 @@ find_package(ARB REQUIRED)
 find_package(FLINT REQUIRED)
 find_package(GMP REQUIRED)
 find_package(MPFR REQUIRED)
+
+find_package(SLEEF REQUIRED)
 
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
@@ -67,7 +69,7 @@ add_executable(Pricer-Tests tests/main.cc ${PROJECT_TEST_SOURCES} ${PROJECT_SOUR
 target_link_libraries(Pricer-Tests pthread dl ${MKL_LIBRARIES} ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${FLINT_LIBRARIES} ${Arb_LIBRARIES})
 
 add_executable(Pricer-Benchmark benchmarks/main.cc ${PROJECT_BENCHMARK_SOURCES} ${PROJECT_SOURCES} ${PROJECT_HEADERS})
-target_link_libraries(Pricer-Benchmark pthread dl ${MKL_LIBRARIES} ${benchmark_LIBRARIES})
+target_link_libraries(Pricer-Benchmark pthread dl ${SLEEF_LIBRARIES} ${MKL_LIBRARIES} ${benchmark_LIBRARIES})
 
 if ("${CMAKE_SYSTEM_NAME}" MATCHES "Windows")
     target_link_libraries(Pricer-Benchmark Shlwapi)

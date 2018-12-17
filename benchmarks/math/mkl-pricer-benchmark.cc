@@ -3,45 +3,43 @@
 //
 
 #include <benchmark/benchmark.h>
-#include <vector>
 #include <random>
-#include <algorithm>
 #include <iterator>
 #include <iostream>
 #include <functional>
-#include <cmath>
 
 
 #include <src/math/pricers/mkl_pricer.h>
-#include <mkl.h>
 
+
+typedef double *__restrict__ __attribute__((aligned(64))) Real_Ptr;
 
 static void BM_Pricer_MKL(benchmark::State &state) {
 
 
-    std::vector<double> ss(state.range(0));
-    std::vector<double> xs(state.range(0));
-    std::vector<double> rs(state.range(0));
-    std::vector<double> sigmas(state.range(0));
-    std::vector<double> ts(state.range(0));
-    std::vector<double> taus(state.range(0));
-    std::vector<double> prices(state.range(0));
-    std::vector<MKL_INT64> flags(state.range(0));
+    Real_Ptr ss = (Real_Ptr) aligned_alloc(64, ((sizeof(FLOAT) * state.range(0)) / 64 + 1) * 64);
+    Real_Ptr xs = (Real_Ptr) aligned_alloc(64, ((sizeof(FLOAT) * state.range(0)) / 64 + 1) * 64);
+    Real_Ptr rs = (Real_Ptr) aligned_alloc(64, ((sizeof(FLOAT) * state.range(0)) / 64 + 1) * 64);
+    Real_Ptr sigmas = (Real_Ptr) aligned_alloc(64, ((sizeof(FLOAT) * state.range(0)) / 64 + 1) * 64);
+    Real_Ptr ts = (Real_Ptr) aligned_alloc(64, ((sizeof(FLOAT) * state.range(0)) / 64 + 1) * 64);
+    Real_Ptr taus = (Real_Ptr) aligned_alloc(64, ((sizeof(FLOAT) * state.range(0)) / 64 + 1) * 64);
+    Real_Ptr prices = (Real_Ptr) aligned_alloc(64, ((sizeof(FLOAT) * state.range(0)) / 64 + 1) * 64);
+    Uint64_Ptr flags = (Uint64_Ptr) aligned_alloc(64, ((sizeof(UINT64) * state.range(0)) / 64 + 1) * 64);
 
-    std::vector<double> tmp1(state.range(0));
-    std::vector<double> tmp2(state.range(0));
-    std::vector<double> tmp3(state.range(0));
-    std::vector<double> tmp4(state.range(0));
-    std::vector<double> tmp5(state.range(0));
+    Real_Ptr tmp1 = (Real_Ptr) aligned_alloc(64, ((sizeof(FLOAT) * state.range(0)) / 64 + 1) * 64);
+    Real_Ptr tmp2 = (Real_Ptr) aligned_alloc(64, ((sizeof(FLOAT) * state.range(0)) / 64 + 1) * 64);
+    Real_Ptr tmp3 = (Real_Ptr) aligned_alloc(64, ((sizeof(FLOAT) * state.range(0)) / 64 + 1) * 64);
+    Real_Ptr tmp4 = (Real_Ptr) aligned_alloc(64, ((sizeof(FLOAT) * state.range(0)) / 64 + 1) * 64);
+    Real_Ptr tmp5 = (Real_Ptr) aligned_alloc(64, ((sizeof(FLOAT) * state.range(0)) / 64 + 1) * 64);
 
-    std::vector<double> sigmaA(state.range(0));
-    std::vector<double> sigmaA2T2(state.range(0));
-    std::vector<double> sigmaAsqrtT(state.range(0));
-    std::vector<double> emrt(state.range(0));
-    std::vector<double> d1(state.range(0));
-    std::vector<double> d2(state.range(0));
+    Real_Ptr sigmaA = (Real_Ptr) aligned_alloc(64, ((sizeof(FLOAT) * state.range(0)) / 64 + 1) * 64);
+    Real_Ptr sigmaA2T2 = (Real_Ptr) aligned_alloc(64, ((sizeof(FLOAT) * state.range(0)) / 64 + 1) * 64);
+    Real_Ptr sigmaAsqrtT = (Real_Ptr) aligned_alloc(64, ((sizeof(FLOAT) * state.range(0)) / 64 + 1) * 64);
+    Real_Ptr emrt = (Real_Ptr) aligned_alloc(64, ((sizeof(FLOAT) * state.range(0)) / 64 + 1) * 64);
+    Real_Ptr d1 = (Real_Ptr) aligned_alloc(64, ((sizeof(FLOAT) * state.range(0)) / 64 + 1) * 64);
+    Real_Ptr d2 = (Real_Ptr) aligned_alloc(64, ((sizeof(FLOAT) * state.range(0)) / 64 + 1) * 64);
 
-    std::vector<double> d2dx2_prep(state.range(0));
+    Real_Ptr d2dx2_prep = (Real_Ptr) aligned_alloc(64, ((sizeof(FLOAT) * state.range(0)) / 64 + 1) * 64);
 
 
     // First create an instance of an engine.
@@ -87,13 +85,13 @@ static void BM_Pricer_MKL(benchmark::State &state) {
         state.PauseTiming();
 
         prices[0] = prices[0] / 2;
-        std::generate(ss.begin(), ss.end(), ss_gen);
-        std::generate(xs.begin(), xs.end(), ss_gen);
-        std::generate(rs.begin(), rs.end(), rs_gen);
-        std::generate(sigmas.begin(), sigmas.end(), sigmas_gen);
-        std::generate(ts.begin(), ts.end(), ts_gen);
-        std::generate(taus.begin(), taus.end(), taus_gen);
-        std::generate(flags.begin(), flags.end(), flags_gen);
+        std::generate(ss, &ss[state.range(0)], ss_gen);
+        std::generate(xs, &xs[state.range(0)], ss_gen);
+        std::generate(rs, &rs[state.range(0)], rs_gen);
+        std::generate(sigmas, &sigmas[state.range(0)], sigmas_gen);
+        std::generate(ts, &ts[state.range(0)], ts_gen);
+        std::generate(taus, &taus[state.range(0)], taus_gen);
+        std::generate(flags, &flags[state.range(0)], flags_gen);
 
         for (MKL_INT64 i = 0; i < state.range(0); ++i) {
             ts[i] += taus[i];
@@ -103,41 +101,63 @@ static void BM_Pricer_MKL(benchmark::State &state) {
 
         prepare_mkl_pricer(
                 state.range(0),
-                ss.data(),
-                sigmas.data(),
-                ts.data(),
-                taus.data(),
-                rs.data(),
-                tmp1.data(),
-                tmp2.data(),
-                tmp3.data(),
-                tmp4.data(),
-                tmp5.data(),
-                sigmaA.data(),
-                sigmaA2T2.data(),
-                sigmaAsqrtT.data(),
-                emrt.data(),
-                d2dx2_prep.data());
+                ss,
+                sigmas,
+                ts,
+                taus,
+                rs,
+                tmp1,
+                tmp2,
+                tmp3,
+                tmp4,
+                tmp5,
+                sigmaA,
+                sigmaA2T2,
+                sigmaAsqrtT,
+                emrt,
+                d2dx2_prep);
 
         state.ResumeTiming();
 
         mkl_pricer(
                 state.range(0),
-                flags.data(),
-                ss.data(),
-                xs.data(),
-                sigmaA2T2.data(),
-                sigmaAsqrtT.data(),
-                emrt.data(),
-                tmp1.data(),
-                tmp2.data(),
-                tmp3.data(),
-                tmp4.data(),
-                d1.data(),
-                d2.data(),
-                prices.data());
+                flags,
+                ss,
+                xs,
+                sigmaA2T2,
+                sigmaAsqrtT,
+                emrt,
+                tmp1,
+                tmp2,
+                tmp3,
+                tmp4,
+                d1,
+                d2,
+                prices);
 
     }
+
+    free(ss);
+    free(xs);
+    free(rs);
+    free(sigmas);
+    free(ts);
+    free(taus);
+    free(prices);
+    free(flags);
+    free(tmp1);
+    free(tmp2);
+    free(tmp3);
+    free(tmp4);
+    free(tmp5);
+    free(sigmaA);
+    free(sigmaA2T2);
+    free(sigmaAsqrtT);
+    free(emrt);
+    free(d1);
+    free(d2);
+    free(d2dx2_prep);
+
 
 }
 // Register the function as a benchmark
