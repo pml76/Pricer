@@ -16,8 +16,8 @@ extern "C" {
 typedef double FLOAT;
 typedef MKL_INT64 UINT64;
 
-typedef FLOAT *__restrict__ __attribute__((aligned(64))) Real_Ptr;
-typedef UINT64 *__restrict__ __attribute__((aligned(64))) Uint64_Ptr;
+typedef FLOAT *__restrict__  Real_Ptr;
+typedef UINT64 *__restrict__ Uint64_Ptr;
 
 void init_mkl_pricer();
 

@@ -45,6 +45,11 @@ static inline void __attribute__((always_inline)) compute_d_values(
         Real_Ptr d1,               /// [out] d1
         Real_Ptr d2) {            /// [out] d2
 
+    s = (Real_Ptr) __builtin_assume_aligned(s,64);
+    x = (Real_Ptr) __builtin_assume_aligned(x,64);
+
+
+
 
     for (MKL_INT64 i = 0; i < n; ++i) {
         tmp1[i] = s[i] / x[i];
