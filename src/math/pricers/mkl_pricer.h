@@ -13,6 +13,22 @@
 extern "C" {
 #endif
 
+#ifdef __GNUC__
+#define BUILTIN_ASSUME_ALIGNED(x) x=__builtin_assume_aligned(x,64);
+#define ASSUME(cond) if(!(cond)) __builtin_unreachable();
+#endif
+
+#ifdef __clang__
+#define BUILTIN_ASSUME_ALIGNED(x) x=__builtin_assume_aligned(x,64);
+#define ASSUME(cond) __builtin_assume(cond);
+#endif
+
+#ifdef __INTEL_COMPILER
+#define BUILTIN_ASSUME_ALIGNED(x) __assume_aligned(x,64);
+#define ASSUME(cond) __assume(cond);
+#endif
+
+
 typedef double FLOAT;
 typedef MKL_INT64 UINT64;
 

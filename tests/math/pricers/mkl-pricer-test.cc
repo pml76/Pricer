@@ -17,11 +17,11 @@ TEST_CASE("pricer-class equals mkl-pricer (long call)", "[pricer]") {
     double sigma __attribute__((aligned(64))) = 0.3;     // vola
     double x __attribute__((aligned(64))) = 72;      // strike
 
-    double tmp1 __attribute__((aligned(64))),
-            tmp2 __attribute__((aligned(64))),
-            tmp3 __attribute__((aligned(64))),
-            tmp4 __attribute__((aligned(64))),
-            tmp5 __attribute__((aligned(64))),
+    double tmp1 __attribute__((aligned(64))) = 1,
+            tmp2 __attribute__((aligned(64))) = 2,
+            tmp3 __attribute__((aligned(64))) = 3,
+            tmp4 __attribute__((aligned(64))) = 4,
+            tmp5 __attribute__((aligned(64))) = 5,
             sigmaA __attribute__((aligned(64))),
             sigmaA2T2 __attribute__((aligned(64))),
             sigmaAsqrtT __attribute__((aligned(64))),
@@ -37,11 +37,9 @@ TEST_CASE("pricer-class equals mkl-pricer (long call)", "[pricer]") {
     p.set_market_data(sigma,t,tau,r,s);
 
     init_mkl_pricer();
+
     prepare_mkl_pricer(1, &s, &sigma, &t, &tau, &r, &tmp1, &tmp2, &tmp3, &tmp4, &tmp5,
                        &sigmaA, &sigmaA2T2, &sigmaAsqrtT, &emrt, &d2dx2_prep);
-
-
-    return;
 
     // test long call price
     mkl_pricer(1,&flags,&s,&x,&sigmaA2T2,&sigmaAsqrtT,&emrt,&tmp1,&tmp2,&tmp3,&tmp4,&d1,&d2,&price);
@@ -54,16 +52,26 @@ TEST_CASE("pricer-class equals mkl-pricer (long call)", "[pricer]") {
 
 TEST_CASE("pricer-class equals mkl-pricer (short call)", "[pricer]") {
 
-    double r = 0.01;    // interest rate
-    double s = 70.;     // stock price
-    double t = 1.2;     // time to maturity
-    double tau = 1. / 12.;  // length of averaging time-window
-    double sigma = 0.3;     // vola
-    double x = 72;      // strike
+    double r __attribute__((aligned(64))) = 0.01;    // interest rate
+    double s __attribute__((aligned(64))) = 70.;     // stock price
+    double t __attribute__((aligned(64))) = 1.2;     // time to maturity
+    double tau __attribute__((aligned(64))) = 1. / 12.;  // length of averaging time-window
+    double sigma __attribute__((aligned(64))) = 0.3;     // vola
+    double x __attribute__((aligned(64))) = 72;      // strike
 
-    double tmp1, tmp2, tmp3, tmp4, tmp5, sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep;
-    double d1, d2;
-    double price;
+    double tmp1 __attribute__((aligned(64))) = 1,
+            tmp2 __attribute__((aligned(64))) = 2,
+            tmp3 __attribute__((aligned(64))) = 3,
+            tmp4 __attribute__((aligned(64))) = 4,
+            tmp5 __attribute__((aligned(64))) = 5,
+            sigmaA __attribute__((aligned(64))),
+            sigmaA2T2 __attribute__((aligned(64))),
+            sigmaAsqrtT __attribute__((aligned(64))),
+            emrt __attribute__((aligned(64))),
+            d2dx2_prep __attribute__((aligned(64)));
+    double d1 __attribute__((aligned(64))), d2 __attribute__((aligned(64)));
+    double price __attribute__((aligned(64)));
+    MKL_INT64 flags __attribute__((aligned(64))) = 2;
 
     Pricer p;
 
@@ -76,7 +84,6 @@ TEST_CASE("pricer-class equals mkl-pricer (short call)", "[pricer]") {
 
 
     // test short call price
-    MKL_INT64 flags = 2;
     mkl_pricer(1, &flags, &s, &x, &sigmaA2T2, &sigmaAsqrtT, &emrt, &tmp1, &tmp2, &tmp3, &tmp4, &d1, &d2, &price);
     double reference_pricer_value = p.compute_call_price(x);
     REQUIRE(abs(reference_pricer_value + price) < 1.0e-8);
@@ -87,16 +94,26 @@ TEST_CASE("pricer-class equals mkl-pricer (short call)", "[pricer]") {
 
 TEST_CASE("pricer-class equals mkl-pricer (long put)", "[pricer]") {
 
-    double r = 0.01;    // interest rate
-    double s = 70.;     // stock price
-    double t = 1.2;     // time to maturity
-    double tau = 1. / 12.;  // length of averaging time-window
-    double sigma = 0.3;     // vola
-    double x = 72;      // strike
+    double r __attribute__((aligned(64))) = 0.01;    // interest rate
+    double s __attribute__((aligned(64))) = 70.;     // stock price
+    double t __attribute__((aligned(64))) = 1.2;     // time to maturity
+    double tau __attribute__((aligned(64))) = 1. / 12.;  // length of averaging time-window
+    double sigma __attribute__((aligned(64))) = 0.3;     // vola
+    double x __attribute__((aligned(64))) = 72;      // strike
 
-    double tmp1, tmp2, tmp3, tmp4, tmp5, sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep;
-    double d1, d2;
-    double price;
+    double tmp1 __attribute__((aligned(64))) = 1,
+            tmp2 __attribute__((aligned(64))) = 2,
+            tmp3 __attribute__((aligned(64))) = 3,
+            tmp4 __attribute__((aligned(64))) = 4,
+            tmp5 __attribute__((aligned(64))) = 5,
+            sigmaA __attribute__((aligned(64))),
+            sigmaA2T2 __attribute__((aligned(64))),
+            sigmaAsqrtT __attribute__((aligned(64))),
+            emrt __attribute__((aligned(64))),
+            d2dx2_prep __attribute__((aligned(64)));
+    double d1 __attribute__((aligned(64))), d2 __attribute__((aligned(64)));
+    double price __attribute__((aligned(64)));
+    MKL_INT64 flags __attribute__((aligned(64))) = 1;
 
     Pricer p;
 
@@ -108,7 +125,6 @@ TEST_CASE("pricer-class equals mkl-pricer (long put)", "[pricer]") {
                        &sigmaA, &sigmaA2T2, &sigmaAsqrtT, &emrt, &d2dx2_prep);
 
     // test long put price
-    MKL_INT64 flags = 1;
     mkl_pricer(1, &flags, &s, &x, &sigmaA2T2, &sigmaAsqrtT, &emrt, &tmp1, &tmp2, &tmp3, &tmp4, &d1, &d2, &price);
     double reference_pricer_value = p.compute_put_price(x);
     REQUIRE(abs(reference_pricer_value - price) < 1.0e-8);
@@ -118,16 +134,26 @@ TEST_CASE("pricer-class equals mkl-pricer (long put)", "[pricer]") {
 
 TEST_CASE("pricer-class equals mkl-pricer (short put)", "[pricer]") {
 
-    double r = 0.01;    // interest rate
-    double s = 70.;     // stock price
-    double t = 1.2;     // time to maturity
-    double tau = 1. / 12.;  // length of averaging time-window
-    double sigma = 0.3;     // vola
-    double x = 72;      // strike
+    double r __attribute__((aligned(64))) = 0.01;    // interest rate
+    double s __attribute__((aligned(64))) = 70.;     // stock price
+    double t __attribute__((aligned(64))) = 1.2;     // time to maturity
+    double tau __attribute__((aligned(64))) = 1. / 12.;  // length of averaging time-window
+    double sigma __attribute__((aligned(64))) = 0.3;     // vola
+    double x __attribute__((aligned(64))) = 72;      // strike
 
-    double tmp1, tmp2, tmp3, tmp4, tmp5, sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep;
-    double d1, d2;
-    double price;
+    double tmp1 __attribute__((aligned(64))) = 1,
+            tmp2 __attribute__((aligned(64))) = 2,
+            tmp3 __attribute__((aligned(64))) = 3,
+            tmp4 __attribute__((aligned(64))) = 4,
+            tmp5 __attribute__((aligned(64))) = 5,
+            sigmaA __attribute__((aligned(64))),
+            sigmaA2T2 __attribute__((aligned(64))),
+            sigmaAsqrtT __attribute__((aligned(64))),
+            emrt __attribute__((aligned(64))),
+            d2dx2_prep __attribute__((aligned(64)));
+    double d1 __attribute__((aligned(64))), d2 __attribute__((aligned(64)));
+    double price __attribute__((aligned(64)));
+    MKL_INT64 flags __attribute__((aligned(64))) = 3;
 
     Pricer p;
 
@@ -139,7 +165,6 @@ TEST_CASE("pricer-class equals mkl-pricer (short put)", "[pricer]") {
                        &sigmaA, &sigmaA2T2, &sigmaAsqrtT, &emrt, &d2dx2_prep);
 
     // test short put price
-    MKL_INT64 flags = 3;
     mkl_pricer(1, &flags, &s, &x, &sigmaA2T2, &sigmaAsqrtT, &emrt, &tmp1, &tmp2, &tmp3, &tmp4, &d1, &d2, &price);
     double reference_pricer_value = p.compute_put_price(x);
     REQUIRE(abs(reference_pricer_value + price) < 1.0e-8);

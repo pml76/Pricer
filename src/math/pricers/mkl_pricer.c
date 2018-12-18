@@ -9,6 +9,7 @@
 #include <src/math/pricers/mkl_pricer.h>
 
 
+
 static FLOAT ln_of_2, msqrt2;
 
 
@@ -45,10 +46,19 @@ static inline void __attribute__((always_inline)) compute_d_values(
         Real_Ptr d1,               /// [out] d1
         Real_Ptr d2) {            /// [out] d2
 
-    s = (Real_Ptr) __builtin_assume_aligned(s,64);
-    x = (Real_Ptr) __builtin_assume_aligned(x,64);
 
+    ASSUME(n % 64 == 0)
 
+    // for optimization assume that every
+    // pointer handed to this function is aligned.
+    BUILTIN_ASSUME_ALIGNED(s)
+    BUILTIN_ASSUME_ALIGNED(x)
+    BUILTIN_ASSUME_ALIGNED(sigmaA2T2)
+    BUILTIN_ASSUME_ALIGNED(sigmaAsqrtT)
+    BUILTIN_ASSUME_ALIGNED(tmp1)
+    BUILTIN_ASSUME_ALIGNED(tmp2)
+    BUILTIN_ASSUME_ALIGNED(d1)
+    BUILTIN_ASSUME_ALIGNED(d2)
 
 
     for (MKL_INT64 i = 0; i < n; ++i) {
@@ -120,6 +130,24 @@ void prepare_mkl_pricer(
         Real_Ptr sigmaAsqrtT,      /// [out] sigmaA*sqrt(t)
         Real_Ptr emrt,             /// [out] exp(-rt)/2
         Real_Ptr d2dx2_prep) {
+
+    ASSUME(n % 64 == 0)
+
+    BUILTIN_ASSUME_ALIGNED(s)
+    BUILTIN_ASSUME_ALIGNED(sigma)
+    BUILTIN_ASSUME_ALIGNED(t)
+    BUILTIN_ASSUME_ALIGNED(tau)
+    BUILTIN_ASSUME_ALIGNED(r)
+    BUILTIN_ASSUME_ALIGNED(tmp1)
+    BUILTIN_ASSUME_ALIGNED(tmp2)
+    BUILTIN_ASSUME_ALIGNED(tmp3)
+    BUILTIN_ASSUME_ALIGNED(tmp4)
+    BUILTIN_ASSUME_ALIGNED(tmp5)
+    BUILTIN_ASSUME_ALIGNED(sigmaA)
+    BUILTIN_ASSUME_ALIGNED(sigmaA2T2)
+    BUILTIN_ASSUME_ALIGNED(sigmaAsqrtT)
+    BUILTIN_ASSUME_ALIGNED(emrt)
+    BUILTIN_ASSUME_ALIGNED(d2dx2_prep)
 
     FLOAT tt1;
     for (MKL_INT64 i = 0; i < n; ++i) {
@@ -215,6 +243,22 @@ void mkl_pricer(
         Real_Ptr d2,
         Real_Ptr price) {            /// [out] d2
 
+    ASSUME(n % 64 == 0)
+
+    BUILTIN_ASSUME_ALIGNED(flags)
+    BUILTIN_ASSUME_ALIGNED(x)
+    BUILTIN_ASSUME_ALIGNED(s)
+    BUILTIN_ASSUME_ALIGNED(sigmaA2T2)
+    BUILTIN_ASSUME_ALIGNED(sigmaAsqrtT)
+    BUILTIN_ASSUME_ALIGNED(emrt)
+    BUILTIN_ASSUME_ALIGNED(tmp1)
+    BUILTIN_ASSUME_ALIGNED(tmp2)
+    BUILTIN_ASSUME_ALIGNED(tmp3)
+    BUILTIN_ASSUME_ALIGNED(tmp4)
+    BUILTIN_ASSUME_ALIGNED(d1)
+    BUILTIN_ASSUME_ALIGNED(d2)
+    BUILTIN_ASSUME_ALIGNED(price)
+
     compute_d_values(n, s, x, sigmaA2T2,
                      sigmaAsqrtT,
                      tmp1,
@@ -278,6 +322,13 @@ void ddx_mkl_pricer(
         Real_Ptr emrt,
         Real_Ptr ddx_price) {            /// [out] d2
 
+    ASSUME(n % 64 == 0)
+
+    BUILTIN_ASSUME_ALIGNED(flags)
+    BUILTIN_ASSUME_ALIGNED(d2)
+    BUILTIN_ASSUME_ALIGNED(emrt)
+    BUILTIN_ASSUME_ALIGNED(ddx_price)
+
 
     vdErfc(n, d2, ddx_price);
 
@@ -313,6 +364,16 @@ void d2dx2_mkl_pricer(
         Real_Ptr d2dx2
 ) {
 
+    ASSUME(n % 64 == 0)
+
+    BUILTIN_ASSUME_ALIGNED(flags)
+    BUILTIN_ASSUME_ALIGNED(s)
+    BUILTIN_ASSUME_ALIGNED(x)
+    BUILTIN_ASSUME_ALIGNED(d2dx2_prep)
+    BUILTIN_ASSUME_ALIGNED(sigmaA2T2)
+    BUILTIN_ASSUME_ALIGNED(tmp1)
+    BUILTIN_ASSUME_ALIGNED(tmp2)
+    BUILTIN_ASSUME_ALIGNED(d2dx2)
 
     for (MKL_INT64 i = 0; i < n; ++i) {
         tmp1[i] = s[i] / x[i];
