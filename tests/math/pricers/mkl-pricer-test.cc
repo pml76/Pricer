@@ -8,7 +8,11 @@
 #include <tests/math/pricers/Pricer.h>
 
 
+#define DECLARE_AND_DEFINE(type,x,y) (type x[64] __attribute__((aligned(64)));for(UINT64 i=0;i<64;i++) x[i]=y;)
+
 TEST_CASE("pricer-class equals mkl-pricer (long call)", "[pricer]") {
+
+    DECLARE_AND_DEFINE(double,rr,0.01)
 
     double r __attribute__((aligned(64))) = 0.01;    // interest rate
     double s __attribute__((aligned(64))) = 70.;     // stock price

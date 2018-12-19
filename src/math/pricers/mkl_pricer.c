@@ -36,7 +36,7 @@ static FLOAT ln_of_2, msqrt2;
  * @param d2 [out]
  */
 static inline void __attribute__((always_inline)) compute_d_values(
-        MKL_INT64 n,
+        UINT64 n,
         Real_Ptr s,                /// [in] stock price
         Real_Ptr x,                /// [in] strike
         Real_Ptr sigmaA2T2,        /// [in] sigmaA^2t/2
@@ -61,13 +61,13 @@ static inline void __attribute__((always_inline)) compute_d_values(
     BUILTIN_ASSUME_ALIGNED(d2)
 
 
-    for (MKL_INT64 i = 0; i < n; ++i) {
+    for (UINT64 i = 0; i < n; ++i) {
         tmp1[i] = s[i] / x[i];
     }
 
     vdLn(n, tmp1, tmp2);
 
-    for (MKL_INT64 i = 0; i < n; ++i) {
+    for (UINT64 i = 0; i < n; ++i) {
         d1[i] = (tmp2[i] + sigmaA2T2[i]) / (sigmaAsqrtT[i] * msqrt2);
         d2[i] = d1[i] - sigmaAsqrtT[i] / msqrt2;
     }
@@ -114,7 +114,7 @@ void init_mkl_pricer() {
  * @param emrt [out]
  */
 void prepare_mkl_pricer(
-        MKL_INT64 n,
+        UINT64 n,
         Real_Ptr s,                 /// [in] future price
         Real_Ptr sigma,             /// [in] vola
         Real_Ptr t,                 /// [in] time to maturity
@@ -150,7 +150,7 @@ void prepare_mkl_pricer(
     BUILTIN_ASSUME_ALIGNED(d2dx2_prep)
 
     FLOAT tt1;
-    for (MKL_INT64 i = 0; i < n; ++i) {
+    for (UINT64 i = 0; i < n; ++i) {
         tt1 = sigma[i] * sigma[i];
         tmp1[i] = tt1 * t[i] + ln_of_2;
         tmp2[i] = tt1 * (t[i] - tau[i]) + ln_of_2;
@@ -162,13 +162,13 @@ void prepare_mkl_pricer(
 
 
     FLOAT tt3;
-    for (MKL_INT64 i = 0; i < n; ++i) {
+    for (UINT64 i = 0; i < n; ++i) {
         tt3 = tmp4[i] * (1. + sigma[i] * sigma[i] * tau[i]);
         tmp2[i] = (tmp3[i] - tt3) / tmp5[i];
     }
 
     vdLn(n, tmp2, tmp1);
-    for (MKL_INT64 i = 0; i < n; ++i) {
+    for (UINT64 i = 0; i < n; ++i) {
         tmp1[i] /= t[i];
     }
 
@@ -176,7 +176,7 @@ void prepare_mkl_pricer(
     vdSqrt(n, t, tmp1);
 
 
-    for (MKL_INT64 i = 0; i < n; ++i) {
+    for (UINT64 i = 0; i < n; ++i) {
         sigmaA2T2[i] = sigmaA[i] * sigmaA[i] * t[i] / 2.;
         sigmaAsqrtT[i] = sigmaA[i] * tmp1[i];
         tmp2[i] = -r[i] * t[i] - ln_of_2;
@@ -186,13 +186,13 @@ void prepare_mkl_pricer(
     vdExp(n, tmp2, emrt);
     vdExp(n, tmp3, tmp2);
 
-    for (MKL_INT64 i = 0; i < n; ++i) {
+    for (UINT64 i = 0; i < n; ++i) {
         tmp1[i] = 2. * s[i] / (2. * M_PI * sigmaA2T2[i]);
     }
 
     vdSqrt(n, tmp1, d2dx2_prep);
 
-    for (MKL_INT64 i = 0; i < n; ++i) {
+    for (UINT64 i = 0; i < n; ++i) {
         d2dx2_prep[i] *= tmp2[i] * emrt[i];
     }
 
@@ -228,7 +228,7 @@ void prepare_mkl_pricer(
  */
 
 void mkl_pricer(
-        MKL_INT64 n,
+        UINT64 n,
         Uint64_Ptr flags,
         Real_Ptr s,                /// [in] stock price
         Real_Ptr x,                /// [in] strike
@@ -266,7 +266,7 @@ void mkl_pricer(
                      d1,
                      d2);
 
-    for (MKL_INT64 i = 0; i < n; ++i) {
+    for (UINT64 i = 0; i < n; ++i) {
         if ((flags[i] & 1) != 0) {
             tmp3[i] = -d1[i];
             tmp4[i] = -d2[i];
@@ -282,7 +282,7 @@ void mkl_pricer(
 
     double sx1, sx2;
     double w1, w2;
-    for (MKL_INT64 i = 0; i < n; ++i) {
+    for (UINT64 i = 0; i < n; ++i) {
         if ((flags[i] & 1) != 0) {
             sx1 = x[i];
             sx2 = s[i];
@@ -316,7 +316,7 @@ void mkl_pricer(
  * @param ddx_price [out]
  */
 void ddx_mkl_pricer(
-        MKL_INT64 n,
+        UINT64 n,
         Uint64_Ptr flags,
         Real_Ptr d2,
         Real_Ptr emrt,
@@ -333,7 +333,7 @@ void ddx_mkl_pricer(
     vdErfc(n, d2, ddx_price);
 
     double d;
-    for (MKL_INT64 i = 0; i < n; ++i) {
+    for (UINT64 i = 0; i < n; ++i) {
 
         if ((flags[i] & 1) != 0) {
             d = 2.;
@@ -353,7 +353,7 @@ void ddx_mkl_pricer(
 
 
 void d2dx2_mkl_pricer(
-        MKL_INT64 n,
+        UINT64 n,
         Uint64_Ptr flags,
         Real_Ptr s,
         Real_Ptr x,
@@ -375,25 +375,25 @@ void d2dx2_mkl_pricer(
     BUILTIN_ASSUME_ALIGNED(tmp2)
     BUILTIN_ASSUME_ALIGNED(d2dx2)
 
-    for (MKL_INT64 i = 0; i < n; ++i) {
+    for (UINT64 i = 0; i < n; ++i) {
         tmp1[i] = s[i] / x[i];
     }
 
     vdLn(n, tmp1, d2dx2);
 
-    for (MKL_INT64 i = 0; i < n; ++i) {
+    for (UINT64 i = 0; i < n; ++i) {
         tmp1[i] = -d2dx2[i] * d2dx2[i] / (4. * sigmaA2T2[i]);
     }
 
     vdExp(n, tmp1, d2dx2);
 
-    for (MKL_INT64 i = 0; i < n; ++i) {
+    for (UINT64 i = 0; i < n; ++i) {
         tmp1[i] = x[i] * x[i] * x[i];
     }
 
     vdSqrt(n, tmp1, tmp2);
 
-    for (MKL_INT64 i = 0; i < n; ++i) {
+    for (UINT64 i = 0; i < n; ++i) {
         d2dx2[i] = d2dx2[i] * d2dx2_prep[i] / tmp2[i];
 
         if ((flags[i] & 2) != 0) {

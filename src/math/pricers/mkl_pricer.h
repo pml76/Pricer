@@ -16,21 +16,28 @@ extern "C" {
 #ifdef __GNUC__
 #define BUILTIN_ASSUME_ALIGNED(x) x=__builtin_assume_aligned(x,64);
 #define ASSUME(cond) if(!(cond)) __builtin_unreachable();
+#define LIKELY(x)   __builtin_expect((x), 1)
+#define UNLIKELY(x) __builtin_expect((x), 0)
 #endif
 
 #ifdef __clang__
 #define BUILTIN_ASSUME_ALIGNED(x) x=__builtin_assume_aligned(x,64);
 #define ASSUME(cond) __builtin_assume(cond);
+#define LIKELY(x)   __builtin_expect((x), 1)
+#define UNLIKELY(x) __builtin_expect((x), 0)
 #endif
 
 #ifdef __INTEL_COMPILER
 #define BUILTIN_ASSUME_ALIGNED(x) __assume_aligned(x,64);
 #define ASSUME(cond) __assume(cond);
+#define LIKELY(x)   __builtin_expect((x), 1)
+#define UNLIKELY(x) __builtin_expect((x), 0)
 #endif
 
 
+
 typedef double FLOAT;
-typedef MKL_INT64 UINT64;
+typedef unsigned long long UINT64;
 
 typedef FLOAT *__restrict__  Real_Ptr;
 typedef UINT64 *__restrict__ Uint64_Ptr;
@@ -38,7 +45,7 @@ typedef UINT64 *__restrict__ Uint64_Ptr;
 void init_mkl_pricer();
 
 void prepare_mkl_pricer(
-        MKL_INT64 n,
+        UINT64 n,
         Real_Ptr s,                 /// [in] stock price
         Real_Ptr sigma,             /// [in] vola
         Real_Ptr t,                 /// [in] time to maturity
@@ -57,7 +64,7 @@ void prepare_mkl_pricer(
 
 
 void mkl_pricer(
-        MKL_INT64 n,
+        UINT64 n,
         Uint64_Ptr flags,
         Real_Ptr s,                /// [in] stock price
         Real_Ptr x,                /// [in] strike
@@ -73,7 +80,7 @@ void mkl_pricer(
         Real_Ptr price);
 
 void ddx_mkl_pricer(
-        MKL_INT64 n,
+        UINT64 n,
         Uint64_Ptr flags,
         Real_Ptr d2,
         Real_Ptr emrt,
@@ -81,7 +88,7 @@ void ddx_mkl_pricer(
 
 
 void d2dx2_mkl_pricer(
-        MKL_INT64 n,
+        UINT64 n,
         Uint64_Ptr flags,
         Real_Ptr s,
         Real_Ptr x,
