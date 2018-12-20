@@ -8,47 +8,52 @@
 #include <tests/math/pricers/Pricer.h>
 
 
-#define DECLARE_AND_DEFINE(type,x,y) (type x[64] __attribute__((aligned(64)));for(UINT64 i=0;i<64;i++) x[i]=y;)
+#define DECLARE_AND_DEFINE(type, x, y) \
+   type x[64] __attribute__((aligned(64))); \
+   for(UINT64 i=0;i<64;i++) x[i]=y;
 
 TEST_CASE("pricer-class equals mkl-pricer (long call)", "[pricer]") {
 
-    DECLARE_AND_DEFINE(double,rr,0.01)
+    DECLARE_AND_DEFINE(FLOAT, r, 0.01)
+    DECLARE_AND_DEFINE(FLOAT, s, 70.)
+    DECLARE_AND_DEFINE(FLOAT, t, 1.2)
+    DECLARE_AND_DEFINE(FLOAT, tau, 1. / 12.)
+    DECLARE_AND_DEFINE(FLOAT, sigma, 0.3)
+    DECLARE_AND_DEFINE(FLOAT, x, 72.)
 
-    double r __attribute__((aligned(64))) = 0.01;    // interest rate
-    double s __attribute__((aligned(64))) = 70.;     // stock price
-    double t __attribute__((aligned(64))) = 1.2;     // time to maturity
-    double tau __attribute__((aligned(64))) = 1. / 12.;  // length of averaging time-window
-    double sigma __attribute__((aligned(64))) = 0.3;     // vola
-    double x __attribute__((aligned(64))) = 72;      // strike
+    DECLARE_AND_DEFINE(FLOAT, tmp1, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp2, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp3, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp4, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp5, 0.)
 
-    double tmp1 __attribute__((aligned(64))) = 1,
-            tmp2 __attribute__((aligned(64))) = 2,
-            tmp3 __attribute__((aligned(64))) = 3,
-            tmp4 __attribute__((aligned(64))) = 4,
-            tmp5 __attribute__((aligned(64))) = 5,
-            sigmaA __attribute__((aligned(64))),
-            sigmaA2T2 __attribute__((aligned(64))),
-            sigmaAsqrtT __attribute__((aligned(64))),
-            emrt __attribute__((aligned(64))),
-            d2dx2_prep __attribute__((aligned(64)));
-    double d1 __attribute__((aligned(64))), d2 __attribute__((aligned(64)));
-    double price __attribute__((aligned(64)));
-    MKL_INT64 flags __attribute__((aligned(64))) = 0;
+    DECLARE_AND_DEFINE(FLOAT, sigmaA, 0.)
+    DECLARE_AND_DEFINE(FLOAT, sigmaA2T2, 0.)
+    DECLARE_AND_DEFINE(FLOAT, sigmaAsqrtT, 0.)
+    DECLARE_AND_DEFINE(FLOAT, emrt, 0.)
+    DECLARE_AND_DEFINE(FLOAT, d2dx2_prep, 0.)
+
+    DECLARE_AND_DEFINE(FLOAT, d1, 0.)
+    DECLARE_AND_DEFINE(FLOAT, d2, 0.)
+
+    DECLARE_AND_DEFINE(FLOAT, price, 0.)
+    DECLARE_AND_DEFINE(UINT64, flags, 0)
+
 
     Pricer p;
 
 
-    p.set_market_data(sigma,t,tau,r,s);
+    p.set_market_data(sigma[0], t[0], tau[0], r[0], s[0]);
 
     init_mkl_pricer();
 
-    prepare_mkl_pricer(1, &s, &sigma, &t, &tau, &r, &tmp1, &tmp2, &tmp3, &tmp4, &tmp5,
-                       &sigmaA, &sigmaA2T2, &sigmaAsqrtT, &emrt, &d2dx2_prep);
+    prepare_mkl_pricer(64, s, sigma, t, tau, r, tmp1, tmp2, tmp3, tmp4, tmp5,
+                       sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep);
 
     // test long call price
-    mkl_pricer(1,&flags,&s,&x,&sigmaA2T2,&sigmaAsqrtT,&emrt,&tmp1,&tmp2,&tmp3,&tmp4,&d1,&d2,&price);
-    double reference_pricer_value = p.compute_call_price(x);
-    REQUIRE(abs(reference_pricer_value - price) < 1.0e-8 );
+    mkl_pricer(64, flags, s, x, sigmaA2T2, sigmaAsqrtT, emrt, tmp1, tmp2, tmp3, tmp4, d1, d2, price);
+    FLOAT reference_pricer_value = p.compute_call_price(x[0]);
+    REQUIRE(abs(reference_pricer_value - price[0]) < 1.0e-8);
 
 
 }
@@ -56,41 +61,46 @@ TEST_CASE("pricer-class equals mkl-pricer (long call)", "[pricer]") {
 
 TEST_CASE("pricer-class equals mkl-pricer (short call)", "[pricer]") {
 
-    double r __attribute__((aligned(64))) = 0.01;    // interest rate
-    double s __attribute__((aligned(64))) = 70.;     // stock price
-    double t __attribute__((aligned(64))) = 1.2;     // time to maturity
-    double tau __attribute__((aligned(64))) = 1. / 12.;  // length of averaging time-window
-    double sigma __attribute__((aligned(64))) = 0.3;     // vola
-    double x __attribute__((aligned(64))) = 72;      // strike
+    DECLARE_AND_DEFINE(FLOAT, r, 0.01)
+    DECLARE_AND_DEFINE(FLOAT, s, 70.)
+    DECLARE_AND_DEFINE(FLOAT, t, 1.2)
+    DECLARE_AND_DEFINE(FLOAT, tau, 1. / 12.)
+    DECLARE_AND_DEFINE(FLOAT, sigma, 0.3)
+    DECLARE_AND_DEFINE(FLOAT, x, 72.)
 
-    double tmp1 __attribute__((aligned(64))) = 1,
-            tmp2 __attribute__((aligned(64))) = 2,
-            tmp3 __attribute__((aligned(64))) = 3,
-            tmp4 __attribute__((aligned(64))) = 4,
-            tmp5 __attribute__((aligned(64))) = 5,
-            sigmaA __attribute__((aligned(64))),
-            sigmaA2T2 __attribute__((aligned(64))),
-            sigmaAsqrtT __attribute__((aligned(64))),
-            emrt __attribute__((aligned(64))),
-            d2dx2_prep __attribute__((aligned(64)));
-    double d1 __attribute__((aligned(64))), d2 __attribute__((aligned(64)));
-    double price __attribute__((aligned(64)));
-    MKL_INT64 flags __attribute__((aligned(64))) = 2;
+    DECLARE_AND_DEFINE(FLOAT, tmp1, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp2, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp3, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp4, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp5, 0.)
+
+    DECLARE_AND_DEFINE(FLOAT, sigmaA, 0.)
+    DECLARE_AND_DEFINE(FLOAT, sigmaA2T2, 0.)
+    DECLARE_AND_DEFINE(FLOAT, sigmaAsqrtT, 0.)
+    DECLARE_AND_DEFINE(FLOAT, emrt, 0.)
+    DECLARE_AND_DEFINE(FLOAT, d2dx2_prep, 0.)
+
+    DECLARE_AND_DEFINE(FLOAT, d1, 0.)
+    DECLARE_AND_DEFINE(FLOAT, d2, 0.)
+
+    DECLARE_AND_DEFINE(FLOAT, price, 0.)
+    DECLARE_AND_DEFINE(UINT64, flags, 2)
+
 
     Pricer p;
 
 
-    p.set_market_data(sigma, t, tau, r, s);
+    p.set_market_data(sigma[0], t[0], tau[0], r[0], s[0]);
 
     init_mkl_pricer();
-    prepare_mkl_pricer(1, &s, &sigma, &t, &tau, &r, &tmp1, &tmp2, &tmp3, &tmp4, &tmp5,
-                       &sigmaA, &sigmaA2T2, &sigmaAsqrtT, &emrt, &d2dx2_prep);
 
+    prepare_mkl_pricer(64, s, sigma, t, tau, r, tmp1, tmp2, tmp3, tmp4, tmp5,
+                       sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep);
 
-    // test short call price
-    mkl_pricer(1, &flags, &s, &x, &sigmaA2T2, &sigmaAsqrtT, &emrt, &tmp1, &tmp2, &tmp3, &tmp4, &d1, &d2, &price);
-    double reference_pricer_value = p.compute_call_price(x);
-    REQUIRE(abs(reference_pricer_value + price) < 1.0e-8);
+    // test long call price
+    mkl_pricer(64, flags, s, x, sigmaA2T2, sigmaAsqrtT, emrt, tmp1, tmp2, tmp3, tmp4, d1, d2, price);
+    FLOAT reference_pricer_value = p.compute_call_price(x[0]);
+    REQUIRE(abs(reference_pricer_value + price[0]) < 1.0e-8);
 
 
 }
@@ -98,440 +108,524 @@ TEST_CASE("pricer-class equals mkl-pricer (short call)", "[pricer]") {
 
 TEST_CASE("pricer-class equals mkl-pricer (long put)", "[pricer]") {
 
-    double r __attribute__((aligned(64))) = 0.01;    // interest rate
-    double s __attribute__((aligned(64))) = 70.;     // stock price
-    double t __attribute__((aligned(64))) = 1.2;     // time to maturity
-    double tau __attribute__((aligned(64))) = 1. / 12.;  // length of averaging time-window
-    double sigma __attribute__((aligned(64))) = 0.3;     // vola
-    double x __attribute__((aligned(64))) = 72;      // strike
+    DECLARE_AND_DEFINE(FLOAT, r, 0.01)
+    DECLARE_AND_DEFINE(FLOAT, s, 70.)
+    DECLARE_AND_DEFINE(FLOAT, t, 1.2)
+    DECLARE_AND_DEFINE(FLOAT, tau, 1. / 12.)
+    DECLARE_AND_DEFINE(FLOAT, sigma, 0.3)
+    DECLARE_AND_DEFINE(FLOAT, x, 72.)
 
-    double tmp1 __attribute__((aligned(64))) = 1,
-            tmp2 __attribute__((aligned(64))) = 2,
-            tmp3 __attribute__((aligned(64))) = 3,
-            tmp4 __attribute__((aligned(64))) = 4,
-            tmp5 __attribute__((aligned(64))) = 5,
-            sigmaA __attribute__((aligned(64))),
-            sigmaA2T2 __attribute__((aligned(64))),
-            sigmaAsqrtT __attribute__((aligned(64))),
-            emrt __attribute__((aligned(64))),
-            d2dx2_prep __attribute__((aligned(64)));
-    double d1 __attribute__((aligned(64))), d2 __attribute__((aligned(64)));
-    double price __attribute__((aligned(64)));
-    MKL_INT64 flags __attribute__((aligned(64))) = 1;
+    DECLARE_AND_DEFINE(FLOAT, tmp1, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp2, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp3, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp4, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp5, 0.)
+
+    DECLARE_AND_DEFINE(FLOAT, sigmaA, 0.)
+    DECLARE_AND_DEFINE(FLOAT, sigmaA2T2, 0.)
+    DECLARE_AND_DEFINE(FLOAT, sigmaAsqrtT, 0.)
+    DECLARE_AND_DEFINE(FLOAT, emrt, 0.)
+    DECLARE_AND_DEFINE(FLOAT, d2dx2_prep, 0.)
+
+    DECLARE_AND_DEFINE(FLOAT, d1, 0.)
+    DECLARE_AND_DEFINE(FLOAT, d2, 0.)
+
+    DECLARE_AND_DEFINE(FLOAT, price, 0.)
+    DECLARE_AND_DEFINE(UINT64, flags, 1)
+
 
     Pricer p;
 
 
-    p.set_market_data(sigma, t, tau, r, s);
+    p.set_market_data(sigma[0], t[0], tau[0], r[0], s[0]);
 
     init_mkl_pricer();
-    prepare_mkl_pricer(1, &s, &sigma, &t, &tau, &r, &tmp1, &tmp2, &tmp3, &tmp4, &tmp5,
-                       &sigmaA, &sigmaA2T2, &sigmaAsqrtT, &emrt, &d2dx2_prep);
 
-    // test long put price
-    mkl_pricer(1, &flags, &s, &x, &sigmaA2T2, &sigmaAsqrtT, &emrt, &tmp1, &tmp2, &tmp3, &tmp4, &d1, &d2, &price);
-    double reference_pricer_value = p.compute_put_price(x);
-    REQUIRE(abs(reference_pricer_value - price) < 1.0e-8);
+    prepare_mkl_pricer(64, s, sigma, t, tau, r, tmp1, tmp2, tmp3, tmp4, tmp5,
+                       sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep);
+
+    // test long call price
+    mkl_pricer(64, flags, s, x, sigmaA2T2, sigmaAsqrtT, emrt, tmp1, tmp2, tmp3, tmp4, d1, d2, price);
+    FLOAT reference_pricer_value = p.compute_put_price(x[0]);
+    REQUIRE(abs(reference_pricer_value - price[0]) < 1.0e-8);
 
 }
 
 
 TEST_CASE("pricer-class equals mkl-pricer (short put)", "[pricer]") {
 
-    double r __attribute__((aligned(64))) = 0.01;    // interest rate
-    double s __attribute__((aligned(64))) = 70.;     // stock price
-    double t __attribute__((aligned(64))) = 1.2;     // time to maturity
-    double tau __attribute__((aligned(64))) = 1. / 12.;  // length of averaging time-window
-    double sigma __attribute__((aligned(64))) = 0.3;     // vola
-    double x __attribute__((aligned(64))) = 72;      // strike
+    DECLARE_AND_DEFINE(FLOAT, r, 0.01)
+    DECLARE_AND_DEFINE(FLOAT, s, 70.)
+    DECLARE_AND_DEFINE(FLOAT, t, 1.2)
+    DECLARE_AND_DEFINE(FLOAT, tau, 1. / 12.)
+    DECLARE_AND_DEFINE(FLOAT, sigma, 0.3)
+    DECLARE_AND_DEFINE(FLOAT, x, 72.)
 
-    double tmp1 __attribute__((aligned(64))) = 1,
-            tmp2 __attribute__((aligned(64))) = 2,
-            tmp3 __attribute__((aligned(64))) = 3,
-            tmp4 __attribute__((aligned(64))) = 4,
-            tmp5 __attribute__((aligned(64))) = 5,
-            sigmaA __attribute__((aligned(64))),
-            sigmaA2T2 __attribute__((aligned(64))),
-            sigmaAsqrtT __attribute__((aligned(64))),
-            emrt __attribute__((aligned(64))),
-            d2dx2_prep __attribute__((aligned(64)));
-    double d1 __attribute__((aligned(64))), d2 __attribute__((aligned(64)));
-    double price __attribute__((aligned(64)));
-    MKL_INT64 flags __attribute__((aligned(64))) = 3;
+    DECLARE_AND_DEFINE(FLOAT, tmp1, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp2, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp3, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp4, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp5, 0.)
+
+    DECLARE_AND_DEFINE(FLOAT, sigmaA, 0.)
+    DECLARE_AND_DEFINE(FLOAT, sigmaA2T2, 0.)
+    DECLARE_AND_DEFINE(FLOAT, sigmaAsqrtT, 0.)
+    DECLARE_AND_DEFINE(FLOAT, emrt, 0.)
+    DECLARE_AND_DEFINE(FLOAT, d2dx2_prep, 0.)
+
+    DECLARE_AND_DEFINE(FLOAT, d1, 0.)
+    DECLARE_AND_DEFINE(FLOAT, d2, 0.)
+
+    DECLARE_AND_DEFINE(FLOAT, price, 0.)
+    DECLARE_AND_DEFINE(UINT64, flags, 3)
+
 
     Pricer p;
 
 
-    p.set_market_data(sigma, t, tau, r, s);
+    p.set_market_data(sigma[0], t[0], tau[0], r[0], s[0]);
 
     init_mkl_pricer();
-    prepare_mkl_pricer(1, &s, &sigma, &t, &tau, &r, &tmp1, &tmp2, &tmp3, &tmp4, &tmp5,
-                       &sigmaA, &sigmaA2T2, &sigmaAsqrtT, &emrt, &d2dx2_prep);
 
-    // test short put price
-    mkl_pricer(1, &flags, &s, &x, &sigmaA2T2, &sigmaAsqrtT, &emrt, &tmp1, &tmp2, &tmp3, &tmp4, &d1, &d2, &price);
-    double reference_pricer_value = p.compute_put_price(x);
-    REQUIRE(abs(reference_pricer_value + price) < 1.0e-8);
+    prepare_mkl_pricer(64, s, sigma, t, tau, r, tmp1, tmp2, tmp3, tmp4, tmp5,
+                       sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep);
+
+    // test long call price
+    mkl_pricer(64, flags, s, x, sigmaA2T2, sigmaAsqrtT, emrt, tmp1, tmp2, tmp3, tmp4, d1, d2, price);
+    FLOAT reference_pricer_value = p.compute_put_price(x[0]);
+    REQUIRE(abs(reference_pricer_value + price[0]) < 1.0e-8);
 
 }
+
 
 
 TEST_CASE("pricer-class equals ddx-mkl-pricer (long call)", "[pricer]") {
 
-    double r     = 0.00;    // interest rate
-    double s     = 70.;     // stock price
-    double t     = 1.2;     // time to maturity
-    double tau   = 1./12.;  // length of averaging time-window
-    double sigma = 0.3;     // vola
-    double x     = 72;      // strike
+    DECLARE_AND_DEFINE(FLOAT, r, 0.01)
+    DECLARE_AND_DEFINE(FLOAT, s, 70.)
+    DECLARE_AND_DEFINE(FLOAT, t, 1.2)
+    DECLARE_AND_DEFINE(FLOAT, tau, 1. / 12.)
+    DECLARE_AND_DEFINE(FLOAT, sigma, 0.3)
+    DECLARE_AND_DEFINE(FLOAT, x, 72.)
 
-    double tmp1, tmp2, tmp3, tmp4, tmp5, sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep;
-    double d1,d2;
-    double price, ddx_price;
-    const double eps = 1.0e-10;
+    DECLARE_AND_DEFINE(FLOAT, tmp1, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp2, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp3, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp4, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp5, 0.)
+
+    DECLARE_AND_DEFINE(FLOAT, sigmaA, 0.)
+    DECLARE_AND_DEFINE(FLOAT, sigmaA2T2, 0.)
+    DECLARE_AND_DEFINE(FLOAT, sigmaAsqrtT, 0.)
+    DECLARE_AND_DEFINE(FLOAT, emrt, 0.)
+    DECLARE_AND_DEFINE(FLOAT, d2dx2_prep, 0.)
+    DECLARE_AND_DEFINE(FLOAT, ddx_price, 0.)
+
+    DECLARE_AND_DEFINE(FLOAT, d1, 0.)
+    DECLARE_AND_DEFINE(FLOAT, d2, 0.)
+
+    DECLARE_AND_DEFINE(FLOAT, price, 0.)
+    DECLARE_AND_DEFINE(UINT64, flags, 0)
+
+    const FLOAT eps = 1.0e-10;
 
     Pricer p;
 
-    p.set_market_data(sigma,t,tau,r,s);
+    p.set_market_data(sigma[0], t[0], tau[0], r[0], s[0]);
 
     init_mkl_pricer();
-    prepare_mkl_pricer(1, &s, &sigma, &t, &tau, &r, &tmp1, &tmp2, &tmp3, &tmp4, &tmp5,
-                       &sigmaA, &sigmaA2T2, &sigmaAsqrtT, &emrt, &d2dx2_prep);
+    prepare_mkl_pricer(64, s, sigma, t, tau, r, tmp1, tmp2, tmp3, tmp4, tmp5,
+                       sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep);
 
 
     // test long call price
-    MKL_INT64 flags = 0;
-    mkl_pricer(1,&flags,&s,&x,&sigmaA2T2,&sigmaAsqrtT,&emrt,&tmp1,&tmp2,&tmp3,&tmp4,&d1,&d2,&price);
-    ddx_mkl_pricer(1,&flags,&d2,&emrt,&ddx_price);
-    double reference_pricer_value1 = p.compute_call_price(x);
-    double reference_pricer_value2 = p.compute_call_price(x+eps);
-    /*
-    std::cout << "d2 = " << d2 << std::endl;
-    std::cout << "emrt = " << emrt << std::endl;
-    std::cout << "ddx_price = " << ddx_price << std::endl;
-    std::cout << "(reference_pricer_value2 - reference_pricer_value1)/eps  = "
-              << (reference_pricer_value2 - reference_pricer_value1)/eps << std::endl;
-    std::cout.flush();
-    */
-    REQUIRE( abs((reference_pricer_value2 - reference_pricer_value1)/eps -ddx_price )< 1.0e-4 );
+    mkl_pricer(64, flags, s, x, sigmaA2T2, sigmaAsqrtT, emrt, tmp1, tmp2, tmp3, tmp4, d1, d2, price);
+    ddx_mkl_pricer(64, flags, d2, emrt, ddx_price);
+    FLOAT reference_pricer_value1 = p.compute_call_price(x[0]);
+    FLOAT reference_pricer_value2 = p.compute_call_price(x[0] + eps);
+
+    REQUIRE(abs((reference_pricer_value2 - reference_pricer_value1) / eps - ddx_price[0]) < 1.0e-4);
 
 }
 
+
 TEST_CASE("pricer-class equals ddx-mkl-pricer (short call)", "[pricer]") {
 
-    double r = 0.00;    // interest rate
-    double s = 70.;     // stock price
-    double t = 1.2;     // time to maturity
-    double tau = 1. / 12.;  // length of averaging time-window
-    double sigma = 0.3;     // vola
-    double x = 72;      // strike
+    DECLARE_AND_DEFINE(FLOAT, r, 0.01)
+    DECLARE_AND_DEFINE(FLOAT, s, 70.)
+    DECLARE_AND_DEFINE(FLOAT, t, 1.2)
+    DECLARE_AND_DEFINE(FLOAT, tau, 1. / 12.)
+    DECLARE_AND_DEFINE(FLOAT, sigma, 0.3)
+    DECLARE_AND_DEFINE(FLOAT, x, 72.)
 
-    double tmp1, tmp2, tmp3, tmp4, tmp5, sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep;
-    double d1, d2;
-    double price, ddx_price;
-    const double eps = 1.0e-10;
+    DECLARE_AND_DEFINE(FLOAT, tmp1, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp2, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp3, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp4, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp5, 0.)
+
+    DECLARE_AND_DEFINE(FLOAT, sigmaA, 0.)
+    DECLARE_AND_DEFINE(FLOAT, sigmaA2T2, 0.)
+    DECLARE_AND_DEFINE(FLOAT, sigmaAsqrtT, 0.)
+    DECLARE_AND_DEFINE(FLOAT, emrt, 0.)
+    DECLARE_AND_DEFINE(FLOAT, d2dx2_prep, 0.)
+    DECLARE_AND_DEFINE(FLOAT, ddx_price, 0.)
+
+    DECLARE_AND_DEFINE(FLOAT, d1, 0.)
+    DECLARE_AND_DEFINE(FLOAT, d2, 0.)
+
+    DECLARE_AND_DEFINE(FLOAT, price, 0.)
+    DECLARE_AND_DEFINE(UINT64, flags, 2)
+
+    const FLOAT eps = 1.0e-10;
 
     Pricer p;
 
-    p.set_market_data(sigma, t, tau, r, s);
+    p.set_market_data(sigma[0], t[0], tau[0], r[0], s[0]);
 
     init_mkl_pricer();
-    prepare_mkl_pricer(1, &s, &sigma, &t, &tau, &r, &tmp1, &tmp2, &tmp3, &tmp4, &tmp5,
-                       &sigmaA, &sigmaA2T2, &sigmaAsqrtT, &emrt, &d2dx2_prep);
+    prepare_mkl_pricer(64, s, sigma, t, tau, r, tmp1, tmp2, tmp3, tmp4, tmp5,
+                       sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep);
 
-    // test short call price
-    MKL_INT64 flags = 2;
-    mkl_pricer(1, &flags, &s, &x, &sigmaA2T2, &sigmaAsqrtT, &emrt, &tmp1, &tmp2, &tmp3, &tmp4, &d1, &d2, &price);
-    ddx_mkl_pricer(1, &flags, &d2, &emrt, &ddx_price);
-    double reference_pricer_value1 = p.compute_call_price(x);
-    double reference_pricer_value2 = p.compute_call_price(x + eps);
-    /*
-    std::cout << "d2 = " << d2 << std::endl;
-    std::cout << "emrt = " << emrt << std::endl;
-    std::cout << "ddx_price = " << ddx_price << std::endl;
-    std::cout << "(reference_pricer_value2 - reference_pricer_value1)/eps  = "
-              << (reference_pricer_value2 - reference_pricer_value1)/eps << std::endl;
-    std::cout.flush();
-    */
-    REQUIRE(abs((reference_pricer_value2 - reference_pricer_value1) / eps + ddx_price) < 1.0e-4);
+
+    // test long call price
+    mkl_pricer(64, flags, s, x, sigmaA2T2, sigmaAsqrtT, emrt, tmp1, tmp2, tmp3, tmp4, d1, d2, price);
+    ddx_mkl_pricer(64, flags, d2, emrt, ddx_price);
+    FLOAT reference_pricer_value1 = p.compute_call_price(x[0]);
+    FLOAT reference_pricer_value2 = p.compute_call_price(x[0] + eps);
+
+    REQUIRE(abs((reference_pricer_value2 - reference_pricer_value1) / eps + ddx_price[0]) < 1.0e-4);
 
 }
 
 TEST_CASE("pricer-class equals ddx-mkl-pricer (long put)", "[pricer]") {
 
-    double r = 0.00;    // interest rate
-    double s = 70.;     // stock price
-    double t = 1.2;     // time to maturity
-    double tau = 1. / 12.;  // length of averaging time-window
-    double sigma = 0.3;     // vola
-    double x = 72;      // strike
+    DECLARE_AND_DEFINE(FLOAT, r, 0.01)
+    DECLARE_AND_DEFINE(FLOAT, s, 70.)
+    DECLARE_AND_DEFINE(FLOAT, t, 1.2)
+    DECLARE_AND_DEFINE(FLOAT, tau, 1. / 12.)
+    DECLARE_AND_DEFINE(FLOAT, sigma, 0.3)
+    DECLARE_AND_DEFINE(FLOAT, x, 72.)
 
-    double tmp1, tmp2, tmp3, tmp4, tmp5, sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep;
-    double d1, d2;
-    double price, ddx_price;
-    const double eps = 1.0e-10;
+    DECLARE_AND_DEFINE(FLOAT, tmp1, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp2, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp3, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp4, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp5, 0.)
+
+    DECLARE_AND_DEFINE(FLOAT, sigmaA, 0.)
+    DECLARE_AND_DEFINE(FLOAT, sigmaA2T2, 0.)
+    DECLARE_AND_DEFINE(FLOAT, sigmaAsqrtT, 0.)
+    DECLARE_AND_DEFINE(FLOAT, emrt, 0.)
+    DECLARE_AND_DEFINE(FLOAT, d2dx2_prep, 0.)
+    DECLARE_AND_DEFINE(FLOAT, ddx_price, 0.)
+
+    DECLARE_AND_DEFINE(FLOAT, d1, 0.)
+    DECLARE_AND_DEFINE(FLOAT, d2, 0.)
+
+    DECLARE_AND_DEFINE(FLOAT, price, 0.)
+    DECLARE_AND_DEFINE(UINT64, flags, 1)
+
+    const FLOAT eps = 1.0e-10;
 
     Pricer p;
 
-    p.set_market_data(sigma, t, tau, r, s);
+    p.set_market_data(sigma[0], t[0], tau[0], r[0], s[0]);
 
     init_mkl_pricer();
-    prepare_mkl_pricer(1, &s, &sigma, &t, &tau, &r, &tmp1, &tmp2, &tmp3, &tmp4, &tmp5,
-                       &sigmaA, &sigmaA2T2, &sigmaAsqrtT, &emrt, &d2dx2_prep);
+    prepare_mkl_pricer(64, s, sigma, t, tau, r, tmp1, tmp2, tmp3, tmp4, tmp5,
+                       sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep);
 
 
+    // test long call price
+    mkl_pricer(64, flags, s, x, sigmaA2T2, sigmaAsqrtT, emrt, tmp1, tmp2, tmp3, tmp4, d1, d2, price);
+    ddx_mkl_pricer(64, flags, d2, emrt, ddx_price);
+    FLOAT reference_pricer_value1 = p.compute_put_price(x[0]);
+    FLOAT reference_pricer_value2 = p.compute_put_price(x[0] + eps);
 
-    // test long put price
-    MKL_INT64 flags = 1;
-    mkl_pricer(1, &flags, &s, &x, &sigmaA2T2, &sigmaAsqrtT, &emrt, &tmp1, &tmp2, &tmp3, &tmp4, &d1, &d2, &price);
-    ddx_mkl_pricer(1, &flags, &d2, &emrt, &ddx_price);
-    double reference_pricer_value1 = p.compute_put_price(x);
-    double reference_pricer_value2 = p.compute_put_price(x + eps);
-
-    /*
-    std::cout << "d2 = " << d2 << std::endl;
-    std::cout << "emrt = " << emrt << std::endl;
-    std::cout << "ddx_price = " << ddx_price << std::endl;
-    std::cout << "(reference_pricer_value2 - reference_pricer_value1)/eps  = "
-              << (reference_pricer_value2 - reference_pricer_value1)/eps << std::endl;
-    std::cout.flush();
-    */
-    REQUIRE(abs((reference_pricer_value2 - reference_pricer_value1) / eps - ddx_price) < 1.0e-4);
+    REQUIRE(abs((reference_pricer_value2 - reference_pricer_value1) / eps - ddx_price[0]) < 1.0e-4);
 
 
 }
 
 TEST_CASE("pricer-class equals ddx-mkl-pricer (short put)", "[pricer]") {
 
-    double r = 0.00;    // interest rate
-    double s = 70.;     // stock price
-    double t = 1.2;     // time to maturity
-    double tau = 1. / 12.;  // length of averaging time-window
-    double sigma = 0.3;     // vola
-    double x = 72;      // strike
+    DECLARE_AND_DEFINE(FLOAT, r, 0.01)
+    DECLARE_AND_DEFINE(FLOAT, s, 70.)
+    DECLARE_AND_DEFINE(FLOAT, t, 1.2)
+    DECLARE_AND_DEFINE(FLOAT, tau, 1. / 12.)
+    DECLARE_AND_DEFINE(FLOAT, sigma, 0.3)
+    DECLARE_AND_DEFINE(FLOAT, x, 72.)
 
-    double tmp1, tmp2, tmp3, tmp4, tmp5, sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep;
-    double d1, d2;
-    double price, ddx_price;
-    const double eps = 1.0e-10;
+    DECLARE_AND_DEFINE(FLOAT, tmp1, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp2, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp3, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp4, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp5, 0.)
+
+    DECLARE_AND_DEFINE(FLOAT, sigmaA, 0.)
+    DECLARE_AND_DEFINE(FLOAT, sigmaA2T2, 0.)
+    DECLARE_AND_DEFINE(FLOAT, sigmaAsqrtT, 0.)
+    DECLARE_AND_DEFINE(FLOAT, emrt, 0.)
+    DECLARE_AND_DEFINE(FLOAT, d2dx2_prep, 0.)
+    DECLARE_AND_DEFINE(FLOAT, ddx_price, 0.)
+
+    DECLARE_AND_DEFINE(FLOAT, d1, 0.)
+    DECLARE_AND_DEFINE(FLOAT, d2, 0.)
+
+    DECLARE_AND_DEFINE(FLOAT, price, 0.)
+    DECLARE_AND_DEFINE(UINT64, flags, 3)
+
+    const FLOAT eps = 1.0e-10;
 
     Pricer p;
 
-    p.set_market_data(sigma, t, tau, r, s);
+    p.set_market_data(sigma[0], t[0], tau[0], r[0], s[0]);
 
     init_mkl_pricer();
-    prepare_mkl_pricer(1, &s, &sigma, &t, &tau, &r, &tmp1, &tmp2, &tmp3, &tmp4, &tmp5,
-                       &sigmaA, &sigmaA2T2, &sigmaAsqrtT, &emrt, &d2dx2_prep);
+    prepare_mkl_pricer(64, s, sigma, t, tau, r, tmp1, tmp2, tmp3, tmp4, tmp5,
+                       sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep);
 
-    // test short put price
-    MKL_INT64 flags = 3;
-    mkl_pricer(1, &flags, &s, &x, &sigmaA2T2, &sigmaAsqrtT, &emrt, &tmp1, &tmp2, &tmp3, &tmp4, &d1, &d2, &price);
-    ddx_mkl_pricer(1, &flags, &d2, &emrt, &ddx_price);
-    double reference_pricer_value1 = p.compute_put_price(x);
-    double reference_pricer_value2 = p.compute_put_price(x + eps);
-    /*
-    std::cout << "d2 = " << d2 << std::endl;
-    std::cout << "emrt = " << emrt << std::endl;
-    std::cout << "ddx_price = " << ddx_price << std::endl;
-    std::cout << "(reference_pricer_value2 - reference_pricer_value1)/eps  = "
-              << (reference_pricer_value2 - reference_pricer_value1)/eps << std::endl;
-    std::cout.flush();
-    */
-    REQUIRE(abs((reference_pricer_value2 - reference_pricer_value1) / eps + ddx_price) < 1.0e-4);
+
+    // test long call price
+    mkl_pricer(64, flags, s, x, sigmaA2T2, sigmaAsqrtT, emrt, tmp1, tmp2, tmp3, tmp4, d1, d2, price);
+    ddx_mkl_pricer(64, flags, d2, emrt, ddx_price);
+
+    FLOAT reference_pricer_value1 = p.compute_put_price(x[0]);
+    FLOAT reference_pricer_value2 = p.compute_put_price(x[0] + eps);
+
+    REQUIRE(abs((reference_pricer_value2 - reference_pricer_value1) / eps + ddx_price[0]) < 1.0e-4);
 
 }
 
 
 TEST_CASE("d2dx2_pricer equals ddx-mkl-pricer diff-quot (long call)", "[pricer]") {
 
-    double r = 0.00;    // interest rate
-    double s = 70.;     // stock price
-    double t = 1.2;     // time to maturity
-    double tau = 1. / 12.;  // length of averaging time-window
-    double sigma = 0.3;     // vola
-    double x = 72;      // strike
+    DECLARE_AND_DEFINE(FLOAT, r, 0.01)
+    DECLARE_AND_DEFINE(FLOAT, s, 70.)
+    DECLARE_AND_DEFINE(FLOAT, t, 1.2)
+    DECLARE_AND_DEFINE(FLOAT, tau, 1. / 12.)
+    DECLARE_AND_DEFINE(FLOAT, sigma, 0.3)
+    DECLARE_AND_DEFINE(FLOAT, x, 72.)
 
-    double tmp1, tmp2, tmp3, tmp4, tmp5, sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep;
-    double d1, d2;
-    double price, d2dx2_price;
-    const double eps = 1.0e-10;
+    DECLARE_AND_DEFINE(FLOAT, tmp1, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp2, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp3, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp4, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp5, 0.)
+
+    DECLARE_AND_DEFINE(FLOAT, sigmaA, 0.)
+    DECLARE_AND_DEFINE(FLOAT, sigmaA2T2, 0.)
+    DECLARE_AND_DEFINE(FLOAT, sigmaAsqrtT, 0.)
+    DECLARE_AND_DEFINE(FLOAT, emrt, 0.)
+    DECLARE_AND_DEFINE(FLOAT, d2dx2_prep, 0.)
+    DECLARE_AND_DEFINE(FLOAT, ddx_price, 0.)
+    DECLARE_AND_DEFINE(FLOAT, d2dx2_price, 0.)
+
+    DECLARE_AND_DEFINE(FLOAT, d1, 0.)
+    DECLARE_AND_DEFINE(FLOAT, d2, 0.)
+
+    DECLARE_AND_DEFINE(FLOAT, price, 0.)
+    DECLARE_AND_DEFINE(UINT64, flags, 0)
+    FLOAT eps = 1.0e-10;
 
     Pricer p;
 
-    p.set_market_data(sigma, t, tau, r, s);
+    p.set_market_data(sigma[0], t[0], tau[0], r[0], s[0]);
 
     init_mkl_pricer();
-    prepare_mkl_pricer(1, &s, &sigma, &t, &tau, &r, &tmp1, &tmp2, &tmp3, &tmp4, &tmp5,
-                       &sigmaA, &sigmaA2T2, &sigmaAsqrtT, &emrt, &d2dx2_prep);
+    prepare_mkl_pricer(64, s, sigma, t, tau, r, tmp1, tmp2, tmp3, tmp4, tmp5,
+                       sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep);
 
 
     // test long call price
-    MKL_INT64 flags = 0;
-    mkl_pricer(1, &flags, &s, &x, &sigmaA2T2, &sigmaAsqrtT, &emrt, &tmp1, &tmp2, &tmp3, &tmp4, &d1, &d2, &price);
-    d2dx2_mkl_pricer(1, &flags, &s, &x, &d2dx2_prep, &sigmaA2T2, &tmp1, &tmp2, &d2dx2_price);
-    double reference_pricer_value1;
-    double reference_pricer_value2;
-    mkl_pricer(1, &flags, &s, &x, &sigmaA2T2, &sigmaAsqrtT, &emrt, &tmp1, &tmp2, &tmp3, &tmp4, &d1, &d2, &price);
-    ddx_mkl_pricer(1, &flags, &d2, &emrt, &reference_pricer_value1);
-    x += eps;
-    mkl_pricer(1, &flags, &s, &x, &sigmaA2T2, &sigmaAsqrtT, &emrt, &tmp1, &tmp2, &tmp3, &tmp4, &d1, &d2, &price);
-    ddx_mkl_pricer(1, &flags, &d2, &emrt, &reference_pricer_value2);
+    mkl_pricer(64, flags, s, x, sigmaA2T2, sigmaAsqrtT, emrt, tmp1, tmp2, tmp3, tmp4, d1, d2, price);
+    d2dx2_mkl_pricer(64, flags, s, x, d2dx2_prep, sigmaA2T2, tmp1, tmp2, d2dx2_price);
 
-    /*
-    std::cout << "d2 = " << d2 << std::endl;
-    std::cout << "emrt = " << emrt << std::endl;
-    std::cout << "ddx_price = " << ddx_price << std::endl;
-    std::cout << "(reference_pricer_value2 - reference_pricer_value1)/eps  = "
-              << (reference_pricer_value2 - reference_pricer_value1)/eps << std::endl;
-    std::cout.flush();
-    */
+    DECLARE_AND_DEFINE(FLOAT, reference_pricer_value1, 0.);
+    DECLARE_AND_DEFINE(FLOAT, reference_pricer_value2, 0.);
 
-    REQUIRE(abs((reference_pricer_value2 - reference_pricer_value1) / eps - d2dx2_price) < 1.0e-4);
+    mkl_pricer(64, flags, s, x, sigmaA2T2, sigmaAsqrtT, emrt, tmp1, tmp2, tmp3, tmp4, d1, d2, price);
+    ddx_mkl_pricer(64, flags, d2, emrt, reference_pricer_value1);
+    for (UINT64 i = 0; i ^ 64; ++i) x[i] += eps;
+    mkl_pricer(64, flags, s, x, sigmaA2T2, sigmaAsqrtT, emrt, tmp1, tmp2, tmp3, tmp4, d1, d2, price);
+    ddx_mkl_pricer(64, flags, d2, emrt, reference_pricer_value2);
+
+
+    REQUIRE(abs((reference_pricer_value2[0] - reference_pricer_value1[0]) / eps - d2dx2_price[0]) < 1.0e-4);
 
 }
 
 
 TEST_CASE("d2dx2_pricer equals ddx-mkl-pricer diff-quot (short call)", "[pricer]") {
 
-    double r = 0.00;    // interest rate
-    double s = 70.;     // stock price
-    double t = 1.2;     // time to maturity
-    double tau = 1. / 12.;  // length of averaging time-window
-    double sigma = 0.3;     // vola
-    double x = 72;      // strike
+    DECLARE_AND_DEFINE(FLOAT, r, 0.01)
+    DECLARE_AND_DEFINE(FLOAT, s, 70.)
+    DECLARE_AND_DEFINE(FLOAT, t, 1.2)
+    DECLARE_AND_DEFINE(FLOAT, tau, 1. / 12.)
+    DECLARE_AND_DEFINE(FLOAT, sigma, 0.3)
+    DECLARE_AND_DEFINE(FLOAT, x, 72.)
 
-    double tmp1, tmp2, tmp3, tmp4, tmp5, sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep;
-    double d1, d2;
-    double price, d2dx2_price;
-    const double eps = 1.0e-10;
+    DECLARE_AND_DEFINE(FLOAT, tmp1, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp2, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp3, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp4, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp5, 0.)
+
+    DECLARE_AND_DEFINE(FLOAT, sigmaA, 0.)
+    DECLARE_AND_DEFINE(FLOAT, sigmaA2T2, 0.)
+    DECLARE_AND_DEFINE(FLOAT, sigmaAsqrtT, 0.)
+    DECLARE_AND_DEFINE(FLOAT, emrt, 0.)
+    DECLARE_AND_DEFINE(FLOAT, d2dx2_prep, 0.)
+    DECLARE_AND_DEFINE(FLOAT, ddx_price, 0.)
+    DECLARE_AND_DEFINE(FLOAT, d2dx2_price, 0.)
+
+    DECLARE_AND_DEFINE(FLOAT, d1, 0.)
+    DECLARE_AND_DEFINE(FLOAT, d2, 0.)
+
+    DECLARE_AND_DEFINE(FLOAT, price, 0.)
+    DECLARE_AND_DEFINE(UINT64, flags, 2)
+    FLOAT eps = 1.0e-10;
 
     Pricer p;
 
-    p.set_market_data(sigma, t, tau, r, s);
+    p.set_market_data(sigma[0], t[0], tau[0], r[0], s[0]);
 
     init_mkl_pricer();
-    prepare_mkl_pricer(1, &s, &sigma, &t, &tau, &r, &tmp1, &tmp2, &tmp3, &tmp4, &tmp5,
-                       &sigmaA, &sigmaA2T2, &sigmaAsqrtT, &emrt, &d2dx2_prep);
+    prepare_mkl_pricer(64, s, sigma, t, tau, r, tmp1, tmp2, tmp3, tmp4, tmp5,
+                       sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep);
 
 
     // test long call price
-    MKL_INT64 flags = 2;
-    mkl_pricer(1, &flags, &s, &x, &sigmaA2T2, &sigmaAsqrtT, &emrt, &tmp1, &tmp2, &tmp3, &tmp4, &d1, &d2, &price);
-    d2dx2_mkl_pricer(1, &flags, &s, &x, &d2dx2_prep, &sigmaA2T2, &tmp1, &tmp2, &d2dx2_price);
-    double reference_pricer_value1;
-    double reference_pricer_value2;
-    mkl_pricer(1, &flags, &s, &x, &sigmaA2T2, &sigmaAsqrtT, &emrt, &tmp1, &tmp2, &tmp3, &tmp4, &d1, &d2, &price);
-    ddx_mkl_pricer(1, &flags, &d2, &emrt, &reference_pricer_value1);
-    x += eps;
-    mkl_pricer(1, &flags, &s, &x, &sigmaA2T2, &sigmaAsqrtT, &emrt, &tmp1, &tmp2, &tmp3, &tmp4, &d1, &d2, &price);
-    ddx_mkl_pricer(1, &flags, &d2, &emrt, &reference_pricer_value2);
+    mkl_pricer(64, flags, s, x, sigmaA2T2, sigmaAsqrtT, emrt, tmp1, tmp2, tmp3, tmp4, d1, d2, price);
+    d2dx2_mkl_pricer(64, flags, s, x, d2dx2_prep, sigmaA2T2, tmp1, tmp2, d2dx2_price);
 
-    /*
-    std::cout << "d2 = " << d2 << std::endl;
-    std::cout << "emrt = " << emrt << std::endl;
-    std::cout << "ddx_price = " << ddx_price << std::endl;
-    std::cout << "(reference_pricer_value2 - reference_pricer_value1)/eps  = "
-              << (reference_pricer_value2 - reference_pricer_value1)/eps << std::endl;
-    std::cout.flush();
-    */
+    DECLARE_AND_DEFINE(FLOAT, reference_pricer_value1, 0.);
+    DECLARE_AND_DEFINE(FLOAT, reference_pricer_value2, 0.);
 
-    REQUIRE(abs((reference_pricer_value2 - reference_pricer_value1) / eps - d2dx2_price) < 1.0e-4);
+    mkl_pricer(64, flags, s, x, sigmaA2T2, sigmaAsqrtT, emrt, tmp1, tmp2, tmp3, tmp4, d1, d2, price);
+    ddx_mkl_pricer(64, flags, d2, emrt, reference_pricer_value1);
+    for (UINT64 i = 0; i ^ 64; ++i) x[i] += eps;
+    mkl_pricer(64, flags, s, x, sigmaA2T2, sigmaAsqrtT, emrt, tmp1, tmp2, tmp3, tmp4, d1, d2, price);
+    ddx_mkl_pricer(64, flags, d2, emrt, reference_pricer_value2);
+
+
+    REQUIRE(abs((reference_pricer_value2[0] - reference_pricer_value1[0]) / eps - d2dx2_price[0]) < 1.0e-4);
 
 }
 
 TEST_CASE("d2dx2_pricer equals ddx-mkl-pricer diff-quot (long put)", "[pricer]") {
 
-    double r = 0.00;    // interest rate
-    double s = 70.;     // stock price
-    double t = 1.2;     // time to maturity
-    double tau = 1. / 12.;  // length of averaging time-window
-    double sigma = 0.3;     // vola
-    double x = 72;      // strike
+    DECLARE_AND_DEFINE(FLOAT, r, 0.01)
+    DECLARE_AND_DEFINE(FLOAT, s, 70.)
+    DECLARE_AND_DEFINE(FLOAT, t, 1.2)
+    DECLARE_AND_DEFINE(FLOAT, tau, 1. / 12.)
+    DECLARE_AND_DEFINE(FLOAT, sigma, 0.3)
+    DECLARE_AND_DEFINE(FLOAT, x, 72.)
 
-    double tmp1, tmp2, tmp3, tmp4, tmp5, sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep;
-    double d1, d2;
-    double price, d2dx2_price;
-    const double eps = 1.0e-10;
+    DECLARE_AND_DEFINE(FLOAT, tmp1, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp2, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp3, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp4, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp5, 0.)
+
+    DECLARE_AND_DEFINE(FLOAT, sigmaA, 0.)
+    DECLARE_AND_DEFINE(FLOAT, sigmaA2T2, 0.)
+    DECLARE_AND_DEFINE(FLOAT, sigmaAsqrtT, 0.)
+    DECLARE_AND_DEFINE(FLOAT, emrt, 0.)
+    DECLARE_AND_DEFINE(FLOAT, d2dx2_prep, 0.)
+    DECLARE_AND_DEFINE(FLOAT, ddx_price, 0.)
+    DECLARE_AND_DEFINE(FLOAT, d2dx2_price, 0.)
+
+    DECLARE_AND_DEFINE(FLOAT, d1, 0.)
+    DECLARE_AND_DEFINE(FLOAT, d2, 0.)
+
+    DECLARE_AND_DEFINE(FLOAT, price, 0.)
+    DECLARE_AND_DEFINE(UINT64, flags, 1)
+    FLOAT eps = 1.0e-10;
 
     Pricer p;
 
-    p.set_market_data(sigma, t, tau, r, s);
+    p.set_market_data(sigma[0], t[0], tau[0], r[0], s[0]);
 
     init_mkl_pricer();
-    prepare_mkl_pricer(1, &s, &sigma, &t, &tau, &r, &tmp1, &tmp2, &tmp3, &tmp4, &tmp5,
-                       &sigmaA, &sigmaA2T2, &sigmaAsqrtT, &emrt, &d2dx2_prep);
+    prepare_mkl_pricer(64, s, sigma, t, tau, r, tmp1, tmp2, tmp3, tmp4, tmp5,
+                       sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep);
 
 
     // test long call price
-    MKL_INT64 flags = 1;
-    mkl_pricer(1, &flags, &s, &x, &sigmaA2T2, &sigmaAsqrtT, &emrt, &tmp1, &tmp2, &tmp3, &tmp4, &d1, &d2, &price);
-    d2dx2_mkl_pricer(1, &flags, &s, &x, &d2dx2_prep, &sigmaA2T2, &tmp1, &tmp2, &d2dx2_price);
-    double reference_pricer_value1;
-    double reference_pricer_value2;
-    mkl_pricer(1, &flags, &s, &x, &sigmaA2T2, &sigmaAsqrtT, &emrt, &tmp1, &tmp2, &tmp3, &tmp4, &d1, &d2, &price);
-    ddx_mkl_pricer(1, &flags, &d2, &emrt, &reference_pricer_value1);
-    x += eps;
-    mkl_pricer(1, &flags, &s, &x, &sigmaA2T2, &sigmaAsqrtT, &emrt, &tmp1, &tmp2, &tmp3, &tmp4, &d1, &d2, &price);
-    ddx_mkl_pricer(1, &flags, &d2, &emrt, &reference_pricer_value2);
+    mkl_pricer(64, flags, s, x, sigmaA2T2, sigmaAsqrtT, emrt, tmp1, tmp2, tmp3, tmp4, d1, d2, price);
+    d2dx2_mkl_pricer(64, flags, s, x, d2dx2_prep, sigmaA2T2, tmp1, tmp2, d2dx2_price);
 
-    /*
-    std::cout << "d2 = " << d2 << std::endl;
-    std::cout << "emrt = " << emrt << std::endl;
-    std::cout << "ddx_price = " << ddx_price << std::endl;
-    std::cout << "(reference_pricer_value2 - reference_pricer_value1)/eps  = "
-              << (reference_pricer_value2 - reference_pricer_value1)/eps << std::endl;
-    std::cout.flush();
-    */
+    DECLARE_AND_DEFINE(FLOAT, reference_pricer_value1, 0.);
+    DECLARE_AND_DEFINE(FLOAT, reference_pricer_value2, 0.);
 
-    REQUIRE(abs((reference_pricer_value2 - reference_pricer_value1) / eps - d2dx2_price) < 1.0e-4);
+    mkl_pricer(64, flags, s, x, sigmaA2T2, sigmaAsqrtT, emrt, tmp1, tmp2, tmp3, tmp4, d1, d2, price);
+    ddx_mkl_pricer(64, flags, d2, emrt, reference_pricer_value1);
+    for (UINT64 i = 0; i ^ 64; ++i) x[i] += eps;
+    mkl_pricer(64, flags, s, x, sigmaA2T2, sigmaAsqrtT, emrt, tmp1, tmp2, tmp3, tmp4, d1, d2, price);
+    ddx_mkl_pricer(64, flags, d2, emrt, reference_pricer_value2);
+
+
+    REQUIRE(abs((reference_pricer_value2[0] - reference_pricer_value1[0]) / eps - d2dx2_price[0]) < 1.0e-4);
 
 }
 
 
 TEST_CASE("d2dx2_pricer equals ddx-mkl-pricer diff-quot (short put)", "[pricer]") {
 
-    double r = 0.00;    // interest rate
-    double s = 70.;     // stock price
-    double t = 1.2;     // time to maturity
-    double tau = 1. / 12.;  // length of averaging time-window
-    double sigma = 0.3;     // vola
-    double x = 72;      // strike
+    DECLARE_AND_DEFINE(FLOAT, r, 0.01)
+    DECLARE_AND_DEFINE(FLOAT, s, 70.)
+    DECLARE_AND_DEFINE(FLOAT, t, 1.2)
+    DECLARE_AND_DEFINE(FLOAT, tau, 1. / 12.)
+    DECLARE_AND_DEFINE(FLOAT, sigma, 0.3)
+    DECLARE_AND_DEFINE(FLOAT, x, 72.)
 
-    double tmp1, tmp2, tmp3, tmp4, tmp5, sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep;
-    double d1, d2;
-    double price, d2dx2_price;
-    const double eps = 1.0e-10;
+    DECLARE_AND_DEFINE(FLOAT, tmp1, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp2, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp3, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp4, 0.)
+    DECLARE_AND_DEFINE(FLOAT, tmp5, 0.)
+
+    DECLARE_AND_DEFINE(FLOAT, sigmaA, 0.)
+    DECLARE_AND_DEFINE(FLOAT, sigmaA2T2, 0.)
+    DECLARE_AND_DEFINE(FLOAT, sigmaAsqrtT, 0.)
+    DECLARE_AND_DEFINE(FLOAT, emrt, 0.)
+    DECLARE_AND_DEFINE(FLOAT, d2dx2_prep, 0.)
+    DECLARE_AND_DEFINE(FLOAT, ddx_price, 0.)
+    DECLARE_AND_DEFINE(FLOAT, d2dx2_price, 0.)
+
+    DECLARE_AND_DEFINE(FLOAT, d1, 0.)
+    DECLARE_AND_DEFINE(FLOAT, d2, 0.)
+
+    DECLARE_AND_DEFINE(FLOAT, price, 0.)
+    DECLARE_AND_DEFINE(UINT64, flags, 3)
+    FLOAT eps = 1.0e-10;
 
     Pricer p;
 
-    p.set_market_data(sigma, t, tau, r, s);
+    p.set_market_data(sigma[0], t[0], tau[0], r[0], s[0]);
 
     init_mkl_pricer();
-    prepare_mkl_pricer(1, &s, &sigma, &t, &tau, &r, &tmp1, &tmp2, &tmp3, &tmp4, &tmp5,
-                       &sigmaA, &sigmaA2T2, &sigmaAsqrtT, &emrt, &d2dx2_prep);
+    prepare_mkl_pricer(64, s, sigma, t, tau, r, tmp1, tmp2, tmp3, tmp4, tmp5,
+                       sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep);
 
 
     // test long call price
-    MKL_INT64 flags = 3;
-    mkl_pricer(1, &flags, &s, &x, &sigmaA2T2, &sigmaAsqrtT, &emrt, &tmp1, &tmp2, &tmp3, &tmp4, &d1, &d2, &price);
-    d2dx2_mkl_pricer(1, &flags, &s, &x, &d2dx2_prep, &sigmaA2T2, &tmp1, &tmp2, &d2dx2_price);
-    double reference_pricer_value1;
-    double reference_pricer_value2;
-    mkl_pricer(1, &flags, &s, &x, &sigmaA2T2, &sigmaAsqrtT, &emrt, &tmp1, &tmp2, &tmp3, &tmp4, &d1, &d2, &price);
-    ddx_mkl_pricer(1, &flags, &d2, &emrt, &reference_pricer_value1);
-    x += eps;
-    mkl_pricer(1, &flags, &s, &x, &sigmaA2T2, &sigmaAsqrtT, &emrt, &tmp1, &tmp2, &tmp3, &tmp4, &d1, &d2, &price);
-    ddx_mkl_pricer(1, &flags, &d2, &emrt, &reference_pricer_value2);
+    mkl_pricer(64, flags, s, x, sigmaA2T2, sigmaAsqrtT, emrt, tmp1, tmp2, tmp3, tmp4, d1, d2, price);
+    d2dx2_mkl_pricer(64, flags, s, x, d2dx2_prep, sigmaA2T2, tmp1, tmp2, d2dx2_price);
 
-    /*
-    std::cout << "d2 = " << d2 << std::endl;
-    std::cout << "emrt = " << emrt << std::endl;
-    std::cout << "ddx_price = " << ddx_price << std::endl;
-    std::cout << "(reference_pricer_value2 - reference_pricer_value1)/eps  = "
-              << (reference_pricer_value2 - reference_pricer_value1)/eps << std::endl;
-    std::cout.flush();
-    */
+    DECLARE_AND_DEFINE(FLOAT, reference_pricer_value1, 0.);
+    DECLARE_AND_DEFINE(FLOAT, reference_pricer_value2, 0.);
 
-    REQUIRE(abs((reference_pricer_value2 - reference_pricer_value1) / eps - d2dx2_price) < 1.0e-4);
+    mkl_pricer(64, flags, s, x, sigmaA2T2, sigmaAsqrtT, emrt, tmp1, tmp2, tmp3, tmp4, d1, d2, price);
+    ddx_mkl_pricer(64, flags, d2, emrt, reference_pricer_value1);
+    for (UINT64 i = 0; i ^ 64; ++i) x[i] += eps;
+    mkl_pricer(64, flags, s, x, sigmaA2T2, sigmaAsqrtT, emrt, tmp1, tmp2, tmp3, tmp4, d1, d2, price);
+    ddx_mkl_pricer(64, flags, d2, emrt, reference_pricer_value2);
+
+
+    REQUIRE(abs((reference_pricer_value2[0] - reference_pricer_value1[0]) / eps - d2dx2_price[0]) < 1.0e-4);
 
 }
+
