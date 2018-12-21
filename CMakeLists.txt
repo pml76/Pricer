@@ -33,8 +33,8 @@ ENDIF ("${isSystemDir}" STREQUAL "-1")
 
 set(CMAKE_PREFIX_PATH "S{CMAKE_PREFIX_PATH} S{CMAKE_SOURCE_DIR}/cmake/")
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Ofast -march=ivybridge -fno-omit-frame-pointer -fopt-info-vec-missed -fPIC")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Ofast -march=ivybridge -fno-omit-frame-pointer -fopt-info-vec-missed -fPIC")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Ofast -march=ivybridge -fno-omit-frame-pointer -ffp-contract=off -fno-math-errno -fno-trapping-math -O3 -fPIC")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Ofast -march=ivybridge -fno-omit-frame-pointer -ffp-contract=off -fno-math-errno -fno-trapping-math -O3 -fPIC")
 
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
@@ -53,14 +53,26 @@ find_package(SLEEF REQUIRED)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
-set(PROJECT_SOURCES src/math/pricers/mkl_pricer.c)
-set(PROJECT_HEADERS src/math/pricers/mkl_pricer.c)
+set(PROJECT_SOURCES src/math/pricers/mkl_pricer.c 3rdParty/sleef/libm/sleefsimddp.c 3rdParty/sleef/libm/rempitab.c src/math/pricers/sleef_pricer.c src/math/pricers/sleef_pricer.h)
+set(PROJECT_HEADERS src/math/pricers/mkl_pricer.h 3rdParty/sleef/arch/helperadvsimd.h
+        3rdParty/sleef/arch/helperavx.h
+        3rdParty/sleef/arch/helperavx2.h
+        3rdParty/sleef/arch/helperavx2_128.h
+        3rdParty/sleef/arch/helperavx512f.h
+        3rdParty/sleef/arch/helperneon32.h
+        3rdParty/sleef/arch/helperpower_128.h
+        3rdParty/sleef/arch/helperpurec.h
+        3rdParty/sleef/arch/helpersse2.h
+        3rdParty/sleef/arch/helpersve.h
+        3rdParty/sleef/arch/helpervecext.h 3rdParty/sleef/common/misc.h 3rdParty/sleef/libm/dd.h)
+
+add_compile_definitions(ENABLE_AVX=1)
 
 set(PROJECT_TEST_SOURCES tests/math/pricers/Pricer.h tests/math/pricers/mkl-pricer-test.cc)
 
 set(PROJECT_BENCHMARK_SOURCES benchmarks/main.cc benchmarks/math/exp-benchmark.cc benchmarks/math/erf-benchmark.cc benchmarks/math/log-benchmark.cc benchmarks/math/sqrt-benchmark.cc benchmarks/math/mkl-pricer-benchmark.cc src/math/include/erfc.h tests/math/Erf-Tests.c)
 
-include_directories(./ $ENV{SPACK_TRANSITIVE_INCLUDE_PATH} ${MKL_INCLUDE_DIRS})
+include_directories(./ $ENV{SPACK_TRANSITIVE_INCLUDE_PATH} ${MKL_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/3rdParty/sleef/arch ${CMAKE_SOURCE_DIR}/3rdParty/sleef/common ${CMAKE_SOURCE_DIR}/3rdParty/sleef/libm)
 
 add_executable(Pricer ${PROJECT_SOURCES} ${PROJECT_HEADERS} src/main.cpp)
 target_link_libraries(Pricer pthread dl ${MKL_LIBRARIES})

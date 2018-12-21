@@ -40,9 +40,6 @@ typedef UINT64 *__restrict__ Uint64_Ptr;
 void ERfc_Test(UINT64 n, Real_Ptr a, Real_Ptr b) {
 
 
-    // DECLARE_AND_DEFINE(FLOAT, a, 2.)
-    // DECLARE_AND_DEFINE(FLOAT, b, 0.)
-
     BUILTIN_ASSUME_ALIGNED(b)
     BUILTIN_ASSUME_ALIGNED(a)
 
