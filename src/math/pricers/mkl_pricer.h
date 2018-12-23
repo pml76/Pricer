@@ -8,39 +8,7 @@
 
 #include <mkl.h>
 
-#ifdef __cplusplus
-#define restrict
-extern "C" {
-#endif
-
-#ifdef __GNUC__
-#define BUILTIN_ASSUME_ALIGNED(x) x=__builtin_assume_aligned(x,64);
-#define ASSUME(cond) if(!(cond)) __builtin_unreachable();
-#define LIKELY(x)   __builtin_expect((x), 1)
-#define UNLIKELY(x) __builtin_expect((x), 0)
-#endif
-
-#ifdef __clang__
-#define BUILTIN_ASSUME_ALIGNED(x) x=__builtin_assume_aligned(x,64);
-#define ASSUME(cond) __builtin_assume(cond);
-#define LIKELY(x)   __builtin_expect((x), 1)
-#define UNLIKELY(x) __builtin_expect((x), 0)
-#endif
-
-#ifdef __INTEL_COMPILER
-#define BUILTIN_ASSUME_ALIGNED(x) __assume_aligned(x,64);
-#define ASSUME(cond) __assume(cond);
-#define LIKELY(x)   __builtin_expect((x), 1)
-#define UNLIKELY(x) __builtin_expect((x), 0)
-#endif
-
-
-
-typedef double FLOAT;
-typedef unsigned long long UINT64;
-
-typedef FLOAT *__restrict__  Real_Ptr;
-typedef UINT64 *__restrict__ Uint64_Ptr;
+#include <src/math/pricers/pricer-base.h>
 
 void init_mkl_pricer();
 

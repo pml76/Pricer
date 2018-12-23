@@ -12,34 +12,38 @@
 #include <src/math/pricers/mkl_pricer.h>
 
 
-typedef double *__restrict__ __attribute__((aligned(64))) Real_Ptr;
+typedef double *__restrict__ __attribute__((aligned(ALIGN_TO))) Real_Ptr;
 
 static void BM_Pricer_MKL(benchmark::State &state) {
 
 
-    Real_Ptr ss = (Real_Ptr) aligned_alloc(64, ((sizeof(FLOAT) * state.range(0)) / 64 + 1) * 64);
-    Real_Ptr xs = (Real_Ptr) aligned_alloc(64, ((sizeof(FLOAT) * state.range(0)) / 64 + 1) * 64);
-    Real_Ptr rs = (Real_Ptr) aligned_alloc(64, ((sizeof(FLOAT) * state.range(0)) / 64 + 1) * 64);
-    Real_Ptr sigmas = (Real_Ptr) aligned_alloc(64, ((sizeof(FLOAT) * state.range(0)) / 64 + 1) * 64);
-    Real_Ptr ts = (Real_Ptr) aligned_alloc(64, ((sizeof(FLOAT) * state.range(0)) / 64 + 1) * 64);
-    Real_Ptr taus = (Real_Ptr) aligned_alloc(64, ((sizeof(FLOAT) * state.range(0)) / 64 + 1) * 64);
-    Real_Ptr prices = (Real_Ptr) aligned_alloc(64, ((sizeof(FLOAT) * state.range(0)) / 64 + 1) * 64);
-    Uint64_Ptr flags = (Uint64_Ptr) aligned_alloc(64, ((sizeof(UINT64) * state.range(0)) / 64 + 1) * 64);
+    Real_Ptr ss = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
+    Real_Ptr xs = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
+    Real_Ptr rs = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
+    Real_Ptr sigmas = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
+    Real_Ptr ts = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
+    Real_Ptr taus = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
+    Real_Ptr prices = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
+    Uint64_Ptr flags = (Uint64_Ptr) aligned_alloc(ALIGN_TO,
+                                                  ((sizeof(UINT64) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
 
-    Real_Ptr tmp1 = (Real_Ptr) aligned_alloc(64, ((sizeof(FLOAT) * state.range(0)) / 64 + 1) * 64);
-    Real_Ptr tmp2 = (Real_Ptr) aligned_alloc(64, ((sizeof(FLOAT) * state.range(0)) / 64 + 1) * 64);
-    Real_Ptr tmp3 = (Real_Ptr) aligned_alloc(64, ((sizeof(FLOAT) * state.range(0)) / 64 + 1) * 64);
-    Real_Ptr tmp4 = (Real_Ptr) aligned_alloc(64, ((sizeof(FLOAT) * state.range(0)) / 64 + 1) * 64);
-    Real_Ptr tmp5 = (Real_Ptr) aligned_alloc(64, ((sizeof(FLOAT) * state.range(0)) / 64 + 1) * 64);
+    Real_Ptr tmp1 = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
+    Real_Ptr tmp2 = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
+    Real_Ptr tmp3 = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
+    Real_Ptr tmp4 = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
+    Real_Ptr tmp5 = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
 
-    Real_Ptr sigmaA = (Real_Ptr) aligned_alloc(64, ((sizeof(FLOAT) * state.range(0)) / 64 + 1) * 64);
-    Real_Ptr sigmaA2T2 = (Real_Ptr) aligned_alloc(64, ((sizeof(FLOAT) * state.range(0)) / 64 + 1) * 64);
-    Real_Ptr sigmaAsqrtT = (Real_Ptr) aligned_alloc(64, ((sizeof(FLOAT) * state.range(0)) / 64 + 1) * 64);
-    Real_Ptr emrt = (Real_Ptr) aligned_alloc(64, ((sizeof(FLOAT) * state.range(0)) / 64 + 1) * 64);
-    Real_Ptr d1 = (Real_Ptr) aligned_alloc(64, ((sizeof(FLOAT) * state.range(0)) / 64 + 1) * 64);
-    Real_Ptr d2 = (Real_Ptr) aligned_alloc(64, ((sizeof(FLOAT) * state.range(0)) / 64 + 1) * 64);
+    Real_Ptr sigmaA = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
+    Real_Ptr sigmaA2T2 = (Real_Ptr) aligned_alloc(ALIGN_TO,
+                                                  ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
+    Real_Ptr sigmaAsqrtT = (Real_Ptr) aligned_alloc(ALIGN_TO,
+                                                    ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
+    Real_Ptr emrt = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
+    Real_Ptr d1 = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
+    Real_Ptr d2 = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
 
-    Real_Ptr d2dx2_prep = (Real_Ptr) aligned_alloc(64, ((sizeof(FLOAT) * state.range(0)) / 64 + 1) * 64);
+    Real_Ptr d2dx2_prep = (Real_Ptr) aligned_alloc(ALIGN_TO,
+                                                   ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
 
 
     // First create an instance of an engine.
@@ -53,7 +57,7 @@ static void BM_Pricer_MKL(benchmark::State &state) {
     std::uniform_real_distribution<double> sigmas_dist{0.01, 1.0};
     std::uniform_real_distribution<double> ts_dist{0.09, 2.0};
     std::uniform_real_distribution<double> taus_dist{0.08, 0.09};
-    std::uniform_int_distribution<MKL_INT64> flags_dist{0, 3};
+    std::uniform_int_distribution<UINT64> flags_dist{0, 3};
 
     auto ss_gen = [&ss_dist, &mersenne_engine]() {
         return ss_dist(mersenne_engine);
@@ -93,7 +97,7 @@ static void BM_Pricer_MKL(benchmark::State &state) {
         std::generate(taus, &taus[state.range(0)], taus_gen);
         std::generate(flags, &flags[state.range(0)], flags_gen);
 
-        for (MKL_INT64 i = 0; i < state.range(0); ++i) {
+        for (UINT64 i = 0; i < state.range(0); ++i) {
             ts[i] += taus[i];
         }
 

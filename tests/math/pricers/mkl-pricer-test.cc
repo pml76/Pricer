@@ -9,8 +9,8 @@
 
 
 #define DECLARE_AND_DEFINE(type, x, y) \
-   type x[64] __attribute__((aligned(64))); \
-   for(UINT64 i=0;i<64;i++) x[i]=y;
+   type x[64] __attribute__((aligned(ALIGN_TO))); \
+   for(UINT64 i=0;i<ALIGN_TO;i++) x[i]=y;
 
 TEST_CASE("pricer-class equals mkl-pricer (long call)", "[pricer]") {
 
