@@ -10,6 +10,11 @@
 
 #include <src/math/pricers/pricer-base.h>
 
+#ifdef __cplusplus
+#define restrict
+extern "C" {
+#endif
+
 void init_mkl_pricer();
 
 void prepare_mkl_pricer(

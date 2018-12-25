@@ -68,7 +68,7 @@ set(PROJECT_HEADERS src/math/pricers/mkl_pricer.h 3rdParty/sleef/arch/helperadvs
 
 add_compile_definitions(ENABLE_AVX=1)
 
-set(PROJECT_TEST_SOURCES tests/math/pricers/Pricer.h tests/math/pricers/mkl-pricer-test.cc)
+set(PROJECT_TEST_SOURCES tests/math/pricers/Pricer.h tests/math/pricers/mkl-pricer-test.cc tests/math/pricers/sleef-pricer-test.cc)
 
 set(PROJECT_BENCHMARK_SOURCES benchmarks/main.cc benchmarks/math/exp-benchmark.cc benchmarks/math/erf-benchmark.cc benchmarks/math/log-benchmark.cc benchmarks/math/sqrt-benchmark.cc benchmarks/math/mkl-pricer-benchmark.cc src/math/include/erfc.h tests/math/Erf-Tests.c)
 

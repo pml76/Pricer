@@ -92,4 +92,9 @@ typedef unsigned long long UINT64;
 typedef FLOAT *__restrict__ Real_Ptr;
 typedef UINT64 *__restrict__ Uint64_Ptr;
 
+
+#ifdef __cplusplus
+};
+#endif
+
 #endif //PRICER_PRICER_BASE_H

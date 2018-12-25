@@ -294,7 +294,6 @@ void sleef_pricer(
         price = vsub_vd_vd_vd(
                 vmul_vd_vd_vd(put_call, vmul_vd_vd_vd(s, tmp1)),
                 vmul_vd_vd_vd(put_call, vmul_vd_vd_vd(x, tmp2)));
-
         price = vmul_vd_vd_vd(vmul_vd_vd_vd(emrt, long_short), price);
 
         vstore_v_p_vd(&d1_[i], d1);
