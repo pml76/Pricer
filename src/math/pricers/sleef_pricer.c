@@ -148,7 +148,7 @@ extern const double rempitabdp[];
 #include <tgmath.h>
 
 static vdouble ln_of_2, msqrt2;
-vdouble one, two, four, pi2, one_over_two, zero;
+vdouble one, two, four, pi2, mone;
 
 
 vdouble xexp(vdouble d);
@@ -167,8 +167,7 @@ void init_sleef_pricer() {
     two = vcast_vd_d(2.);
     four = vcast_vd_d(4.);
     pi2 = vmul_vd_vd_vd(two, vcast_vd_d(M_PI));
-    one_over_two = vdiv_vd_vd_vd(one, two);
-    zero = vcast_vd_d(0.);
+    mone = vcast_vd_d(-1.);
 
 }
 
@@ -203,6 +202,7 @@ void prepare_sleef_pricer(
     vdouble tt1, tt3;
     vdouble s, sigma, t, tau, r, sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep;
 
+#pragma omp parallel for
     for (UINT64 i = 0; i < n; i += sizeof(vdouble) / sizeof(double)) {
 
         s = vload_vd_p(&s_[i]);
@@ -271,6 +271,7 @@ void sleef_pricer(
     vdouble tmp1, tmp2, tmp3, tmp4, x, s, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price;
     vdouble long_short, put_call;
 
+#pragma omp parallel for
     for (UINT64 i = 0; i < n; i += sizeof(vdouble) / sizeof(double)) {
         s = vload_vd_p(&s_[i]);
         x = vload_vd_p(&x_[i]);
@@ -301,5 +302,40 @@ void sleef_pricer(
         vstore_v_p_vd(&price_[i], price);
     }
 
+
+}
+
+
+void ddx_sleef_pricer(
+        UINT64 n,
+        Real_Ptr long_short_,     // 1 == long option // -1 == short option
+        Real_Ptr put_call_,       // -1 == put // 1 == call
+        Real_Ptr d2_,
+        Real_Ptr emrt_,
+        Real_Ptr ddx_price_) {
+    ASSUME(n % 64 == 0)
+
+    ASSUME_ALIGNED(long_short_)
+    ASSUME_ALIGNED(put_call_)
+    ASSUME_ALIGNED(d2_)
+    ASSUME_ALIGNED(emrt_)
+    ASSUME_ALIGNED(ddx_price_)
+
+    vdouble long_short, put_call, d2, emrt, ddx_price, d;
+
+#pragma omp parallel for
+    for (UINT64 i = 0; i < n; i += sizeof(vdouble) / sizeof(double)) {
+
+        d2 = vload_vd_p(&d2_[i]);
+        put_call = vload_vd_p(&put_call_[i]);
+        long_short = vload_vd_p(&long_short_[i]);
+        emrt = vload_vd_p(&emrt_[i]);
+
+        ddx_price = xerfc_u15(d2);
+        ddx_price = vsub_vd_vd_vd(vadd_vd_vd_vd(one, vmul_vd_vd_vd(put_call, mone)), ddx_price);
+        ddx_price = vmul_vd_vd_vd(vmul_vd_vd_vd(emrt, long_short), ddx_price);
+
+        vstore_v_p_vd(&ddx_price_[i], ddx_price);
+    }
 
 }
