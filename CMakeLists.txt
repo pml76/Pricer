@@ -33,8 +33,8 @@ ENDIF ("${isSystemDir}" STREQUAL "-1")
 
 set(CMAKE_PREFIX_PATH "S{CMAKE_PREFIX_PATH} S{CMAKE_SOURCE_DIR}/cmake/")
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Ofast -march=ivybridge -fopenmp -fno-omit-frame-pointer -ffp-contract=off -fno-math-errno -fno-trapping-math -O3 -fPIC")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Ofast -march=ivybridge -fopenmp -fno-omit-frame-pointer -ffp-contract=off -fno-math-errno -fno-trapping-math -O3 -fPIC")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fopenmp -Ofast -march=ivybridge -fno-omit-frame-pointer -ffp-contract=off -fno-math-errno -fno-trapping-math -O3 -fPIC")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp -Ofast -march=ivybridge -fno-omit-frame-pointer -ffp-contract=off -fno-math-errno -fno-trapping-math -O3 -fPIC")
 
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})

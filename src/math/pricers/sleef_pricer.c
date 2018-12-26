@@ -198,12 +198,14 @@ void prepare_sleef_pricer(
     ASSUME_ALIGNED(emrt_)
     ASSUME_ALIGNED(d2dx2_prep_)
 
-    vdouble tmp1, tmp2, tmp3, tmp4, tmp5;
-    vdouble tt1, tt3;
-    vdouble s, sigma, t, tau, r, sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep;
+
 
 #pragma omp parallel for
     for (UINT64 i = 0; i < n; i += sizeof(vdouble) / sizeof(double)) {
+
+        vdouble tmp1, tmp2, tmp3, tmp4, tmp5;
+        vdouble tt1, tt3;
+        vdouble s, sigma, t, tau, r, sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep;
 
         s = vload_vd_p(&s_[i]);
         sigma = vload_vd_p(&sigma_[i]);
@@ -268,11 +270,12 @@ void sleef_pricer(
     ASSUME_ALIGNED(long_short_)
     ASSUME_ALIGNED(put_call_)
 
-    vdouble tmp1, tmp2, tmp3, tmp4, x, s, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price;
-    vdouble long_short, put_call;
-
 #pragma omp parallel for
     for (UINT64 i = 0; i < n; i += sizeof(vdouble) / sizeof(double)) {
+
+        vdouble tmp1, tmp2, tmp3, tmp4, x, s, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price;
+        vdouble long_short, put_call;
+
         s = vload_vd_p(&s_[i]);
         x = vload_vd_p(&x_[i]);
         sigmaA2T2 = vload_vd_p(&sigmaA2T2_[i]);
@@ -321,10 +324,10 @@ void ddx_sleef_pricer(
     ASSUME_ALIGNED(emrt_)
     ASSUME_ALIGNED(ddx_price_)
 
-    vdouble long_short, put_call, d2, emrt, ddx_price, d;
-
 #pragma omp parallel for
     for (UINT64 i = 0; i < n; i += sizeof(vdouble) / sizeof(double)) {
+
+        vdouble long_short, put_call, d2, emrt, ddx_price;
 
         d2 = vload_vd_p(&d2_[i]);
         put_call = vload_vd_p(&put_call_[i]);
@@ -336,6 +339,123 @@ void ddx_sleef_pricer(
         ddx_price = vmul_vd_vd_vd(vmul_vd_vd_vd(emrt, long_short), ddx_price);
 
         vstore_v_p_vd(&ddx_price_[i], ddx_price);
+    }
+
+}
+
+
+void d2dx2_sleef_pricer(
+        UINT64 n,
+        Real_Ptr long_short_,
+        Real_Ptr s_,
+        Real_Ptr x_,
+        Real_Ptr d2dx2_prep_,
+        Real_Ptr sigmaA2T2_,
+        Real_Ptr d2dx2_
+) {
+
+    ASSUME(n % 64 == 0)
+
+    ASSUME_ALIGNED(long_short_)
+    ASSUME_ALIGNED(s_)
+    ASSUME_ALIGNED(x_)
+    ASSUME_ALIGNED(d2dx2_prep_)
+    ASSUME_ALIGNED(sigmaA2T2_)
+    ASSUME_ALIGNED(d2dx2_)
+
+#pragma omp parallel for
+    for (UINT64 i = 0; i < n; i += sizeof(vdouble) / sizeof(double)) {
+
+        vdouble long_short, s, x, d2dx2_prep, sigmaA2T2, d2dx2;
+
+        long_short = vload_vd_p(&long_short_[i]);
+        s = vload_vd_p(&s_[i]);
+        x = vload_vd_p(&x_[i]);
+        d2dx2_prep = vload_vd_p(&d2dx2_prep_[i]);
+        sigmaA2T2 = vload_vd_p(&sigmaA2T2_[i]);
+
+        d2dx2 = xlog(vdiv_vd_vd_vd(s, x));
+        d2dx2 = xexp(vneg_vd_vd(vdiv_vd_vd_vd(vmul_vd_vd_vd(d2dx2, d2dx2), vmul_vd_vd_vd(four, sigmaA2T2))));
+        d2dx2 = vdiv_vd_vd_vd(vmul_vd_vd_vd(d2dx2, d2dx2_prep), xsqrt(vmul_vd_vd_vd(vmul_vd_vd_vd(x, x), x)));
+        d2dx2 = vmul_vd_vd_vd(d2dx2, long_short);
+
+        vstore_v_p_vd(&d2dx2_[i], d2dx2);
+    }
+
+}
+
+void full_sleef_pricer(
+        UINT64 n,
+        Real_Ptr long_short_,     // 1 == long option // -1 == short option
+        Real_Ptr put_call_,       // -1 == put // 1 == call
+        Real_Ptr s_,                /// [in] stock price
+        Real_Ptr x_,                /// [in] strike
+        Real_Ptr sigmaA2T2_,        /// [in] sigmaA^2t/2
+        Real_Ptr sigmaAsqrtT_,      /// [in] sigmaA*sqrt(t)
+        Real_Ptr emrt_,
+        Real_Ptr d2dx2_prep_,
+        Real_Ptr price_,
+        Real_Ptr ddx_price_,
+        Real_Ptr d2dx2_) {
+
+    ASSUME(n % 64 == 0)
+
+    ASSUME_ALIGNED(x_)
+    ASSUME_ALIGNED(s_)
+    ASSUME_ALIGNED(sigmaA2T2_)
+    ASSUME_ALIGNED(sigmaAsqrtT_)
+    ASSUME_ALIGNED(emrt_)
+    ASSUME_ALIGNED(price_)
+    ASSUME_ALIGNED(long_short_)
+    ASSUME_ALIGNED(put_call_)
+    ASSUME_ALIGNED(ddx_price_)
+    ASSUME_ALIGNED(d2dx2_)
+    ASSUME_ALIGNED(d2dx2_prep_)
+
+#pragma omp parallel for
+    for (UINT64 i = 0; i < n; i += sizeof(vdouble) / sizeof(double)) {
+        vdouble tmp1, tmp2, tmp3, tmp4, x, s, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price;
+        vdouble long_short, put_call;
+        vdouble ddx_price;
+        vdouble d2dx2, d2dx2_prep;
+
+        s = vload_vd_p(&s_[i]);
+        x = vload_vd_p(&x_[i]);
+        sigmaA2T2 = vload_vd_p(&sigmaA2T2_[i]);
+        sigmaAsqrtT = vload_vd_p(&sigmaAsqrtT_[i]);
+        emrt = vload_vd_p(&emrt_[i]);
+        long_short = vload_vd_p(&long_short_[i]);
+        put_call = vload_vd_p(&put_call_[i]);
+        d2dx2_prep = vload_vd_p(&d2dx2_prep_[i]);
+
+        tmp2 = xlog(vdiv_vd_vd_vd(s, x));
+        d1 = vdiv_vd_vd_vd(vadd_vd_vd_vd(tmp2, sigmaA2T2), vmul_vd_vd_vd(sigmaAsqrtT, msqrt2));
+        d2 = vsub_vd_vd_vd(d1, vdiv_vd_vd_vd(sigmaAsqrtT, msqrt2));
+
+        tmp3 = vmul_vd_vd_vd(put_call, d1);
+        tmp4 = vmul_vd_vd_vd(put_call, d2);
+
+        tmp1 = xerfc_u15(tmp3);
+        tmp2 = xerfc_u15(tmp4);
+
+        price = vsub_vd_vd_vd(
+                vmul_vd_vd_vd(put_call, vmul_vd_vd_vd(s, tmp1)),
+                vmul_vd_vd_vd(put_call, vmul_vd_vd_vd(x, tmp2)));
+        price = vmul_vd_vd_vd(vmul_vd_vd_vd(emrt, long_short), price);
+
+        ddx_price = xerfc_u15(d2);
+        ddx_price = vsub_vd_vd_vd(vadd_vd_vd_vd(one, vmul_vd_vd_vd(put_call, mone)), ddx_price);
+        ddx_price = vmul_vd_vd_vd(vmul_vd_vd_vd(emrt, long_short), ddx_price);
+
+
+        d2dx2 = xlog(vdiv_vd_vd_vd(s, x));
+        d2dx2 = xexp(vneg_vd_vd(vdiv_vd_vd_vd(vmul_vd_vd_vd(d2dx2, d2dx2), vmul_vd_vd_vd(four, sigmaA2T2))));
+        d2dx2 = vdiv_vd_vd_vd(vmul_vd_vd_vd(d2dx2, d2dx2_prep), xsqrt(vmul_vd_vd_vd(vmul_vd_vd_vd(x, x), x)));
+        d2dx2 = vmul_vd_vd_vd(d2dx2, long_short);
+
+        vstore_v_p_vd(&d2dx2_[i], d2dx2);
+        vstore_v_p_vd(&ddx_price_[i], ddx_price);
+        vstore_v_p_vd(&price_[i], price);
     }
 
 }

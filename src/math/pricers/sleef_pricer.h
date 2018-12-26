@@ -41,6 +41,41 @@ void sleef_pricer(
         Real_Ptr d2_,
         Real_Ptr price_);
 
+
+void d2dx2_sleef_pricer(
+        UINT64 n,
+        Real_Ptr long_short_,
+        Real_Ptr s_,
+        Real_Ptr x_,
+        Real_Ptr d2dx2_prep_,
+        Real_Ptr sigmaA2T2_,
+        Real_Ptr d2dx2_);
+
+
+void ddx_sleef_pricer(
+        UINT64 n,
+        Real_Ptr long_short_,     // 1 == long option // -1 == short option
+        Real_Ptr put_call_,       // -1 == put // 1 == call
+        Real_Ptr d2_,
+        Real_Ptr emrt_,
+        Real_Ptr ddx_price_);
+
+
+void full_sleef_pricer(
+        UINT64 n,
+        Real_Ptr long_short_,     // 1 == long option // -1 == short option
+        Real_Ptr put_call_,       // -1 == put // 1 == call
+        Real_Ptr s_,                /// [in] stock price
+        Real_Ptr x_,                /// [in] strike
+        Real_Ptr sigmaA2T2_,        /// [in] sigmaA^2t/2
+        Real_Ptr sigmaAsqrtT_,      /// [in] sigmaA*sqrt(t)
+        Real_Ptr emrt_,
+        Real_Ptr d2dx2_prep_,
+        Real_Ptr price_,
+        Real_Ptr ddx_price_,
+        Real_Ptr d2dx2_);
+
+
 #ifdef __cplusplus
 };
 #endif
