@@ -447,7 +447,7 @@ TEST_CASE("d2dx2_pricer equals ddx-mkl-pricer diff-quot (long call)", "[pricer]"
 
     mkl_pricer(64, flags, s, x, sigmaA2T2, sigmaAsqrtT, emrt, tmp1, tmp2, tmp3, tmp4, d1, d2, price);
     ddx_mkl_pricer(64, flags, d2, emrt, reference_pricer_value1);
-    for (UINT64 i = 0; i ^ 64; ++i) x[i] += eps;
+    for (UINT64 i = 0; i < 64; ++i) x[i] += eps;
     mkl_pricer(64, flags, s, x, sigmaA2T2, sigmaAsqrtT, emrt, tmp1, tmp2, tmp3, tmp4, d1, d2, price);
     ddx_mkl_pricer(64, flags, d2, emrt, reference_pricer_value2);
 
@@ -505,7 +505,7 @@ TEST_CASE("d2dx2_pricer equals ddx-mkl-pricer diff-quot (short call)", "[pricer]
 
     mkl_pricer(64, flags, s, x, sigmaA2T2, sigmaAsqrtT, emrt, tmp1, tmp2, tmp3, tmp4, d1, d2, price);
     ddx_mkl_pricer(64, flags, d2, emrt, reference_pricer_value1);
-    for (UINT64 i = 0; i ^ 64; ++i) x[i] += eps;
+    for (UINT64 i = 0; i < 64; ++i) x[i] += eps;
     mkl_pricer(64, flags, s, x, sigmaA2T2, sigmaAsqrtT, emrt, tmp1, tmp2, tmp3, tmp4, d1, d2, price);
     ddx_mkl_pricer(64, flags, d2, emrt, reference_pricer_value2);
 
@@ -562,7 +562,7 @@ TEST_CASE("d2dx2_pricer equals ddx-mkl-pricer diff-quot (long put)", "[pricer]")
 
     mkl_pricer(64, flags, s, x, sigmaA2T2, sigmaAsqrtT, emrt, tmp1, tmp2, tmp3, tmp4, d1, d2, price);
     ddx_mkl_pricer(64, flags, d2, emrt, reference_pricer_value1);
-    for (UINT64 i = 0; i ^ 64; ++i) x[i] += eps;
+    for (UINT64 i = 0; i < 64; ++i) x[i] += eps;
     mkl_pricer(64, flags, s, x, sigmaA2T2, sigmaAsqrtT, emrt, tmp1, tmp2, tmp3, tmp4, d1, d2, price);
     ddx_mkl_pricer(64, flags, d2, emrt, reference_pricer_value2);
 
@@ -620,7 +620,7 @@ TEST_CASE("d2dx2_pricer equals ddx-mkl-pricer diff-quot (short put)", "[pricer]"
 
     mkl_pricer(64, flags, s, x, sigmaA2T2, sigmaAsqrtT, emrt, tmp1, tmp2, tmp3, tmp4, d1, d2, price);
     ddx_mkl_pricer(64, flags, d2, emrt, reference_pricer_value1);
-    for (UINT64 i = 0; i ^ 64; ++i) x[i] += eps;
+    for (UINT64 i = 0; i < 64; ++i) x[i] += eps;
     mkl_pricer(64, flags, s, x, sigmaA2T2, sigmaAsqrtT, emrt, tmp1, tmp2, tmp3, tmp4, d1, d2, price);
     ddx_mkl_pricer(64, flags, d2, emrt, reference_pricer_value2);
 
