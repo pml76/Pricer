@@ -200,46 +200,49 @@ void prepare_sleef_pricer(
 
 
 
-#pragma omp parallel for
-    for (UINT64 i = 0; i < n; i += sizeof(vdouble) / sizeof(double)) {
-
+#pragma omp parallel
+    {
         vdouble tmp1, tmp2, tmp3, tmp4, tmp5;
         vdouble tt1, tt3;
         vdouble s, sigma, t, tau, r, sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep;
 
-        s = vload_vd_p(&s_[i]);
-        sigma = vload_vd_p(&sigma_[i]);
-        t = vload_vd_p(&t_[i]);
-        tau = vload_vd_p(&tau_[i]);
-        r = vload_vd_p(&r_[i]);
+#pragma omp for schedule(static)
+        for (UINT64 i = 0; i < n; i += sizeof(vdouble) / sizeof(double)) {
 
-        tt1 = vmul_vd_vd_vd(sigma, sigma);
-        tmp1 = vadd_vd_vd_vd(ln_of_2, vmul_vd_vd_vd(tt1, t));
-        tmp2 = vadd_vd_vd_vd(ln_of_2, vmul_vd_vd_vd(tt1, vsub_vd_vd_vd(t, tau)));
-        tmp5 = vmul_vd_vd_vd(vmul_vd_vd_vd(tt1, tt1), vmul_vd_vd_vd(tau, tau));
+            s = vload_vd_p(&s_[i]);
+            sigma = vload_vd_p(&sigma_[i]);
+            t = vload_vd_p(&t_[i]);
+            tau = vload_vd_p(&tau_[i]);
+            r = vload_vd_p(&r_[i]);
 
-        tmp3 = xexp(tmp1);
-        tmp4 = xexp(tmp2);
+            tt1 = vmul_vd_vd_vd(sigma, sigma);
+            tmp1 = vadd_vd_vd_vd(ln_of_2, vmul_vd_vd_vd(tt1, t));
+            tmp2 = vadd_vd_vd_vd(ln_of_2, vmul_vd_vd_vd(tt1, vsub_vd_vd_vd(t, tau)));
+            tmp5 = vmul_vd_vd_vd(vmul_vd_vd_vd(tt1, tt1), vmul_vd_vd_vd(tau, tau));
 
-        tt3 = vmul_vd_vd_vd(tmp4, vadd_vd_vd_vd(one, vmul_vd_vd_vd(sigma, vmul_vd_vd_vd(sigma, tau))));
-        tmp2 = vdiv_vd_vd_vd(vsub_vd_vd_vd(tmp3, tt3), tmp5);
+            tmp3 = xexp(tmp1);
+            tmp4 = xexp(tmp2);
 
-        sigmaA = xsqrt(vdiv_vd_vd_vd(xlog(tmp2), t));
-        tmp1 = xsqrt(t);
+            tt3 = vmul_vd_vd_vd(tmp4, vadd_vd_vd_vd(one, vmul_vd_vd_vd(sigma, vmul_vd_vd_vd(sigma, tau))));
+            tmp2 = vdiv_vd_vd_vd(vsub_vd_vd_vd(tmp3, tt3), tmp5);
 
-        sigmaA2T2 = vmul_vd_vd_vd(vmul_vd_vd_vd(sigmaA, sigmaA), vdiv_vd_vd_vd(t, two));
-        emrt = xexp(vsub_vd_vd_vd(vneg_vd_vd(vmul_vd_vd_vd(r, t)), ln_of_2));
-        sigmaAsqrtT = vmul_vd_vd_vd(sigmaA, tmp1);
-        tmp2 = xexp(vneg_vd_vd(vdiv_vd_vd_vd(sigmaA2T2, four)));
-        tmp1 = vdiv_vd_vd_vd(vmul_vd_vd_vd(two, s), vmul_vd_vd_vd(pi2, sigmaA2T2));
-        d2dx2_prep = vmul_vd_vd_vd(xsqrt(tmp1), vmul_vd_vd_vd(tmp2, emrt));
+            sigmaA = xsqrt(vdiv_vd_vd_vd(xlog(tmp2), t));
+            tmp1 = xsqrt(t);
 
-        vstore_v_p_vd(&sigmaA_[i], sigmaA);
-        vstore_v_p_vd(&emrt_[i], emrt);
-        vstore_v_p_vd(&sigmaA2T2_[i], sigmaA2T2);
-        vstore_v_p_vd(&sigmaAsqrtT_[i], sigmaAsqrtT);
-        vstore_v_p_vd(&d2dx2_prep_[i], d2dx2_prep);
+            sigmaA2T2 = vmul_vd_vd_vd(vmul_vd_vd_vd(sigmaA, sigmaA), vdiv_vd_vd_vd(t, two));
+            emrt = xexp(vsub_vd_vd_vd(vneg_vd_vd(vmul_vd_vd_vd(r, t)), ln_of_2));
+            sigmaAsqrtT = vmul_vd_vd_vd(sigmaA, tmp1);
+            tmp2 = xexp(vneg_vd_vd(vdiv_vd_vd_vd(sigmaA2T2, four)));
+            tmp1 = vdiv_vd_vd_vd(vmul_vd_vd_vd(two, s), vmul_vd_vd_vd(pi2, sigmaA2T2));
+            d2dx2_prep = vmul_vd_vd_vd(xsqrt(tmp1), vmul_vd_vd_vd(tmp2, emrt));
 
+            vstore_v_p_vd(&sigmaA_[i], sigmaA);
+            vstore_v_p_vd(&emrt_[i], emrt);
+            vstore_v_p_vd(&sigmaA2T2_[i], sigmaA2T2);
+            vstore_v_p_vd(&sigmaAsqrtT_[i], sigmaAsqrtT);
+            vstore_v_p_vd(&d2dx2_prep_[i], d2dx2_prep);
+
+        }
     }
 
 }
@@ -270,39 +273,42 @@ void sleef_pricer(
     ASSUME_ALIGNED(long_short_)
     ASSUME_ALIGNED(put_call_)
 
-#pragma omp parallel for
-    for (UINT64 i = 0; i < n; i += sizeof(vdouble) / sizeof(double)) {
-
+#pragma omp parallel
+    {
         vdouble tmp1, tmp2, tmp3, tmp4, x, s, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price;
         vdouble long_short, put_call;
 
-        s = vload_vd_p(&s_[i]);
-        x = vload_vd_p(&x_[i]);
-        sigmaA2T2 = vload_vd_p(&sigmaA2T2_[i]);
-        sigmaAsqrtT = vload_vd_p(&sigmaAsqrtT_[i]);
-        emrt = vload_vd_p(&emrt_[i]);
-        long_short = vload_vd_p(&long_short_[i]);
-        put_call = vload_vd_p(&put_call_[i]);
+#pragma omp for schedule(static)
+        for (UINT64 i = 0; i < n; i += sizeof(vdouble) / sizeof(double)) {
+
+            s = vload_vd_p(&s_[i]);
+            x = vload_vd_p(&x_[i]);
+            sigmaA2T2 = vload_vd_p(&sigmaA2T2_[i]);
+            sigmaAsqrtT = vload_vd_p(&sigmaAsqrtT_[i]);
+            emrt = vload_vd_p(&emrt_[i]);
+            long_short = vload_vd_p(&long_short_[i]);
+            put_call = vload_vd_p(&put_call_[i]);
 
 
-        tmp2 = xlog(vdiv_vd_vd_vd(s, x));
-        d1 = vdiv_vd_vd_vd(vadd_vd_vd_vd(tmp2, sigmaA2T2), vmul_vd_vd_vd(sigmaAsqrtT, msqrt2));
-        d2 = vsub_vd_vd_vd(d1, vdiv_vd_vd_vd(sigmaAsqrtT, msqrt2));
+            tmp2 = xlog(vdiv_vd_vd_vd(s, x));
+            d1 = vdiv_vd_vd_vd(vadd_vd_vd_vd(tmp2, sigmaA2T2), vmul_vd_vd_vd(sigmaAsqrtT, msqrt2));
+            d2 = vsub_vd_vd_vd(d1, vdiv_vd_vd_vd(sigmaAsqrtT, msqrt2));
 
-        tmp3 = vmul_vd_vd_vd(put_call, d1);
-        tmp4 = vmul_vd_vd_vd(put_call, d2);
+            tmp3 = vmul_vd_vd_vd(put_call, d1);
+            tmp4 = vmul_vd_vd_vd(put_call, d2);
 
-        tmp1 = xerfc_u15(tmp3);
-        tmp2 = xerfc_u15(tmp4);
+            tmp1 = xerfc_u15(tmp3);
+            tmp2 = xerfc_u15(tmp4);
 
-        price = vsub_vd_vd_vd(
-                vmul_vd_vd_vd(put_call, vmul_vd_vd_vd(s, tmp1)),
-                vmul_vd_vd_vd(put_call, vmul_vd_vd_vd(x, tmp2)));
-        price = vmul_vd_vd_vd(vmul_vd_vd_vd(emrt, long_short), price);
+            price = vsub_vd_vd_vd(
+                    vmul_vd_vd_vd(put_call, vmul_vd_vd_vd(s, tmp1)),
+                    vmul_vd_vd_vd(put_call, vmul_vd_vd_vd(x, tmp2)));
+            price = vmul_vd_vd_vd(vmul_vd_vd_vd(emrt, long_short), price);
 
-        vstore_v_p_vd(&d1_[i], d1);
-        vstore_v_p_vd(&d2_[i], d2);
-        vstore_v_p_vd(&price_[i], price);
+            vstore_v_p_vd(&d1_[i], d1);
+            vstore_v_p_vd(&d2_[i], d2);
+            vstore_v_p_vd(&price_[i], price);
+        }
     }
 
 
@@ -324,21 +330,24 @@ void ddx_sleef_pricer(
     ASSUME_ALIGNED(emrt_)
     ASSUME_ALIGNED(ddx_price_)
 
-#pragma omp parallel for
-    for (UINT64 i = 0; i < n; i += sizeof(vdouble) / sizeof(double)) {
-
+#pragma omp parallel
+    {
         vdouble long_short, put_call, d2, emrt, ddx_price;
 
-        d2 = vload_vd_p(&d2_[i]);
-        put_call = vload_vd_p(&put_call_[i]);
-        long_short = vload_vd_p(&long_short_[i]);
-        emrt = vload_vd_p(&emrt_[i]);
+#pragma omp for schedule(static)
+        for (UINT64 i = 0; i < n; i += sizeof(vdouble) / sizeof(double)) {
 
-        ddx_price = xerfc_u15(d2);
-        ddx_price = vsub_vd_vd_vd(vadd_vd_vd_vd(one, vmul_vd_vd_vd(put_call, mone)), ddx_price);
-        ddx_price = vmul_vd_vd_vd(vmul_vd_vd_vd(emrt, long_short), ddx_price);
+            d2 = vload_vd_p(&d2_[i]);
+            put_call = vload_vd_p(&put_call_[i]);
+            long_short = vload_vd_p(&long_short_[i]);
+            emrt = vload_vd_p(&emrt_[i]);
 
-        vstore_v_p_vd(&ddx_price_[i], ddx_price);
+            ddx_price = xerfc_u15(d2);
+            ddx_price = vsub_vd_vd_vd(vadd_vd_vd_vd(one, vmul_vd_vd_vd(put_call, mone)), ddx_price);
+            ddx_price = vmul_vd_vd_vd(vmul_vd_vd_vd(emrt, long_short), ddx_price);
+
+            vstore_v_p_vd(&ddx_price_[i], ddx_price);
+        }
     }
 
 }
@@ -363,23 +372,26 @@ void d2dx2_sleef_pricer(
     ASSUME_ALIGNED(sigmaA2T2_)
     ASSUME_ALIGNED(d2dx2_)
 
-#pragma omp parallel for
-    for (UINT64 i = 0; i < n; i += sizeof(vdouble) / sizeof(double)) {
-
+#pragma omp parallel
+    {
         vdouble long_short, s, x, d2dx2_prep, sigmaA2T2, d2dx2;
 
-        long_short = vload_vd_p(&long_short_[i]);
-        s = vload_vd_p(&s_[i]);
-        x = vload_vd_p(&x_[i]);
-        d2dx2_prep = vload_vd_p(&d2dx2_prep_[i]);
-        sigmaA2T2 = vload_vd_p(&sigmaA2T2_[i]);
+#pragma omp for schedule(static)
+        for (UINT64 i = 0; i < n; i += sizeof(vdouble) / sizeof(double)) {
 
-        d2dx2 = xlog(vdiv_vd_vd_vd(s, x));
-        d2dx2 = xexp(vneg_vd_vd(vdiv_vd_vd_vd(vmul_vd_vd_vd(d2dx2, d2dx2), vmul_vd_vd_vd(four, sigmaA2T2))));
-        d2dx2 = vdiv_vd_vd_vd(vmul_vd_vd_vd(d2dx2, d2dx2_prep), xsqrt(vmul_vd_vd_vd(vmul_vd_vd_vd(x, x), x)));
-        d2dx2 = vmul_vd_vd_vd(d2dx2, long_short);
+            long_short = vload_vd_p(&long_short_[i]);
+            s = vload_vd_p(&s_[i]);
+            x = vload_vd_p(&x_[i]);
+            d2dx2_prep = vload_vd_p(&d2dx2_prep_[i]);
+            sigmaA2T2 = vload_vd_p(&sigmaA2T2_[i]);
 
-        vstore_v_p_vd(&d2dx2_[i], d2dx2);
+            d2dx2 = xlog(vdiv_vd_vd_vd(s, x));
+            d2dx2 = xexp(vneg_vd_vd(vdiv_vd_vd_vd(vmul_vd_vd_vd(d2dx2, d2dx2), vmul_vd_vd_vd(four, sigmaA2T2))));
+            d2dx2 = vdiv_vd_vd_vd(vmul_vd_vd_vd(d2dx2, d2dx2_prep), xsqrt(vmul_vd_vd_vd(vmul_vd_vd_vd(x, x), x)));
+            d2dx2 = vmul_vd_vd_vd(d2dx2, long_short);
+
+            vstore_v_p_vd(&d2dx2_[i], d2dx2);
+        }
     }
 
 }
@@ -412,50 +424,55 @@ void full_sleef_pricer(
     ASSUME_ALIGNED(d2dx2_)
     ASSUME_ALIGNED(d2dx2_prep_)
 
-#pragma omp parallel for
-    for (UINT64 i = 0; i < n; i += sizeof(vdouble) / sizeof(double)) {
+#pragma omp parallel
+    {
+
         vdouble tmp1, tmp2, tmp3, tmp4, x, s, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price;
         vdouble long_short, put_call;
         vdouble ddx_price;
         vdouble d2dx2, d2dx2_prep;
 
-        s = vload_vd_p(&s_[i]);
-        x = vload_vd_p(&x_[i]);
-        sigmaA2T2 = vload_vd_p(&sigmaA2T2_[i]);
-        sigmaAsqrtT = vload_vd_p(&sigmaAsqrtT_[i]);
-        emrt = vload_vd_p(&emrt_[i]);
-        long_short = vload_vd_p(&long_short_[i]);
-        put_call = vload_vd_p(&put_call_[i]);
-        d2dx2_prep = vload_vd_p(&d2dx2_prep_[i]);
+#pragma omp for schedule(static)
+        for (UINT64 i = 0; i < n; i += sizeof(vdouble) / sizeof(double)) {
 
-        tmp2 = xlog(vdiv_vd_vd_vd(s, x));
-        d1 = vdiv_vd_vd_vd(vadd_vd_vd_vd(tmp2, sigmaA2T2), vmul_vd_vd_vd(sigmaAsqrtT, msqrt2));
-        d2 = vsub_vd_vd_vd(d1, vdiv_vd_vd_vd(sigmaAsqrtT, msqrt2));
+            s = vload_vd_p(&s_[i]);
+            x = vload_vd_p(&x_[i]);
+            sigmaA2T2 = vload_vd_p(&sigmaA2T2_[i]);
+            sigmaAsqrtT = vload_vd_p(&sigmaAsqrtT_[i]);
+            emrt = vload_vd_p(&emrt_[i]);
+            long_short = vload_vd_p(&long_short_[i]);
+            put_call = vload_vd_p(&put_call_[i]);
+            d2dx2_prep = vload_vd_p(&d2dx2_prep_[i]);
 
-        tmp3 = vmul_vd_vd_vd(put_call, d1);
-        tmp4 = vmul_vd_vd_vd(put_call, d2);
+            tmp2 = xlog(vdiv_vd_vd_vd(s, x));
+            d1 = vdiv_vd_vd_vd(vadd_vd_vd_vd(tmp2, sigmaA2T2), vmul_vd_vd_vd(sigmaAsqrtT, msqrt2));
+            d2 = vsub_vd_vd_vd(d1, vdiv_vd_vd_vd(sigmaAsqrtT, msqrt2));
 
-        tmp1 = xerfc_u15(tmp3);
-        tmp2 = xerfc_u15(tmp4);
+            tmp3 = vmul_vd_vd_vd(put_call, d1);
+            tmp4 = vmul_vd_vd_vd(put_call, d2);
 
-        price = vsub_vd_vd_vd(
-                vmul_vd_vd_vd(put_call, vmul_vd_vd_vd(s, tmp1)),
-                vmul_vd_vd_vd(put_call, vmul_vd_vd_vd(x, tmp2)));
-        price = vmul_vd_vd_vd(vmul_vd_vd_vd(emrt, long_short), price);
+            tmp1 = xerfc_u15(tmp3);
+            tmp2 = xerfc_u15(tmp4);
 
-        ddx_price = xerfc_u15(d2);
-        ddx_price = vsub_vd_vd_vd(vadd_vd_vd_vd(one, vmul_vd_vd_vd(put_call, mone)), ddx_price);
-        ddx_price = vmul_vd_vd_vd(vmul_vd_vd_vd(emrt, long_short), ddx_price);
+            price = vsub_vd_vd_vd(
+                    vmul_vd_vd_vd(put_call, vmul_vd_vd_vd(s, tmp1)),
+                    vmul_vd_vd_vd(put_call, vmul_vd_vd_vd(x, tmp2)));
+            price = vmul_vd_vd_vd(vmul_vd_vd_vd(emrt, long_short), price);
+
+            ddx_price = xerfc_u15(d2);
+            ddx_price = vsub_vd_vd_vd(vadd_vd_vd_vd(one, vmul_vd_vd_vd(put_call, mone)), ddx_price);
+            ddx_price = vmul_vd_vd_vd(vmul_vd_vd_vd(emrt, long_short), ddx_price);
 
 
-        d2dx2 = xlog(vdiv_vd_vd_vd(s, x));
-        d2dx2 = xexp(vneg_vd_vd(vdiv_vd_vd_vd(vmul_vd_vd_vd(d2dx2, d2dx2), vmul_vd_vd_vd(four, sigmaA2T2))));
-        d2dx2 = vdiv_vd_vd_vd(vmul_vd_vd_vd(d2dx2, d2dx2_prep), xsqrt(vmul_vd_vd_vd(vmul_vd_vd_vd(x, x), x)));
-        d2dx2 = vmul_vd_vd_vd(d2dx2, long_short);
+            d2dx2 = xlog(vdiv_vd_vd_vd(s, x));
+            d2dx2 = xexp(vneg_vd_vd(vdiv_vd_vd_vd(vmul_vd_vd_vd(d2dx2, d2dx2), vmul_vd_vd_vd(four, sigmaA2T2))));
+            d2dx2 = vdiv_vd_vd_vd(vmul_vd_vd_vd(d2dx2, d2dx2_prep), xsqrt(vmul_vd_vd_vd(vmul_vd_vd_vd(x, x), x)));
+            d2dx2 = vmul_vd_vd_vd(d2dx2, long_short);
 
-        vstore_v_p_vd(&d2dx2_[i], d2dx2);
-        vstore_v_p_vd(&ddx_price_[i], ddx_price);
-        vstore_v_p_vd(&price_[i], price);
+            vstore_v_p_vd(&d2dx2_[i], d2dx2);
+            vstore_v_p_vd(&ddx_price_[i], ddx_price);
+            vstore_v_p_vd(&price_[i], price);
+        }
     }
 
 }
