@@ -34,6 +34,11 @@ extern "C" {
 #undef UNLIKELY
 #endif
 #define UNLIKELY(x) __builtin_expect((x), 0)
+
+#ifdef PREFETCH
+#undef PREFETCH
+#endif
+#define PREFETCH(a, b, c) __builtin_prefetch(a,b,c)
 #endif
 
 #ifdef __clang__
@@ -85,13 +90,17 @@ extern "C" {
 
 #endif
 
+#define DECLARE_AND_DEFINE_ARRAY(type, size, x, y) \
+   type x[64] __attribute__((aligned(ALIGN_TO))); \
+   for(UINT64 i=0;i<ALIGN_TO;i++) x[i]=y;
+
 
 typedef double FLOAT;
 typedef unsigned long long UINT64;
 
 typedef FLOAT *__restrict__ Real_Ptr;
 typedef UINT64 *__restrict__ Uint64_Ptr;
-
+typedef int32_t *__restrict Int32_Ptr;
 
 #ifdef __cplusplus
 };

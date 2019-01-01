@@ -147,6 +147,8 @@ extern const double rempitabdp[];
 #include <src/math/pricers/pricer-base.h>
 #include <tgmath.h>
 
+#include <omp.h>
+
 static vdouble ln_of_2, msqrt2;
 vdouble one, two, four, pi2, mone;
 
@@ -206,8 +208,13 @@ void prepare_sleef_pricer(
         vdouble tt1, tt3;
         vdouble s, sigma, t, tau, r, sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep;
 
-#pragma omp for schedule(static)
-        for (UINT64 i = 0; i < n; i += sizeof(vdouble) / sizeof(double)) {
+        uint64_t n2 = n / (64 / sizeof(double));
+        uint64_t tid = omp_get_thread_num();
+        uint64_t num_threads = omp_get_num_threads();
+        uint64_t begin = ((tid * n2) / num_threads) * (64 / sizeof(double));
+        uint64_t end = (((tid + 1) * n2) / num_threads) * (64 / sizeof(double));
+
+        for (uint64_t i = begin; i < end; i += sizeof(vdouble) / sizeof(double)) {
 
             s = vload_vd_p(&s_[i]);
             sigma = vload_vd_p(&sigma_[i]);
@@ -278,8 +285,13 @@ void sleef_pricer(
         vdouble tmp1, tmp2, tmp3, tmp4, x, s, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price;
         vdouble long_short, put_call;
 
-#pragma omp for schedule(static)
-        for (UINT64 i = 0; i < n; i += sizeof(vdouble) / sizeof(double)) {
+        uint64_t n2 = n / (64 / sizeof(double));
+        uint64_t tid = omp_get_thread_num();
+        uint64_t num_threads = omp_get_num_threads();
+        uint64_t begin = ((tid * n2) / num_threads) * (64 / sizeof(double));
+        uint64_t end = (((tid + 1) * n2) / num_threads) * (64 / sizeof(double));
+
+        for (uint64_t i = begin; i < end; i += sizeof(vdouble) / sizeof(double)) {
 
             s = vload_vd_p(&s_[i]);
             x = vload_vd_p(&x_[i]);
@@ -334,8 +346,13 @@ void ddx_sleef_pricer(
     {
         vdouble long_short, put_call, d2, emrt, ddx_price;
 
-#pragma omp for schedule(static)
-        for (UINT64 i = 0; i < n; i += sizeof(vdouble) / sizeof(double)) {
+        uint64_t n2 = n / (64 / sizeof(double));
+        uint64_t tid = omp_get_thread_num();
+        uint64_t num_threads = omp_get_num_threads();
+        uint64_t begin = ((tid * n2) / num_threads) * (64 / sizeof(double));
+        uint64_t end = (((tid + 1) * n2) / num_threads) * (64 / sizeof(double));
+
+        for (uint64_t i = begin; i < end; i += sizeof(vdouble) / sizeof(double)) {
 
             d2 = vload_vd_p(&d2_[i]);
             put_call = vload_vd_p(&put_call_[i]);
@@ -376,8 +393,13 @@ void d2dx2_sleef_pricer(
     {
         vdouble long_short, s, x, d2dx2_prep, sigmaA2T2, d2dx2;
 
-#pragma omp for schedule(static)
-        for (UINT64 i = 0; i < n; i += sizeof(vdouble) / sizeof(double)) {
+        uint64_t n2 = n / (64 / sizeof(double));
+        uint64_t tid = omp_get_thread_num();
+        uint64_t num_threads = omp_get_num_threads();
+        uint64_t begin = ((tid * n2) / num_threads) * (64 / sizeof(double));
+        uint64_t end = (((tid + 1) * n2) / num_threads) * (64 / sizeof(double));
+
+        for (uint64_t i = begin; i < end; i += sizeof(vdouble) / sizeof(double)) {
 
             long_short = vload_vd_p(&long_short_[i]);
             s = vload_vd_p(&s_[i]);
@@ -432,8 +454,13 @@ void full_sleef_pricer(
         vdouble ddx_price;
         vdouble d2dx2, d2dx2_prep;
 
-#pragma omp for schedule(static)
-        for (UINT64 i = 0; i < n; i += sizeof(vdouble) / sizeof(double)) {
+        uint64_t n2 = n / (64 / sizeof(double));
+        uint64_t tid = omp_get_thread_num();
+        uint64_t num_threads = omp_get_num_threads();
+        uint64_t begin = ((tid * n2) / num_threads) * (64 / sizeof(double));
+        uint64_t end = (((tid + 1) * n2) / num_threads) * (64 / sizeof(double));
+
+        for (uint64_t i = begin; i < end; i += sizeof(vdouble) / sizeof(double)) {
 
             s = vload_vd_p(&s_[i]);
             x = vload_vd_p(&x_[i]);
@@ -472,6 +499,93 @@ void full_sleef_pricer(
             vstore_v_p_vd(&d2dx2_[i], d2dx2);
             vstore_v_p_vd(&ddx_price_[i], ddx_price);
             vstore_v_p_vd(&price_[i], price);
+
+        }
+    }
+
+}
+
+
+void computeTargetValues(
+        UINT64 n,
+        UINT64 m,
+        Real_Ptr long_short,        // 1 == long option // -1 == short option
+        Real_Ptr put_call,          // -1 == put // 1 == call
+        Real_Ptr s,                 /// [in] stock price
+        Real_Ptr x,                 /// [in] strike
+        Real_Ptr sigma,             /// [in] vola
+        Real_Ptr t,                 /// [in] time to maturity
+        Real_Ptr tau,               /// [in] time of avg. period
+        Real_Ptr r,                 /// [in] interest rate
+        Int32_Ptr to_structure,
+        Real_Ptr premiums,
+        Real_Ptr prices,
+        Real_Ptr ddx_prices,
+        Real_Ptr d2dx2_prices,
+        Real_Ptr instrument_prices,
+        Real_Ptr instrument_ddx_prices,
+        Real_Ptr instrument_d2dx2_prices) {
+
+#pragma omp parallel
+    {
+
+        ///
+        /// set the variables to zero where we are going to aggregate the numbers
+        ///
+#pragma omp for schedule(static)
+        for (uint64_t i = 0; i < m; ++i) {
+            prices[i] = ddx_prices[i] = d2dx2_prices[i] = 0.;
+        }
+
+        ///
+        /// aggregate the prices and its first two derivatives
+        ///
+#pragma omp for schedule(static)
+        for (int64_t i = 0; i < n; ++i) {
+#pragma omp atomic update
+            prices[to_structure[i]] += instrument_prices[i];
+#pragma omp atomic update
+            ddx_prices[to_structure[i]] += instrument_ddx_prices[i];
+#pragma omp atomic update
+            d2dx2_prices[to_structure[i]] += instrument_d2dx2_prices[i];
+        }
+
+
+        ///
+        /// convert the three arrays:
+        ///
+        ///    instrument_prices,
+        ///    instrument_ddx_prices
+        ///    instrument_d2dx2_prices
+        ///
+        /// to the values of the target function and its first and second derivative´, respectively.
+        ///
+        vdouble instrument_price, instrument_ddx_price, instrument_d2dx2_price, premium;
+        uint64_t m2 = m / (64 / sizeof(double));
+        uint64_t tid = omp_get_thread_num();
+        uint64_t num_threads = omp_get_num_threads();
+        uint64_t begin = ((tid * m2) / num_threads) * (64 / sizeof(double));
+        uint64_t end = (((tid + 1) * m2) / num_threads) * (64 / sizeof(double));
+        for (uint64_t i = begin; i < end; i += sizeof(vdouble) / sizeof(double)) {
+            instrument_price = vload_vd_p(&instrument_prices[i]);
+            instrument_ddx_price = vload_vd_p(&instrument_ddx_prices[i]);
+            instrument_d2dx2_price = vload_vd_p(&instrument_d2dx2_prices[i]);
+            premium = vload_vd_p(&premiums[i]);
+
+            instrument_price = vsub_vd_vd_vd(instrument_price, premium);
+            instrument_d2dx2_price = vmul_vd_vd_vd(two,
+                                                   vadd_vd_vd_vd(
+                                                           vmul_vd_vd_vd(instrument_ddx_price, instrument_ddx_price),
+                                                           vmul_vd_vd_vd(instrument_price, instrument_d2dx2_price)
+                                                   ));
+            instrument_ddx_price = vmul_vd_vd_vd(vmul_vd_vd_vd(two, instrument_price), instrument_ddx_price);
+            instrument_price = vmul_vd_vd_vd(instrument_price, instrument_price);
+
+            vstore_v_p_vd(&instrument_prices[i], instrument_price);
+            vstore_v_p_vd(&instrument_ddx_prices[i], instrument_ddx_price);
+            vstore_v_p_vd(&instrument_d2dx2_prices[i], instrument_d2dx2_price);
+
+
         }
     }
 
