@@ -150,7 +150,7 @@ extern const double rempitabdp[];
 #include <omp.h>
 
 static vdouble ln_of_2, msqrt2;
-vdouble one, two, four, pi2, mone;
+vdouble one, two, four, pi2, mone, zero;
 
 
 vdouble xexp(vdouble d);
@@ -170,6 +170,7 @@ void init_sleef_pricer() {
     four = vcast_vd_d(4.);
     pi2 = vmul_vd_vd_vd(two, vcast_vd_d(M_PI));
     mone = vcast_vd_d(-1.);
+    zero = vcast_vd_d(0.);
 
 }
 
@@ -508,85 +509,129 @@ void full_sleef_pricer(
 
 void computeTargetValues(
         UINT64 n,
-        UINT64 m,
-        Real_Ptr long_short,        // 1 == long option // -1 == short option
-        Real_Ptr put_call,          // -1 == put // 1 == call
-        Real_Ptr s,                 /// [in] stock price
-        Real_Ptr x,                 /// [in] strike
-        Real_Ptr sigma,             /// [in] vola
-        Real_Ptr t,                 /// [in] time to maturity
-        Real_Ptr tau,               /// [in] time of avg. period
-        Real_Ptr r,                 /// [in] interest rate
+        Real_Ptr long_short_,        // 1 == long option // -1 == short option
+        Real_Ptr put_call_,          // -1 == put // 1 == call
+        Real_Ptr s_,
+        Real_Ptr x_tmp,
+        Real_Ptr sigmaA2T2_,
+        Real_Ptr sigmaAsqrtT_,
+        Real_Ptr emrt_,
         Int32_Ptr to_structure,
-        Real_Ptr premiums,
-        Real_Ptr prices,
-        Real_Ptr ddx_prices,
-        Real_Ptr d2dx2_prices,
-        Real_Ptr instrument_prices,
-        Real_Ptr instrument_ddx_prices,
-        Real_Ptr instrument_d2dx2_prices) {
+        Int32_Ptr from_instrument,
+        Real_Ptr offsets_,
+        Real_Ptr prices_,
+        UINT64 m,
+        Real_Ptr premiums_,
+        Real_Ptr instrument_prices_,
+        Real_Ptr instrument_pricesl_,
+        Real_Ptr instrument_pricesh_,
+        Real_Ptr xl_,
+        Real_Ptr xh_,
+        Real_Ptr x_) {
 
+
+    for (int w = 0; w < 25; ++w) {
 #pragma omp parallel
-    {
+        {
 
-        ///
-        /// set the variables to zero where we are going to aggregate the numbers
-        ///
+            vdouble tmp, tmp1, tmp2, tmp3, tmp4, x, xl, xh, s, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price;
+            vdouble long_short, put_call;
+            vopmask op;
+            vdouble pricel, priceh;
+
+            uint64_t n2 = n / (64 / sizeof(double));
+            uint64_t tid = omp_get_thread_num();
+            uint64_t num_threads = omp_get_num_threads();
+            uint64_t begin = ((tid * n2) / num_threads) * (64 / sizeof(double));
+            uint64_t end = (((tid + 1) * n2) / num_threads) * (64 / sizeof(double));
+
+            for (uint64_t i = begin; i < end; i += sizeof(vdouble) / sizeof(double)) {
+
+                for (uint64_t k = i; k < i + sizeof(vdouble) / sizeof(double); ++k) {
+                    x[k - i] = x_[to_structure[k]] + offsets_[k];
+                }
+
+                s = vload_vd_p(&s_[i]);
+
+                sigmaA2T2 = vload_vd_p(&sigmaA2T2_[i]);
+                sigmaAsqrtT = vload_vd_p(&sigmaAsqrtT_[i]);
+                emrt = vload_vd_p(&emrt_[i]);
+                long_short = vload_vd_p(&long_short_[i]);
+                put_call = vload_vd_p(&put_call_[i]);
+
+                tmp2 = xlog(vdiv_vd_vd_vd(s, x));
+                d1 = vdiv_vd_vd_vd(vadd_vd_vd_vd(tmp2, sigmaA2T2), vmul_vd_vd_vd(sigmaAsqrtT, msqrt2));
+                d2 = vsub_vd_vd_vd(d1, vdiv_vd_vd_vd(sigmaAsqrtT, msqrt2));
+
+                tmp3 = vmul_vd_vd_vd(put_call, d1);
+                tmp4 = vmul_vd_vd_vd(put_call, d2);
+
+                tmp1 = xerfc_u15(tmp3);
+                tmp2 = xerfc_u15(tmp4);
+
+                price = vsub_vd_vd_vd(
+                        vmul_vd_vd_vd(put_call, vmul_vd_vd_vd(s, tmp1)),
+                        vmul_vd_vd_vd(put_call, vmul_vd_vd_vd(x, tmp2)));
+                price = vmul_vd_vd_vd(vmul_vd_vd_vd(emrt, long_short), price);
+
+                vstore_v_p_vd(&prices_[i], price);
+            }
+
+
+
+
+            ///
+            /// set the variables to zero where we are going to aggregate the numbers
+            ///
+            uint64_t m2 = m / (64 / sizeof(double));
+            begin = ((tid * m2) / num_threads) * (64 / sizeof(double));
+            end = (((tid + 1) * m2) / num_threads) * (64 / sizeof(double));
+            for (uint64_t i = begin; i < end; i += sizeof(vdouble) / sizeof(double)) {
+                tmp = vload_vd_p(&premiums_[i]);
+                vstore_v_p_vd(&instrument_prices_[i], vneg_vd_vd(tmp));
+            }
+
+#pragma omp barrier
+
+            ///
+            /// aggregate the prices and its first two derivatives
+            ///
 #pragma omp for schedule(static)
-        for (uint64_t i = 0; i < m; ++i) {
-            prices[i] = ddx_prices[i] = d2dx2_prices[i] = 0.;
-        }
-
-        ///
-        /// aggregate the prices and its first two derivatives
-        ///
-#pragma omp for schedule(static)
-        for (int64_t i = 0; i < n; ++i) {
+            for (int64_t i = 0; i < n; ++i) {
 #pragma omp atomic update
-            prices[to_structure[i]] += instrument_prices[i];
-#pragma omp atomic update
-            ddx_prices[to_structure[i]] += instrument_ddx_prices[i];
-#pragma omp atomic update
-            d2dx2_prices[to_structure[i]] += instrument_d2dx2_prices[i];
-        }
+                instrument_prices_[to_structure[i]] += prices_[i];
+            }
 
+#pragma omp barrier
 
-        ///
-        /// convert the three arrays:
-        ///
-        ///    instrument_prices,
-        ///    instrument_ddx_prices
-        ///    instrument_d2dx2_prices
-        ///
-        /// to the values of the target function and its first and second derivative´, respectively.
-        ///
-        vdouble instrument_price, instrument_ddx_price, instrument_d2dx2_price, premium;
-        uint64_t m2 = m / (64 / sizeof(double));
-        uint64_t tid = omp_get_thread_num();
-        uint64_t num_threads = omp_get_num_threads();
-        uint64_t begin = ((tid * m2) / num_threads) * (64 / sizeof(double));
-        uint64_t end = (((tid + 1) * m2) / num_threads) * (64 / sizeof(double));
-        for (uint64_t i = begin; i < end; i += sizeof(vdouble) / sizeof(double)) {
-            instrument_price = vload_vd_p(&instrument_prices[i]);
-            instrument_ddx_price = vload_vd_p(&instrument_ddx_prices[i]);
-            instrument_d2dx2_price = vload_vd_p(&instrument_d2dx2_prices[i]);
-            premium = vload_vd_p(&premiums[i]);
+            m2 = m / (64 / sizeof(double));
+            begin = ((tid * m2) / num_threads) * (64 / sizeof(double));
+            end = (((tid + 1) * m2) / num_threads) * (64 / sizeof(double));
+            for (uint64_t i = begin; i < end; i += sizeof(vdouble) / sizeof(double)) {
 
-            instrument_price = vsub_vd_vd_vd(instrument_price, premium);
-            instrument_d2dx2_price = vmul_vd_vd_vd(two,
-                                                   vadd_vd_vd_vd(
-                                                           vmul_vd_vd_vd(instrument_ddx_price, instrument_ddx_price),
-                                                           vmul_vd_vd_vd(instrument_price, instrument_d2dx2_price)
-                                                   ));
-            instrument_ddx_price = vmul_vd_vd_vd(vmul_vd_vd_vd(two, instrument_price), instrument_ddx_price);
-            instrument_price = vmul_vd_vd_vd(instrument_price, instrument_price);
+                price = vload_vd_p(&instrument_prices_[i]);
+                pricel = vload_vd_p(&instrument_pricesl_[i]);
+                priceh = vload_vd_p(&instrument_pricesh_[i]);
 
-            vstore_v_p_vd(&instrument_prices[i], instrument_price);
-            vstore_v_p_vd(&instrument_ddx_prices[i], instrument_ddx_price);
-            vstore_v_p_vd(&instrument_d2dx2_prices[i], instrument_d2dx2_price);
+                x = vload_vd_p(&x_[i]);
+                xl = vload_vd_p(&xl_[i]);
+                xh = vload_vd_p(&xh_[i]);
 
+                op = vgt_vo_vd_vd(vmul_vd_vd_vd(price, pricel), zero);
+                pricel = vsel_vd_vo_vd_vd(op, price, pricel);
+                priceh = vsel_vd_vo_vd_vd(op, priceh, price);
+                xl = vsel_vd_vo_vd_vd(op, x, xl);
+                xh = vsel_vd_vo_vd_vd(op, xl, x);
 
+                vstore_v_p_vd(&instrument_pricesh_[i], priceh);
+                vstore_v_p_vd(&instrument_pricesl_[i], pricel);
+                vstore_v_p_vd(&xl_[i], xl);
+                vstore_v_p_vd(&xh_[i], xh);
+            }
+
+#pragma omp barrier
         }
     }
+
 
 }
