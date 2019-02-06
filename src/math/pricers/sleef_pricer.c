@@ -527,27 +527,58 @@ void computeTargetValues(
         Real_Ptr xh_,
         Real_Ptr x_) {
 
-    double err;
+
+    ASSUME(n % 64 == 0)
+    ASSUME(m % 64 == 0)
+
+    ASSUME_ALIGNED(long_short_)
+    ASSUME_ALIGNED(put_call_)
+    ASSUME_ALIGNED(s_)
+    ASSUME_ALIGNED(sigmaA2T2_)
+    ASSUME_ALIGNED(sigmaAsqrtT_)
+    ASSUME_ALIGNED(emrt_)
+    ASSUME_ALIGNED(to_structure)
+    ASSUME_ALIGNED(offsets_)
+    ASSUME_ALIGNED(prices_)
+
+    ASSUME_ALIGNED(premiums_)
+    ASSUME_ALIGNED(instrument_prices_)
+    ASSUME_ALIGNED(instrument_pricesh_)
+    ASSUME_ALIGNED(instrument_pricesl_)
+    ASSUME_ALIGNED(x_)
+    ASSUME_ALIGNED(xh_)
+    ASSUME_ALIGNED(xl_)
+
+    vdouble err;
+    double buffer[sizeof(vdouble)/ sizeof(double)] __attribute__((aligned(ALIGN_TO)));
 
     do {
-        err = 0;
-        #pragma omp parallel reduction(+:err)
+        err = zero;
+#pragma omp parallel
         {
 
+            vdouble err1 = zero;
             vdouble tmp, tmp1, tmp2, tmp3, tmp4, x, xl, xh, s, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price;
             vdouble long_short, put_call;
             vopmask op;
             vdouble pricel, priceh;
 
-            uint64_t n2 = n / (64 / sizeof(double));
+            uint64_t m2 = m / (64 / sizeof(double));
             uint64_t tid = omp_get_thread_num();
             uint64_t num_threads = omp_get_num_threads();
-            uint64_t begin = ((tid * n2) / num_threads) * (64 / sizeof(double));
-            uint64_t end = (((tid + 1) * n2) / num_threads) * (64 / sizeof(double));
+            uint64_t m_begin = ((tid * m2) / num_threads) * (64 / sizeof(double));
+            uint64_t m_end = (((tid + 1) * m2) / num_threads) * (64 / sizeof(double));
+            uint64_t n2 = n / (64 / sizeof(double));
+            uint64_t n_begin = ((tid * n2) / num_threads) * (64 / sizeof(double));
+            uint64_t n_end = (((tid + 1) * n2) / num_threads) * (64 / sizeof(double));
 
-            for (uint64_t i = begin; i < end; i += sizeof(vdouble) / sizeof(double)) {
 
-                x = vadd_vd_vd_vd( vgather_vd_p_vi(x_,vloadu_vi_p(&to_structure[i])), vload_vd_p(&offsets_[i]));
+
+            for (uint64_t i = n_begin; i < n_end; i += sizeof(vdouble) / sizeof(double)) {
+
+                xh = vadd_vd_vd_vd( vgather_vd_p_vi(xh_,vloadu_vi_p(&to_structure[i])), vload_vd_p(&offsets_[i]));
+                xh = vadd_vd_vd_vd( vgather_vd_p_vi(xh_,vloadu_vi_p(&to_structure[i])), vload_vd_p(&offsets_[i]));
+                x = vdiv_vd_vd_vd(vadd_vd_vd_vd(xl,xh),two);
 
                 s = vload_vd_p(&s_[i]);
 
@@ -581,10 +612,7 @@ void computeTargetValues(
             ///
             /// set the variables to zero where we are going to aggregate the numbers
             ///
-            uint64_t m2 = m / (64 / sizeof(double));
-            begin = ((tid * m2) / num_threads) * (64 / sizeof(double));
-            end = (((tid + 1) * m2) / num_threads) * (64 / sizeof(double));
-            for (uint64_t i = begin; i < end; i += sizeof(vdouble) / sizeof(double)) {
+            for (uint64_t i = m_begin; i < m_end; i += sizeof(vdouble) / sizeof(double)) {
                 tmp = vload_vd_p(&premiums_[i]);
                 vstore_v_p_vd(&instrument_prices_[i], vneg_vd_vd(tmp));
             }
@@ -602,36 +630,43 @@ void computeTargetValues(
 
 #pragma omp barrier
 
-            m2 = m / (64 / sizeof(double));
-            begin = ((tid * m2) / num_threads) * (64 / sizeof(double));
-            end = (((tid + 1) * m2) / num_threads) * (64 / sizeof(double));
-            for (uint64_t i = begin; i < end; i += sizeof(vdouble) / sizeof(double)) {
+            for (uint64_t i = m_begin; i < m_end; i += sizeof(vdouble) / sizeof(double)) {
 
-                price = vload_vd_p(&instrument_prices_[i]);
+                price  = vload_vd_p(&instrument_prices_[i]);
                 pricel = vload_vd_p(&instrument_pricesl_[i]);
                 priceh = vload_vd_p(&instrument_pricesh_[i]);
 
-                x = vload_vd_p(&x_[i]);
+                x  = vload_vd_p(&x_[i]);
                 xl = vload_vd_p(&xl_[i]);
                 xh = vload_vd_p(&xh_[i]);
 
-                op = vgt_vo_vd_vd(vmul_vd_vd_vd(price, pricel), zero);
+                op     = vgt_vo_vd_vd(vmul_vd_vd_vd(price, pricel), zero);
+
                 pricel = vsel_vd_vo_vd_vd(op, price, pricel);
                 priceh = vsel_vd_vo_vd_vd(op, priceh, price);
-                xl = vsel_vd_vo_vd_vd(op, x, xl);
-                xh = vsel_vd_vo_vd_vd(op, xh, x);
+
+                xl     = vsel_vd_vo_vd_vd(op, x, xl);
+                xh     = vsel_vd_vo_vd_vd(op, xh, x);
 
                 vstore_v_p_vd(&instrument_pricesh_[i], priceh);
                 vstore_v_p_vd(&instrument_pricesl_[i], pricel);
                 vstore_v_p_vd(&xl_[i], xl);
                 vstore_v_p_vd(&xh_[i], xh);
 
+                tmp = vsub_vd_vd_vd(vmax_vd_vd_vd(xh,xl),vmin_vd_vd_vd(xh,xl));
+                err1 = vadd_vd_vd_vd(err1,vmul_vd_vd_vd(tmp,tmp));
 
             }
 
-#pragma omp barrier
+#pragma omp critical
+            {
+                err = vadd_vd_vd_vd(err, err1);
+            }
         }
-    } while(err > 1.0e-5);
+
+        vstore_v_p_vd(buffer, _mm256_hadd_pd(err,err));
+
+    } while(buffer[0] > 1.0e-5);
 
 
 }
