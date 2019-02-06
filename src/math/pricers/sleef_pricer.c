@@ -512,12 +512,10 @@ void computeTargetValues(
         Real_Ptr long_short_,        // 1 == long option // -1 == short option
         Real_Ptr put_call_,          // -1 == put // 1 == call
         Real_Ptr s_,
-        Real_Ptr x_tmp,
         Real_Ptr sigmaA2T2_,
         Real_Ptr sigmaAsqrtT_,
         Real_Ptr emrt_,
         Int32_Ptr to_structure,
-        Int32_Ptr from_instrument,
         Real_Ptr offsets_,
         Real_Ptr prices_,
         UINT64 m,
@@ -529,9 +527,11 @@ void computeTargetValues(
         Real_Ptr xh_,
         Real_Ptr x_) {
 
+    double err;
 
-    for (int w = 0; w < 25; ++w) {
-#pragma omp parallel
+    do {
+        err = 0;
+        #pragma omp parallel reduction(+:err)
         {
 
             vdouble tmp, tmp1, tmp2, tmp3, tmp4, x, xl, xh, s, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price;
@@ -547,9 +547,7 @@ void computeTargetValues(
 
             for (uint64_t i = begin; i < end; i += sizeof(vdouble) / sizeof(double)) {
 
-                for (uint64_t k = i; k < i + sizeof(vdouble) / sizeof(double); ++k) {
-                    x[k - i] = x_[to_structure[k]] + offsets_[k];
-                }
+                x = vadd_vd_vd_vd( vgather_vd_p_vi(x_,vloadu_vi_p(&to_structure[i])), vload_vd_p(&offsets_[i]));
 
                 s = vload_vd_p(&s_[i]);
 
@@ -597,7 +595,7 @@ void computeTargetValues(
             /// aggregate the prices and its first two derivatives
             ///
 #pragma omp for schedule(static)
-            for (int64_t i = 0; i < n; ++i) {
+            for (uint64_t i = 0; i < n; ++i) {
 #pragma omp atomic update
                 instrument_prices_[to_structure[i]] += prices_[i];
             }
@@ -621,17 +619,19 @@ void computeTargetValues(
                 pricel = vsel_vd_vo_vd_vd(op, price, pricel);
                 priceh = vsel_vd_vo_vd_vd(op, priceh, price);
                 xl = vsel_vd_vo_vd_vd(op, x, xl);
-                xh = vsel_vd_vo_vd_vd(op, xl, x);
+                xh = vsel_vd_vo_vd_vd(op, xh, x);
 
                 vstore_v_p_vd(&instrument_pricesh_[i], priceh);
                 vstore_v_p_vd(&instrument_pricesl_[i], pricel);
                 vstore_v_p_vd(&xl_[i], xl);
                 vstore_v_p_vd(&xh_[i], xh);
+
+
             }
 
 #pragma omp barrier
         }
-    }
+    } while(err > 1.0e-5);
 
 
 }
