@@ -664,7 +664,10 @@ void computeTargetValues(
             }
         }
 
-        vstore_v_p_vd(buffer, _mm256_hadd_pd(err,err));
+        vstore_v_p_vd(buffer, err);
+        for(uint64_t i = 1; i < sizeof(vdouble)/ sizeof(double); ++i) {
+            buffer[0] += buffer[i];
+        }
 
     } while(buffer[0] > 1.0e-5);
 
