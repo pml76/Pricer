@@ -669,7 +669,8 @@ void computeTargetValues(
             buffer[0] += buffer[i];
         }
 
-    } while(buffer[0] > 1.0e-5);
+
+    } while(sqrt(buffer[0]) > 1.0e-5);
 
 
 }
