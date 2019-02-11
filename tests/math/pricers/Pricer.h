@@ -52,9 +52,7 @@ private:
 
 class unprecise_calculation_exception : public std::exception {
 public:
-    unprecise_calculation_exception(const char *s) {
-        str = s;
-    }
+    unprecise_calculation_exception(const char *s) : str(s) {}
 
     virtual const char *what() const noexcept override {
         return str.data();
