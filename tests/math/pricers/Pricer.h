@@ -1,3 +1,22 @@
+/*
+ *
+ * (c) 2019, by Peter Lennartz  // peter.lennartz@gmail.com
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #pragma once
 
 #include <arb.h>
@@ -9,11 +28,11 @@
 #include <exception>
 #include <vector>
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <execinfo.h>
 #include <cmath>
 
-#define THROW_EXCEPTION(e, t) {std::stringstream ss;void *buffer[1000];int size = backtrace(buffer, 1000); char **bt = backtrace_symbols(buffer, size);for( int i = 0; i < size; i++ ) { ss << bt[i] << std::endl;} free(bt); ss << std::endl << "********************************" << std::endl << " E X C E P T I O N " << std::endl << "********************************" << std::endl << t << std::endl << "********************************" << std::endl; throw e(ss.str().data()); };
+#define THROW_EXCEPTION(e, t) ({std::stringstream ss;void *buffer[1000];int size = backtrace(buffer, 1000); char **bt = backtrace_symbols(buffer, size);for( int i = 0; i < size; i++ ) { ss << bt[i] << std::endl;} free(bt); ss << std::endl << "********************************" << std::endl << " E X C E P T I O N " << std::endl << "********************************" << std::endl << t << std::endl << "********************************" << std::endl; throw e(ss.str().data()); });
 
 
 class not_normal_number_exception : public std::exception {
@@ -131,7 +150,7 @@ private:
                 arb_div(d2, d2, msqrt2, prec); // have the erfc function in stock ...
 
                 if (arb_rel_accuracy_bits(d1) < target_prec + additional_prec ||
-                    arb_rel_accuracy_bits(d2) < target_prec + additional_prec) {
+                        arb_rel_accuracy_bits(d2) < target_prec + additional_prec) {
                     prec *= 2;
                     init();
                     continue;
@@ -360,13 +379,13 @@ public:
             std::stringstream ss;
 
             ss << "Variable x equals nan in compute_put_price" << std::endl
-               << " s         = " << s << std::endl
-               << " x         = " << x << std::endl
-               << " sigma     = " << sigma << std::endl
-               << " r         = " << r << std::endl
-               << " t         = " << t << std::endl
-               << " tau       = " << tau << std::endl
-               << std::endl;
+                    << " s         = " << s << std::endl
+                    << " x         = " << x << std::endl
+                    << " sigma     = " << sigma << std::endl
+                    << " r         = " << r << std::endl
+                    << " t         = " << t << std::endl
+                    << " tau       = " << tau << std::endl
+                    << std::endl;
             THROW_EXCEPTION(not_normal_number_exception, ss.str().data());
         }
 
@@ -543,13 +562,13 @@ public:
         if (arf_is_nan(arb_midref(x))) {
             std::stringstream ss;
             ss << "variable x equals nan in compute_put_price()" << std::endl
-               << " s         = " << s << std::endl
-               << " x         = " << x << std::endl
-               << " sigma     = " << sigma << std::endl
-               << " r         = " << r << std::endl
-               << " t         = " << t << std::endl
-               << " tau       = " << tau << std::endl
-               << std::endl;
+                    << " s         = " << s << std::endl
+                    << " x         = " << x << std::endl
+                    << " sigma     = " << sigma << std::endl
+                    << " r         = " << r << std::endl
+                    << " t         = " << t << std::endl
+                    << " tau       = " << tau << std::endl
+                    << std::endl;
             THROW_EXCEPTION(not_normal_number_exception, ss.str().data());
         }
 

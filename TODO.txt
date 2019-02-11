@@ -1,0 +1,4 @@
+ - IO to and from portable netcdf / hdf5 file format
+ - Documentation of the interface
+ - Creating a proper dependencies to the sleef project
+ - Create a batch mechanism to incorporate different architectures
