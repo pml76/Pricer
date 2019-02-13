@@ -21,6 +21,9 @@
 #include <src/math/pricers/mkl_pricer.h>
 #include <tests/math/pricers/Pricer.h>
 
+#ifdef DECLARE_AND_DEFINE
+#undef DECLARE_AND_DEFINE
+#endif
 
 #define DECLARE_AND_DEFINE(type, x, y) \
    (type x[64] __attribute__((aligned(ALIGN_TO))); \

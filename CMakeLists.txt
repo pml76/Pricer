@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.12)
 project(Pricer)
 
+
+add_subdirectory("3rdParty" "3rdParty")
+
+
 set(CMAKE_CXX_STANDARD 17)
 
 
@@ -53,18 +57,25 @@ find_package(SLEEF REQUIRED)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
-set(PROJECT_SOURCES src/math/pricers/mkl_pricer.c 3rdParty/sleef/libm/sleefsimddp.c 3rdParty/sleef/libm/rempitab.c src/math/pricers/sleef_pricer.c src/math/pricers/sleef_pricer.h)
-set(PROJECT_HEADERS src/math/pricers/mkl_pricer.h 3rdParty/sleef/arch/helperadvsimd.h
-        3rdParty/sleef/arch/helperavx.h
-        3rdParty/sleef/arch/helperavx2.h
-        3rdParty/sleef/arch/helperavx2_128.h
-        3rdParty/sleef/arch/helperavx512f.h
-        3rdParty/sleef/arch/helperneon32.h
-        3rdParty/sleef/arch/helperpower_128.h
-        3rdParty/sleef/arch/helperpurec.h
-        3rdParty/sleef/arch/helpersse2.h
-        3rdParty/sleef/arch/helpersve.h
-        3rdParty/sleef/arch/helpervecext.h 3rdParty/sleef/common/misc.h 3rdParty/sleef/libm/dd.h)
+set(PROJECT_SOURCES src/math/pricers/mkl_pricer.c
+        3rdParty/sleef/src/libm/sleefsimddp.c
+        3rdParty/sleef/src/libm/rempitab.c
+        src/math/pricers/sleef_pricer.c)
+set(PROJECT_HEADERS src/math/pricers/mkl_pricer.h
+        3rdParty/sleef/src/arch/helperadvsimd.h
+        3rdParty/sleef/src/arch/helperavx.h
+        3rdParty/sleef/src/arch/helperavx2.h
+        3rdParty/sleef/src/arch/helperavx2_128.h
+        3rdParty/sleef/src/arch/helperavx512f.h
+        3rdParty/sleef/src/arch/helperneon32.h
+        3rdParty/sleef/src/arch/helperpower_128.h
+        3rdParty/sleef/src/arch/helperpurec.h
+        3rdParty/sleef/src/arch/helpersse2.h
+        3rdParty/sleef/src/arch/helpersve.h
+        3rdParty/sleef/src/arch/helpervecext.h
+        3rdParty/sleef/src/common/misc.h
+        3rdParty/sleef/src/libm/dd.h
+        src/math/pricers/sleef_pricer.h)
 
 add_compile_definitions(ENABLE_AVX=1)
 
@@ -72,7 +83,7 @@ set(PROJECT_TEST_SOURCES tests/math/pricers/Pricer.h tests/math/pricers/mkl-pric
 
 set(PROJECT_BENCHMARK_SOURCES benchmarks/main.cc benchmarks/math/mkl-pricer-benchmark.cc benchmarks/math/sleef-pricer-benchmark.cc)
 
-include_directories(./ $ENV{SPACK_TRANSITIVE_INCLUDE_PATH} ${MKL_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/3rdParty/sleef/arch ${CMAKE_SOURCE_DIR}/3rdParty/sleef/common ${CMAKE_SOURCE_DIR}/3rdParty/sleef/libm)
+include_directories(./ $ENV{SPACK_TRANSITIVE_INCLUDE_PATH} ${MKL_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/3rdParty/sleef/src/arch ${CMAKE_SOURCE_DIR}/3rdParty/sleef/src/common ${CMAKE_SOURCE_DIR}/3rdParty/sleef/src/libm)
 
 add_executable(Pricer ${PROJECT_SOURCES} ${PROJECT_HEADERS} src/main.cpp)
 target_link_libraries(Pricer pthread dl ${MKL_LIBRARIES})

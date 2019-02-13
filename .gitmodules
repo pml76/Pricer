@@ -7,3 +7,6 @@
 [submodule "catch2"]
 	path = catch2
 	url = https://github.com/catchorg/Catch2.git
+[submodule "3rdParty/sleef"]
+	path = 3rdParty/sleef
+	url = https://github.com/shibatch/sleef.git
