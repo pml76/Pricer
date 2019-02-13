@@ -26,12 +26,12 @@
 #endif
 
 #define DECLARE_AND_DEFINE(type, x, y) \
-   (type x[64] __attribute__((aligned(ALIGN_TO))); \
-   for(UINT64 i=0;i<ALIGN_TO;i++) x[i]=y);
+   type x[64] __attribute__((aligned(ALIGN_TO))); \
+   for(UINT64 i=0;i<ALIGN_TO;i++) x[i]=y;
 
 TEST_CASE("pricer-class equals mkl-pricer (long call)", "[pricer]") {
 
-    DECLARE_AND_DEFINE(FLOAT, r, 0.01)
+DECLARE_AND_DEFINE(double, r, 0.01)
     DECLARE_AND_DEFINE(FLOAT, s, 70.)
     DECLARE_AND_DEFINE(FLOAT, t, 1.2)
     DECLARE_AND_DEFINE(FLOAT, tau, 1. / 12.)

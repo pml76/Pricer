@@ -110,10 +110,6 @@ extern "C" {
    for(UINT64 i=0;i<ALIGN_TO;i++) x[i]=y;
 
 
-#ifdef FLOAT
-#undef FLOAT
-#endif
-
 typedef double FLOAT;
 typedef unsigned long long UINT64;
 
