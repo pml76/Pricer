@@ -158,7 +158,7 @@ extern const double rempitabdp[];
 
 //
 
-#include <src/math/pricers/pricer-base.h>
+#include <math/pricers/pricer-base.h>
 #include <tgmath.h>
 
 #include <omp.h>

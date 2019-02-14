@@ -23,7 +23,7 @@
 
 #include <mkl.h>
 #include <math.h>
-#include <src/math/pricers/mkl_pricer.h>
+#include <math/pricers/mkl_pricer.h>
 
 
 static FLOAT ln_of_2, msqrt2;
