@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.12)
 project(Pricer)
 
+
+OPTION(OPTION_BUILD_TESTS "Build the test-suite" ON)
+OPTION(OPTION_BUILD_BENCHMARKS "Build the benchmark-suite" ON)
+
 # prep cmake to accept our local .cmake files
 set(CMAKE_PREFIX_PATH "S{CMAKE_PREFIX_PATH} S{CMAKE_SOURCE_DIR}/cmake/")
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
@@ -51,13 +55,22 @@ set(TARGET_LIBPRICER "pricer")
 set(PRICER_VERSION 0)
 set(PRICER_SOVERSION 1)
 
-set(PRICER_TEST_TARGET "pricer-test")
-set(PRICER_BENCHMARK_TARGET "pricer-benchmark")
+# builds the test-executable
+set(TARGET_PRICER_TEST "pricer-test")
+
+# builds the benchmark executable
+set(LARGET_PRICER_BENCHMARK "pricer-benchmark")
 
 
 add_subdirectory(src)
-# add_subdirectory(tests)
-# add_subdirectory(benchmarks)
+
+if (${OPTION_BUILD_TESTS})
+    add_subdirectory(tests)
+endif ()
+
+if (${OPTION_BUILD_BENCHMARKS})
+    add_subdirectory(benchmarks)
+endif ()
 
 # find_package(GoogleBenchmark REQUIRED)
 # find_package(Catch2 REQUIRED)
