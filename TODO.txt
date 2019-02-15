@@ -5,6 +5,5 @@
 
  - write black scholes pricing routines
 
- - Documentation of the interface
- - Creating a proper dependencies to the sleef project
+ - Documentation of the interface / dependencies
  - Create a batch mechanism to incorporate different architectures
