@@ -2,6 +2,23 @@ cmake_minimum_required(VERSION 3.12)
 project(Pricer)
 
 
+# create the dipatcher generator
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/dispatcher-generator/)
+execute_process(
+        COMMAND ${CMAKE_COMMAND} ${CMAKE_SOURCE_DIR}/dispatcher-generator/ -G "Unix Makefiles"
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/dispatcher-generator/)
+
+execute_process(
+        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/dispatcher-generator/
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/dispatcher-generator/)
+
+find_file(DISPATCHER_GENERATOR dispgen ${CMAKE_BINARY_DIR}/dispatcher-generator/)
+
+if ()
+
+endif ()
+
+
 OPTION(OPTION_BUILD_TESTS "Build the test-suite" ON)
 OPTION(OPTION_BUILD_BENCHMARKS "Build the benchmark-suite" ON)
 
