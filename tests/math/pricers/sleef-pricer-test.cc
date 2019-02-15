@@ -17,8 +17,8 @@
  */
 
 #include <catch2/catch.hpp>
-#include <src/math/pricers/sleef_pricer.h>
-#include <tests/math/pricers/Pricer.h>
+#include <math/pricers/sleef_pricer.h>
+#include <math/pricers/Pricer.h>
 
 
 #define DECLARE_AND_DEFINE(type, x, y) \

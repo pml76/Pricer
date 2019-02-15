@@ -59,7 +59,7 @@ set(PRICER_SOVERSION 1)
 set(TARGET_PRICER_TEST "pricer-test")
 
 # builds the benchmark executable
-set(LARGET_PRICER_BENCHMARK "pricer-benchmark")
+set(TARGET_PRICER_BENCHMARK "pricer-benchmark")
 
 
 add_subdirectory(src)

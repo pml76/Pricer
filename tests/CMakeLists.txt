@@ -8,14 +8,22 @@ find_package(GMP REQUIRED)
 find_package(MPFR REQUIRED)
 find_package(MKL REQUIRED)
 
-set(TARGET_PRICER_TESTS_SOURCES
+set(TARGET_PRICER_TEST_SOURCES
         math/pricers/mkl-pricer-test.cc
-        math/pricers/sleef-pricer-test.cc)
+        math/pricers/sleef-pricer-test.cc
+        main.cc)
 
-set(TARGET_PRICER_Tests_HEADERS
+set(TARGET_PRICER_TTEST_HEADERS
         math/pricers/Pricer.h)
 
-add_executable(${TARGET_PRICER_TEST} ${TARGET_PRICER_SOURCES} ${TARGET_PRICER_HEADERS})
+include_directories(
+        ./
+        ../src/
+        $ENV{SPACK_TRANSITIVE_INCLUDE_PATH}
+        ${MKL_INCLUDE_DIRS})
+
+
+add_executable(${TARGET_PRICER_TEST} ${TARGET_PRICER_TEST_SOURCES} ${TARGET_PRICER_TEST_HEADERS})
 target_link_libraries(${TARGET_PRICER_TEST}
         pthread
         dl
@@ -25,4 +33,5 @@ target_link_libraries(${TARGET_PRICER_TEST}
         ${FLINT_LIBRARIES}
         ${Arb_LIBRARIES}
         sleef
-        ${TARGET_LIBPRICER})
+        ${TARGET_LIBPRICER}
+        Catch2::Catch2)

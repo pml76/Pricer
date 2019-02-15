@@ -20,7 +20,8 @@ include_directories(
         ${MKL_INCLUDE_DIRS}
         ${CMAKE_SOURCE_DIR}/3rdParty/sleef/src/arch
         ${CMAKE_SOURCE_DIR}/3rdParty/sleef/src/common
-        ${CMAKE_SOURCE_DIR}/3rdParty/sleef/src/libm)
+        ${CMAKE_SOURCE_DIR}/3rdParty/sleef/src/libm
+        ${CMAKE_BINARY_DIR}/3rdParty/sleef/src/libm/include)
 
 add_library(${TARGET_LIBPRICER} ${TARGET_PRICER_SOURCES} ${TARGET_PRICER_HEADERS})
 set_target_properties(${TARGET_LIBPRICER} PROPERTIES

@@ -18,8 +18,8 @@
 
 #include <catch2/catch.hpp>
 #include <iostream>
-#include <src/math/pricers/mkl_pricer.h>
-#include <tests/math/pricers/Pricer.h>
+#include <math/pricers/mkl_pricer.h>
+#include <math/pricers/Pricer.h>
 
 #ifdef DECLARE_AND_DEFINE
 #undef DECLARE_AND_DEFINE
