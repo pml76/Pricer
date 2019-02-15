@@ -14,9 +14,7 @@ execute_process(
 
 find_file(DISPATCHER_GENERATOR dispgen ${CMAKE_BINARY_DIR}/dispatcher-generator/)
 
-if ()
-
-endif ()
+include(cmake/Configure.cmake)
 
 
 OPTION(OPTION_BUILD_TESTS "Build the test-suite" ON)
