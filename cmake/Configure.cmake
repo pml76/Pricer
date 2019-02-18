@@ -106,6 +106,28 @@ if (NOT DISABLE_AVX512F)
 endif ()
 
 
+option(DISABLE_OPENMP "Disable OPENMP" OFF)
+
+if(NOT DISABLE_OPENMP)
+    find_package(OpenMP)
+    # Check if compilation with OpenMP really succeeds
+    # It does not succeed on Travis even though find_package(OpenMP) succeeds.
+    if(OPENMP_FOUND)
+        set (CMAKE_REQUIRED_FLAGS "${OpenMP_C_FLAGS}")
+        CHECK_C_SOURCE_COMPILES("
+  #include <stdio.h>
+  int main() {
+  int i;
+  #pragma omp parallel for
+    for(i=0;i < 10;i++) { putchar(0); }
+  }"
+                COMPILER_SUPPORTS_OPENMP)
+    endif(OPENMP_FOUND)
+else()
+    message(STATUS "Support for OpenMP disabled by CMake option")
+endif()
+
+
 # Reset used flags
 set(CMAKE_REQUIRED_FLAGS)
 set(CMAKE_REQUIRED_LIBRARIES)
@@ -123,4 +145,8 @@ endif ()
 
 if (COMPILER_SUPPORTS_AVX512F)
     message(STATUS "AVX512F supported")
+endif ()
+
+if (COMPILER_SUPPORTS_OPENMP)
+    message(STATUS "OPENMP supported")
 endif ()
