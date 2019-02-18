@@ -1,18 +1,14 @@
 #!/home/VortexUser/spack/opt/spack/linux-centos7-x86_64/gcc-8.2.0/python-2.7.15-tjspyxf3yh64tn4cg34lvdclxruddxaa/bin/python
 #
 
+import sys
 import os
 import subprocess
-import sys
-
 
 def cmdlist(str):
-    return list(x.strip().replace("'", '') for x in str.split('\n') if x)
-
-
+    return list(x.strip().replace("'",'') for x in str.split('\n') if x)
 env = dict(os.environ)
-env[
-    'CC'] = '/home/VortexUser/spack/opt/spack/linux-centos7-x86_64/gcc-4.8.5/gcc-8.2.0-sxbf4jq6ghmoybsjlpqz2dm2qbbxzfyn/bin/gcc'
+env['CC'] = '/home/VortexUser/spack/opt/spack/linux-centos7-x86_64/gcc-4.8.5/gcc-8.2.0-sxbf4jq6ghmoybsjlpqz2dm2qbbxzfyn/bin/gcc'
 env['CMAKE_PREFIX_PATH'] = ":".join(cmdlist("""
     /home/VortexUser/spack/opt/spack/linux-centos7-x86_64/gcc-8.2.0/libiconv-1.15-q7w32zbfjms2zfzcllbtovtga4r46u6z
     /home/VortexUser/spack/opt/spack/linux-centos7-x86_64/gcc-8.2.0/libxslt-1.1.32-pmogeq5jollvtni2yxzevvhduh4hw3en
@@ -57,10 +53,8 @@ env['CMAKE_PREFIX_PATH'] = ":".join(cmdlist("""
     /home/VortexUser/spack/opt/spack/linux-centos7-x86_64/gcc-8.2.0/gdbm-1.18.1-2ggaajb6mzsqorehy3fzrglcm7t35f3u
     /home/VortexUser/spack/opt/spack/linux-centos7-x86_64/gcc-8.2.0/libszip-2.1.1-kg225bg7y5k2y4ouosikcpn7qy5wyzxf
 """))
-env[
-    'CXX'] = '/home/VortexUser/spack/opt/spack/linux-centos7-x86_64/gcc-4.8.5/gcc-8.2.0-sxbf4jq6ghmoybsjlpqz2dm2qbbxzfyn/bin/g++'
-env[
-    'FC'] = '/home/VortexUser/spack/opt/spack/linux-centos7-x86_64/gcc-4.8.5/gcc-8.2.0-sxbf4jq6ghmoybsjlpqz2dm2qbbxzfyn/bin/gfortran'
+env['CXX'] = '/home/VortexUser/spack/opt/spack/linux-centos7-x86_64/gcc-4.8.5/gcc-8.2.0-sxbf4jq6ghmoybsjlpqz2dm2qbbxzfyn/bin/g++'
+env['FC'] = '/home/VortexUser/spack/opt/spack/linux-centos7-x86_64/gcc-4.8.5/gcc-8.2.0-sxbf4jq6ghmoybsjlpqz2dm2qbbxzfyn/bin/gfortran'
 env['PATH'] = ":".join(cmdlist("""
     /home/VortexUser/spack/opt/spack/linux-centos7-x86_64/gcc-8.2.0/python-2.7.15-tjspyxf3yh64tn4cg34lvdclxruddxaa/bin
     /home/VortexUser/spack/opt/spack/linux-centos7-x86_64/gcc-8.2.0/gsl-2.5-zi2ov24dfs5byq5t66nwyxxsw4oiz5me/bin
@@ -82,7 +76,32 @@ env['PATH'] = ":".join(cmdlist("""
     /home/VortexUser/spack/opt/spack/linux-centos7-x86_64/gcc-8.2.0/ccache-3.6-f3cx6i5u44bdqjmgvngtuwqbrbsct2p2/bin
     /home/VortexUser/spack/opt/spack/linux-centos7-x86_64/gcc-8.2.0/doxygen-1.8.15-7qtakpp4w76oats34woylifl6obl66qj/bin
     /home/VortexUser/spack/opt/spack/linux-centos7-x86_64/gcc-8.2.0/intel-mkl-2019.1.144-hhawmrvixxoc3gtyathay6j4alvfj6fi/bin
+    /home/VortexUser/spack/opt/spack/linux-centos7-x86_64/gcc-8.2.0/pricer-development-4s55oak2p3cvmdudcutsq36ag4s4dx3m/bin
+    /home/VortexUser/spack/opt/spack/linux-centos7-x86_64/gcc-8.2.0/intel-mkl-2019.1.144-hhawmrvixxoc3gtyathay6j4alvfj6fi/bin
+    /home/VortexUser/spack/opt/spack/linux-centos7-x86_64/gcc-8.2.0/hdf5-1.10.4-3quqb62hgt2tgt7xf4wfaaeflc2cjlen/bin
+    /home/VortexUser/spack/opt/spack/linux-centos7-x86_64/gcc-8.2.0/gsl-2.5-zi2ov24dfs5byq5t66nwyxxsw4oiz5me/bin
+    /home/VortexUser/spack/opt/spack/linux-centos7-x86_64/gcc-8.2.0/gcc-8.2.0-ofh3irxuvx5t3qq3bhrnrz3mj77ctcss/bin
+    /home/VortexUser/spack/opt/spack/linux-centos7-x86_64/gcc-8.2.0/doxygen-1.8.15-7qtakpp4w76oats34woylifl6obl66qj/bin
+    /home/VortexUser/spack/opt/spack/linux-centos7-x86_64/gcc-8.2.0/graphviz-2.40.1-wujmug3qnpb47hwcdr4x3q3oby4p6kcs/bin
+    /home/VortexUser/spack/opt/spack/linux-centos7-x86_64/gcc-8.2.0/cmake-3.13.2-lgifhqmxfoaukg3y6ovlxkrfehju6yqy/bin
+    /home/VortexUser/spack/opt/spack/linux-centos7-x86_64/gcc-8.2.0/ccache-3.6-f3cx6i5u44bdqjmgvngtuwqbrbsct2p2/bin
+    /home/VortexUser/spack/opt/spack/linux-centos7-x86_64/gcc-8.2.0/libxslt-1.1.32-pmogeq5jollvtni2yxzevvhduh4hw3en/bin
+    /home/VortexUser/spack/opt/spack/linux-centos7-x86_64/gcc-8.2.0/libgcrypt-1.8.1-a2nc4vjtt4r5mhlrualfcxbyb2efzgab/bin
+    /home/VortexUser/spack/opt/spack/linux-centos7-x86_64/gcc-8.2.0/libgpg-error-1.27-a6z3cplgc7qiar2xjabp2lisq6yemygd/bin
+    /home/VortexUser/spack/opt/spack/linux-centos7-x86_64/gcc-8.2.0/gperf-3.0.4-rggielmpgsffz6zp2b7zjdoe7v4fzc2v/bin
     /home/VortexUser/spack/opt/spack/linux-centos7-x86_64/gcc-8.2.0/python-2.7.15-tjspyxf3yh64tn4cg34lvdclxruddxaa/bin
+    /home/VortexUser/spack/opt/spack/linux-centos7-x86_64/gcc-8.2.0/sqlite-3.26.0-s5v72k5h3wkzyyf6lodngc367tikautf/bin
+    /home/VortexUser/spack/opt/spack/linux-centos7-x86_64/gcc-8.2.0/openssl-1.1.1-amxovq22o3ukqljhepctty3yvg4xwlzd/bin
+    /home/VortexUser/spack/opt/spack/linux-centos7-x86_64/gcc-8.2.0/gdbm-1.18.1-2ggaajb6mzsqorehy3fzrglcm7t35f3u/bin
+    /home/VortexUser/spack/opt/spack/linux-centos7-x86_64/gcc-8.2.0/readline-7.0-wcnxwmbecktrveueg3pht7w7vr4c3orn/bin
+    /home/VortexUser/spack/opt/spack/linux-centos7-x86_64/gcc-8.2.0/ncurses-6.1-i655y27j765f243z6i562sryflgenk33/bin
+    /home/VortexUser/spack/opt/spack/linux-centos7-x86_64/gcc-8.2.0/openmpi-3.1.3-atscp4jz5a7tt2lig7m2s6tdeb5pgx3t/bin
+    /home/VortexUser/spack/opt/spack/linux-centos7-x86_64/gcc-8.2.0/hwloc-1.11.11-6brxyfqbgwgcvsbgbrtfcn4ii2plvf5i/bin
+    /home/VortexUser/spack/opt/spack/linux-centos7-x86_64/gcc-8.2.0/numactl-2.0.12-355ef36k3m3xnqdfmizkys6qa7j6oiss/bin
+    /home/VortexUser/spack/opt/spack/linux-centos7-x86_64/gcc-8.2.0/libxml2-2.9.8-z2gjacsstfth7p2zx2t2jzdeyk2vmqbo/bin
+    /home/VortexUser/spack/opt/spack/linux-centos7-x86_64/gcc-8.2.0/xz-5.2.4-fvj6tohizvl45nmccwhd36ppjrtsxrte/bin
+    /home/VortexUser/spack/opt/spack/linux-centos7-x86_64/gcc-8.2.0/libiconv-1.15-q7w32zbfjms2zfzcllbtovtga4r46u6z/bin
+    /home/VortexUser/spack/opt/spack/linux-centos7-x86_64/gcc-8.2.0/bzip2-1.0.6-7djguhm2gowcvvtpweipynfjcj2szvxw/bin
     /home/VortexUser/spack/opt/spack/linux-centos7-x86_64/gcc-4.8.5/environment-modules-3.2.10-k5d3cqqywkaxlplgqilode6hcrwmzjix/Modules/bin
     /home/VortexUser/spack/bin
     /home/VortexUser/.opam/system/bin
