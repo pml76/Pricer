@@ -3,7 +3,10 @@ include(CheckCCompilerFlag)
 include(CheckCSourceCompiles)
 include(CheckTypeSize)
 
-set(PRICER_SUPPORTED_EXTENSIONS AVX AVX2 AVX512F)
+
+# a list of supported extensions
+# sequence matters: quickest one first, slowest last
+set(PRICER_SUPPORTED_EXTENSIONS AVX512F AVX2 AVX)
 
 # Allow to define the Gcc/Clang here
 # As we might compile the lib with MSVC, but generates bitcode with CLANG
