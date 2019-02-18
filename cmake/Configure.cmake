@@ -3,7 +3,6 @@ include(CheckCCompilerFlag)
 include(CheckCSourceCompiles)
 include(CheckTypeSize)
 
-
 set(PRICER_SUPPORTED_EXTENSIONS AVX AVX2 AVX512F)
 
 # Allow to define the Gcc/Clang here
