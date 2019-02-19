@@ -117,7 +117,7 @@ typedef unsigned long long UINT64;
 
 typedef FLOAT *__restrict__ Real_Ptr;
 typedef UINT64 *__restrict__ Uint64_Ptr;
-typedef int32_t *__restrict Int32_Ptr;
+typedef int32_t *__restrict__ Int32_Ptr;
 
 #ifdef __cplusplus
 };

@@ -60,8 +60,8 @@ IF ("${isSystemDir}" STREQUAL "-1")
 ENDIF ("${isSystemDir}" STREQUAL "-1")
 
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -fopenmp -Ofast -march=native -fno-omit-frame-pointer -ffp-contract=off -fno-math-errno -fno-trapping-math -O3 -fPIC")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -fopenmp -Ofast -march=native -fno-omit-frame-pointer -ffp-contract=off -fno-math-errno -fno-trapping-math -O3 -fPIC")
+# set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -fopenmp -Ofast -march=native -fno-omit-frame-pointer -ffp-contract=off -fno-math-errno -fno-trapping-math -O3 -fPIC")
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -fopenmp -Ofast -march=native -fno-omit-frame-pointer -ffp-contract=off -fno-math-errno -fno-trapping-math -O3 -fPIC")
 
 
 #
