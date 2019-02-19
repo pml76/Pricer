@@ -6,4 +6,3 @@
  - write black scholes pricing routines
 
  - Documentation of the interface / dependencies
- - Create a batch mechanism to incorporate different architectures

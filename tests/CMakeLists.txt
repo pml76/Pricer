@@ -19,6 +19,7 @@ set(TARGET_PRICER_TTEST_HEADERS
 include_directories(
         ./
         ../src/
+        ${CMAKE_BINARY_DIR}
         $ENV{SPACK_TRANSITIVE_INCLUDE_PATH}
         ${MKL_INCLUDE_DIRS})
 

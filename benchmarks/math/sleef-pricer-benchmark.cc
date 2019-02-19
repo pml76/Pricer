@@ -26,6 +26,8 @@
 
 #include <math/pricers/sleef_pricer.h>
 
+#include <pricer.h>
+
 
 typedef double *__restrict__ __attribute__((aligned(ALIGN_TO))) Real_Ptr;
 
@@ -118,9 +120,9 @@ static void BM_Pricer_Sleef(benchmark::State &state) {
             ts[i] += taus[i];
         }
 
-        init_sleef_pricer();
+        init_tw_pricer();
 
-        prepare_sleef_pricer(
+        prepare_tw_pricer(
                 state.range(0),
                 ss,
                 sigmas,
@@ -135,7 +137,7 @@ static void BM_Pricer_Sleef(benchmark::State &state) {
 
         state.ResumeTiming();
 
-        sleef_pricer(
+        tw_pricer(
                 state.range(0),
                 long_short,
                 put_call,
@@ -269,9 +271,9 @@ static void BM_Pricer_Full_Sleef(benchmark::State &state) {
             ts[i] += taus[i];
         }
 
-        init_sleef_pricer();
+        init_tw_pricer();
 
-        prepare_sleef_pricer(
+        prepare_tw_pricer(
                 state.range(0),
                 ss,
                 sigmas,
@@ -286,7 +288,7 @@ static void BM_Pricer_Full_Sleef(benchmark::State &state) {
 
         state.ResumeTiming();
 
-        full_sleef_pricer(
+        full_tw_pricer(
                 state.range(0),
                 long_short,
                 put_call,

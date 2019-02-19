@@ -70,6 +70,8 @@ set(TARGET_LIBPRICER "pricer")
 set(PRICER_VERSION 0)
 set(PRICER_SOVERSION 1)
 
+set(TARGET_LIBPRICER_MKL "pricer_mkl")
+
 # builds the test-executable
 set(TARGET_PRICER_TEST "pricer-test")
 

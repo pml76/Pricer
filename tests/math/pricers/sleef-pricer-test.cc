@@ -19,6 +19,7 @@
 #include <catch2/catch.hpp>
 #include <math/pricers/sleef_pricer.h>
 #include <math/pricers/Pricer.h>
+#include <pricer.h>
 
 
 #define DECLARE_AND_DEFINE(type, x, y) \
@@ -53,15 +54,15 @@ TEST_CASE("pricer-class equals sleef-pricer (long call)", "[pricer]") {
 
     p.set_market_data(sigma[0], t[0], tau[0], r[0], s[0]);
 
-    init_sleef_pricer();
+    init_tw_pricer();
 
-    prepare_sleef_pricer(64, s, sigma, t, tau, r,
+    prepare_tw_pricer(64, s, sigma, t, tau, r,
                          sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep);
 
 
 
     // test long call price
-    sleef_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price);
+    tw_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price);
     FLOAT reference_pricer_value = p.compute_call_price(x[0]);
     REQUIRE(abs(reference_pricer_value - price[0]) < 1.0e-8);
 
@@ -95,15 +96,15 @@ TEST_CASE("pricer-class equals sleef-pricer (short call)", "[pricer]") {
 
     p.set_market_data(sigma[0], t[0], tau[0], r[0], s[0]);
 
-    init_sleef_pricer();
+    init_tw_pricer();
 
-    prepare_sleef_pricer(64, s, sigma, t, tau, r,
+    prepare_tw_pricer(64, s, sigma, t, tau, r,
                          sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep);
 
 
 
     // test long call price
-    sleef_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price);
+    tw_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price);
     FLOAT reference_pricer_value = p.compute_call_price(x[0]);
     REQUIRE(abs(reference_pricer_value + price[0]) < 1.0e-8);
 
@@ -137,15 +138,15 @@ TEST_CASE("pricer-class equals sleef-pricer (long put)", "[pricer]") {
 
     p.set_market_data(sigma[0], t[0], tau[0], r[0], s[0]);
 
-    init_sleef_pricer();
+    init_tw_pricer();
 
-    prepare_sleef_pricer(64, s, sigma, t, tau, r,
+    prepare_tw_pricer(64, s, sigma, t, tau, r,
                          sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep);
 
 
 
     // test long call price
-    sleef_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price);
+    tw_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price);
     FLOAT reference_pricer_value = p.compute_put_price(x[0]);
     REQUIRE(abs(reference_pricer_value - price[0]) < 1.0e-8);
 
@@ -179,15 +180,15 @@ TEST_CASE("pricer-class equals sleef-pricer (short put)", "[pricer]") {
 
     p.set_market_data(sigma[0], t[0], tau[0], r[0], s[0]);
 
-    init_sleef_pricer();
+    init_tw_pricer();
 
-    prepare_sleef_pricer(64, s, sigma, t, tau, r,
+    prepare_tw_pricer(64, s, sigma, t, tau, r,
                          sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep);
 
 
 
     // test long call price
-    sleef_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price);
+    tw_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price);
     FLOAT reference_pricer_value = p.compute_put_price(x[0]);
 
     REQUIRE(abs(reference_pricer_value + price[0]) < 1.0e-8);
@@ -224,14 +225,14 @@ TEST_CASE("pricer-class equals ddx-sleef-pricer (long call)", "[pricer]") {
 
     p.set_market_data(sigma[0], t[0], tau[0], r[0], s[0]);
 
-    init_sleef_pricer();
-    prepare_sleef_pricer(64, s, sigma, t, tau, r,
+    init_tw_pricer();
+    prepare_tw_pricer(64, s, sigma, t, tau, r,
                          sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep);
 
 
     // test long call price
-    sleef_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price);
-    ddx_sleef_pricer(64, long_short, put_call, d2, emrt, ddx_price);
+    tw_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price);
+    ddx_tw_pricer(64, long_short, put_call, d2, emrt, ddx_price);
     FLOAT reference_pricer_value1 = p.compute_call_price(x[0]);
     FLOAT reference_pricer_value2 = p.compute_call_price(x[0] + eps);
 
@@ -269,14 +270,14 @@ TEST_CASE("pricer-class equals ddx-sleef-pricer (short call)", "[pricer]") {
 
     p.set_market_data(sigma[0], t[0], tau[0], r[0], s[0]);
 
-    init_sleef_pricer();
-    prepare_sleef_pricer(64, s, sigma, t, tau, r,
+    init_tw_pricer();
+    prepare_tw_pricer(64, s, sigma, t, tau, r,
                          sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep);
 
 
     // test long call price
-    sleef_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price);
-    ddx_sleef_pricer(64, long_short, put_call, d2, emrt, ddx_price);
+    tw_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price);
+    ddx_tw_pricer(64, long_short, put_call, d2, emrt, ddx_price);
     FLOAT reference_pricer_value1 = p.compute_call_price(x[0]);
     FLOAT reference_pricer_value2 = p.compute_call_price(x[0] + eps);
 
@@ -314,14 +315,14 @@ TEST_CASE("pricer-class equals ddx-sleef-pricer (long put)", "[pricer]") {
 
     p.set_market_data(sigma[0], t[0], tau[0], r[0], s[0]);
 
-    init_sleef_pricer();
-    prepare_sleef_pricer(64, s, sigma, t, tau, r,
+    init_tw_pricer();
+    prepare_tw_pricer(64, s, sigma, t, tau, r,
                          sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep);
 
 
     // test long call price
-    sleef_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price);
-    ddx_sleef_pricer(64, long_short, put_call, d2, emrt, ddx_price);
+    tw_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price);
+    ddx_tw_pricer(64, long_short, put_call, d2, emrt, ddx_price);
     FLOAT reference_pricer_value1 = p.compute_put_price(x[0]);
     FLOAT reference_pricer_value2 = p.compute_put_price(x[0] + eps);
 
@@ -359,14 +360,14 @@ TEST_CASE("pricer-class equals ddx-sleef-pricer (short put)", "[pricer]") {
 
     p.set_market_data(sigma[0], t[0], tau[0], r[0], s[0]);
 
-    init_sleef_pricer();
-    prepare_sleef_pricer(64, s, sigma, t, tau, r,
+    init_tw_pricer();
+    prepare_tw_pricer(64, s, sigma, t, tau, r,
                          sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep);
 
 
     // test long call price
-    sleef_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price);
-    ddx_sleef_pricer(64, long_short, put_call, d2, emrt, ddx_price);
+    tw_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price);
+    ddx_tw_pricer(64, long_short, put_call, d2, emrt, ddx_price);
     FLOAT reference_pricer_value1 = p.compute_put_price(x[0]);
     FLOAT reference_pricer_value2 = p.compute_put_price(x[0] + eps);
 
@@ -405,23 +406,23 @@ TEST_CASE("d2dx2_pricer equals ddx-sleef-pricer diff-quot (long call)", "[pricer
 
     p.set_market_data(sigma[0], t[0], tau[0], r[0], s[0]);
 
-    init_sleef_pricer();
-    prepare_sleef_pricer(64, s, sigma, t, tau, r,
+    init_tw_pricer();
+    prepare_tw_pricer(64, s, sigma, t, tau, r,
                          sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep);
 
 
     // test long call price
-    sleef_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price);
-    d2dx2_sleef_pricer(64, long_short, s, x, d2dx2_prep, sigmaA2T2, d2dx2_price);
+    tw_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price);
+    d2dx2_tw_pricer(64, long_short, s, x, d2dx2_prep, sigmaA2T2, d2dx2_price);
 
     DECLARE_AND_DEFINE(FLOAT, reference_pricer_value1, 0.);
     DECLARE_AND_DEFINE(FLOAT, reference_pricer_value2, 0.);
 
-    sleef_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price);
-    ddx_sleef_pricer(64, long_short, put_call, d2, emrt, reference_pricer_value1);
+    tw_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price);
+    ddx_tw_pricer(64, long_short, put_call, d2, emrt, reference_pricer_value1);
     for (UINT64 i = 0; i ^ 64; ++i) x[i] += eps;
-    sleef_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price);
-    ddx_sleef_pricer(64, long_short, put_call, d2, emrt, reference_pricer_value2);
+    tw_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price);
+    ddx_tw_pricer(64, long_short, put_call, d2, emrt, reference_pricer_value2);
 
 
     REQUIRE(abs((reference_pricer_value2[0] - reference_pricer_value1[0]) / eps - d2dx2_price[0]) < 1.0e-4);
@@ -458,23 +459,23 @@ TEST_CASE("d2dx2_pricer equals ddx-sleef-pricer diff-quot (long put)", "[pricer]
 
     p.set_market_data(sigma[0], t[0], tau[0], r[0], s[0]);
 
-    init_sleef_pricer();
-    prepare_sleef_pricer(64, s, sigma, t, tau, r,
+    init_tw_pricer();
+    prepare_tw_pricer(64, s, sigma, t, tau, r,
                          sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep);
 
 
     // test long call price
-    sleef_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price);
-    d2dx2_sleef_pricer(64, long_short, s, x, d2dx2_prep, sigmaA2T2, d2dx2_price);
+    tw_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price);
+    d2dx2_tw_pricer(64, long_short, s, x, d2dx2_prep, sigmaA2T2, d2dx2_price);
 
     DECLARE_AND_DEFINE(FLOAT, reference_pricer_value1, 0.);
     DECLARE_AND_DEFINE(FLOAT, reference_pricer_value2, 0.);
 
-    sleef_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price);
-    ddx_sleef_pricer(64, long_short, put_call, d2, emrt, reference_pricer_value1);
+    tw_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price);
+    ddx_tw_pricer(64, long_short, put_call, d2, emrt, reference_pricer_value1);
     for (UINT64 i = 0; i ^ 64; ++i) x[i] += eps;
-    sleef_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price);
-    ddx_sleef_pricer(64, long_short, put_call, d2, emrt, reference_pricer_value2);
+    tw_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price);
+    ddx_tw_pricer(64, long_short, put_call, d2, emrt, reference_pricer_value2);
 
 
     REQUIRE(abs((reference_pricer_value2[0] - reference_pricer_value1[0]) / eps - d2dx2_price[0]) < 1.0e-4);
@@ -512,23 +513,23 @@ TEST_CASE("d2dx2_pricer equals ddx-sleef-pricer diff-quot (short call)", "[price
 
     p.set_market_data(sigma[0], t[0], tau[0], r[0], s[0]);
 
-    init_sleef_pricer();
-    prepare_sleef_pricer(64, s, sigma, t, tau, r,
+    init_tw_pricer();
+    prepare_tw_pricer(64, s, sigma, t, tau, r,
                          sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep);
 
 
     // test long call price
-    sleef_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price);
-    d2dx2_sleef_pricer(64, long_short, s, x, d2dx2_prep, sigmaA2T2, d2dx2_price);
+    tw_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price);
+    d2dx2_tw_pricer(64, long_short, s, x, d2dx2_prep, sigmaA2T2, d2dx2_price);
 
     DECLARE_AND_DEFINE(FLOAT, reference_pricer_value1, 0.);
     DECLARE_AND_DEFINE(FLOAT, reference_pricer_value2, 0.);
 
-    sleef_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price);
-    ddx_sleef_pricer(64, long_short, put_call, d2, emrt, reference_pricer_value1);
+    tw_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price);
+    ddx_tw_pricer(64, long_short, put_call, d2, emrt, reference_pricer_value1);
     for (UINT64 i = 0; i ^ 64; ++i) x[i] += eps;
-    sleef_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price);
-    ddx_sleef_pricer(64, long_short, put_call, d2, emrt, reference_pricer_value2);
+    tw_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price);
+    ddx_tw_pricer(64, long_short, put_call, d2, emrt, reference_pricer_value2);
 
 
     REQUIRE(abs((reference_pricer_value2[0] - reference_pricer_value1[0]) / eps - d2dx2_price[0]) < 1.0e-4);
@@ -565,23 +566,23 @@ TEST_CASE("d2dx2_pricer equals ddx-sleef-pricer diff-quot (short put)", "[pricer
 
     p.set_market_data(sigma[0], t[0], tau[0], r[0], s[0]);
 
-    init_sleef_pricer();
-    prepare_sleef_pricer(64, s, sigma, t, tau, r,
+    init_tw_pricer();
+    prepare_tw_pricer(64, s, sigma, t, tau, r,
                          sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep);
 
 
     // test long call price
-    sleef_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price);
-    d2dx2_sleef_pricer(64, long_short, s, x, d2dx2_prep, sigmaA2T2, d2dx2_price);
+    tw_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price);
+    d2dx2_tw_pricer(64, long_short, s, x, d2dx2_prep, sigmaA2T2, d2dx2_price);
 
     DECLARE_AND_DEFINE(FLOAT, reference_pricer_value1, 0.);
     DECLARE_AND_DEFINE(FLOAT, reference_pricer_value2, 0.);
 
-    sleef_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price);
-    ddx_sleef_pricer(64, long_short, put_call, d2, emrt, reference_pricer_value1);
+    tw_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price);
+    ddx_tw_pricer(64, long_short, put_call, d2, emrt, reference_pricer_value1);
     for (UINT64 i = 0; i ^ 64; ++i) x[i] += eps;
-    sleef_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price);
-    ddx_sleef_pricer(64, long_short, put_call, d2, emrt, reference_pricer_value2);
+    tw_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price);
+    ddx_tw_pricer(64, long_short, put_call, d2, emrt, reference_pricer_value2);
 
 
     REQUIRE(abs((reference_pricer_value2[0] - reference_pricer_value1[0]) / eps - d2dx2_price[0]) < 1.0e-4);
@@ -619,8 +620,8 @@ TEST_CASE("full-sleef-pricer-test", "[pricer]") {
 
     p.set_market_data(sigma[0], t[0], tau[0], r[0], s[0]);
 
-    init_sleef_pricer();
-    prepare_sleef_pricer(64, s, sigma, t, tau, r,
+    init_tw_pricer();
+    prepare_tw_pricer(64, s, sigma, t, tau, r,
                          sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep);
 
 
@@ -630,7 +631,7 @@ TEST_CASE("full-sleef-pricer-test", "[pricer]") {
             long_short[i] = 1;
         }
         // test long call price
-        full_sleef_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep, price, ddx_price,
+        full_tw_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep, price, ddx_price,
                           d2dx2_price);
         FLOAT reference_pricer_value = p.compute_call_price(x[0]);
         REQUIRE(abs(reference_pricer_value - price[0]) < 1.0e-8);
@@ -642,7 +643,7 @@ TEST_CASE("full-sleef-pricer-test", "[pricer]") {
             long_short[i] = -1;
         }
         // test long call price
-        full_sleef_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep, price, ddx_price,
+        full_tw_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep, price, ddx_price,
                           d2dx2_price);
         FLOAT reference_pricer_value = p.compute_call_price(x[0]);
         REQUIRE(abs(reference_pricer_value + price[0]) < 1.0e-8);
@@ -654,7 +655,7 @@ TEST_CASE("full-sleef-pricer-test", "[pricer]") {
             long_short[i] = 1;
         }
         // test long call price
-        full_sleef_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep, price, ddx_price,
+        full_tw_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep, price, ddx_price,
                           d2dx2_price);
         FLOAT reference_pricer_value = p.compute_put_price(x[0]);
         REQUIRE(abs(reference_pricer_value - price[0]) < 1.0e-8);
@@ -666,7 +667,7 @@ TEST_CASE("full-sleef-pricer-test", "[pricer]") {
             long_short[i] = -1;
         }
         // test long call price
-        full_sleef_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep, price, ddx_price,
+        full_tw_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep, price, ddx_price,
                           d2dx2_price);
         FLOAT reference_pricer_value = p.compute_put_price(x[0]);
         REQUIRE(abs(reference_pricer_value + price[0]) < 1.0e-8);
@@ -678,7 +679,7 @@ TEST_CASE("full-sleef-pricer-test", "[pricer]") {
             long_short[i] = 1;
         }
         // test long call price
-        full_sleef_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep, price, ddx_price,
+        full_tw_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep, price, ddx_price,
                           d2dx2_price);
         FLOAT reference_pricer_value1 = p.compute_call_price(x[0]);
         FLOAT reference_pricer_value2 = p.compute_call_price(x[0] + eps);
@@ -692,7 +693,7 @@ TEST_CASE("full-sleef-pricer-test", "[pricer]") {
             long_short[i] = -1;
         }
         // test long call price
-        full_sleef_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep, price, ddx_price,
+        full_tw_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep, price, ddx_price,
                           d2dx2_price);
         FLOAT reference_pricer_value1 = p.compute_call_price(x[0]);
         FLOAT reference_pricer_value2 = p.compute_call_price(x[0] + eps);
@@ -707,7 +708,7 @@ TEST_CASE("full-sleef-pricer-test", "[pricer]") {
             long_short[i] = 1;
         }
         // test long call price
-        full_sleef_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep, price, ddx_price,
+        full_tw_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep, price, ddx_price,
                           d2dx2_price);
         FLOAT reference_pricer_value1 = p.compute_put_price(x[0]);
         FLOAT reference_pricer_value2 = p.compute_put_price(x[0] + eps);
@@ -721,7 +722,7 @@ TEST_CASE("full-sleef-pricer-test", "[pricer]") {
             long_short[i] = -1;
         }
         // test long call price
-        full_sleef_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep, price, ddx_price,
+        full_tw_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep, price, ddx_price,
                           d2dx2_price);
         FLOAT reference_pricer_value1 = p.compute_put_price(x[0]);
         FLOAT reference_pricer_value2 = p.compute_put_price(x[0] + eps);
@@ -735,11 +736,11 @@ TEST_CASE("full-sleef-pricer-test", "[pricer]") {
             long_short[i] = 1;
         }
         // test long call price
-        full_sleef_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep, price, ddx_price,
+        full_tw_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep, price, ddx_price,
                           d2dx2_price);
 
         for (UINT64 i = 0; i < 64; i++) x[i] += eps;
-        full_sleef_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep, price, ddx_price2,
+        full_tw_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep, price, ddx_price2,
                           d2dx2_price);
         for (UINT64 i = 0; i < 64; i++) x[i] -= eps;
 
@@ -752,11 +753,11 @@ TEST_CASE("full-sleef-pricer-test", "[pricer]") {
             long_short[i] = -1;
         }
         // test long call price
-        full_sleef_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep, price, ddx_price,
+        full_tw_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep, price, ddx_price,
                           d2dx2_price);
 
         for (UINT64 i = 0; i < 64; i++) x[i] += eps;
-        full_sleef_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep, price, ddx_price2,
+        full_tw_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep, price, ddx_price2,
                           d2dx2_price);
         for (UINT64 i = 0; i < 64; i++) x[i] -= eps;
 
@@ -769,11 +770,11 @@ TEST_CASE("full-sleef-pricer-test", "[pricer]") {
             long_short[i] = 1;
         }
         // test long call price
-        full_sleef_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep, price, ddx_price,
+        full_tw_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep, price, ddx_price,
                           d2dx2_price);
 
         for (UINT64 i = 0; i < 64; i++) x[i] += eps;
-        full_sleef_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep, price, ddx_price2,
+        full_tw_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep, price, ddx_price2,
                           d2dx2_price);
         for (UINT64 i = 0; i < 64; i++) x[i] -= eps;
 
@@ -786,11 +787,11 @@ TEST_CASE("full-sleef-pricer-test", "[pricer]") {
             long_short[i] = -1;
         }
         // test long call price
-        full_sleef_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep, price, ddx_price,
+        full_tw_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep, price, ddx_price,
                           d2dx2_price);
 
         for (UINT64 i = 0; i < 64; i++) x[i] += eps;
-        full_sleef_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep, price, ddx_price2,
+        full_tw_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep, price, ddx_price2,
                           d2dx2_price);
         for (UINT64 i = 0; i < 64; i++) x[i] -= eps;
 

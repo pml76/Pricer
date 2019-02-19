@@ -20,6 +20,8 @@
 #ifndef PRICER_PRICER_BASE_H
 #define PRICER_PRICER_BASE_H
 
+#include <stdint.h>
+
 
 #define ALIGN_TO 64
 

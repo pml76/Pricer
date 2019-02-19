@@ -159,6 +159,7 @@ extern const double rempitabdp[];
 //
 
 #include <math/pricers/pricer-base.h>
+#include <pricer-renamer.h>
 #include <tgmath.h>
 
 #include <omp.h>
@@ -176,7 +177,7 @@ vdouble xsqrt(vdouble d);
 vdouble xerfc_u15(vdouble a);
 
 
-void init_sleef_pricer() {
+void init_tw_pricer() {
     ln_of_2 = vcast_vd_d(log(2.));
     msqrt2 = vcast_vd_d(-sqrt(2));
     one = vcast_vd_d(1.);
@@ -189,7 +190,7 @@ void init_sleef_pricer() {
 }
 
 
-void prepare_sleef_pricer(
+void prepare_tw_pricer(
         UINT64 n,
         Real_Ptr s_,                 /// [in] future price
         Real_Ptr sigma_,             /// [in] vola
@@ -269,7 +270,7 @@ void prepare_sleef_pricer(
 
 }
 
-void sleef_pricer(
+void tw_pricer(
         UINT64 n,
         Real_Ptr long_short_,     // 1 == long option // -1 == short option
         Real_Ptr put_call_,       // -1 == put // 1 == call
@@ -342,7 +343,7 @@ void sleef_pricer(
 }
 
 
-void ddx_sleef_pricer(
+void ddx_tw_pricer(
         UINT64 n,
         Real_Ptr long_short_,     // 1 == long option // -1 == short option
         Real_Ptr put_call_,       // -1 == put // 1 == call
@@ -385,7 +386,7 @@ void ddx_sleef_pricer(
 }
 
 
-void d2dx2_sleef_pricer(
+void d2dx2_tw_pricer(
         UINT64 n,
         Real_Ptr long_short_,
         Real_Ptr s_,
@@ -433,7 +434,7 @@ void d2dx2_sleef_pricer(
 
 }
 
-void full_sleef_pricer(
+void full_tw_pricer(
         UINT64 n,
         Real_Ptr long_short_,     // 1 == long option // -1 == short option
         Real_Ptr put_call_,       // -1 == put // 1 == call
@@ -521,7 +522,7 @@ void full_sleef_pricer(
 }
 
 
-void computeTargetValues(
+void compute_tw_strikes_from_premiums(
         UINT64 n,
         Real_Ptr long_short_,        // 1 == long option // -1 == short option
         Real_Ptr put_call_,          // -1 == put // 1 == call

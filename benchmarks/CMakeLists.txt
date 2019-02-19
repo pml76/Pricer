@@ -15,6 +15,7 @@ set(TARGET_PRICER_BENCHMARK_SOURCES
 include_directories(
         ./
         ../src/
+        ${CMAKE_BINARY_DIR}
         $ENV{SPACK_TRANSITIVE_INCLUDE_PATH}
         ${MKL_INCLUDE_DIRS})
 
