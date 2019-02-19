@@ -196,7 +196,7 @@ TEST_CASE("pricer-class equals sleef-pricer (short put)", "[pricer]") {
 }
 
 
-TEST_CASE("pricer-class equals ddx-sleef-pricer (long call)", "[pricer]") {
+TEST_CASE("pricer-class equals ddx-tw-pricer (long call)", "[pricer]") {
 
     DECLARE_AND_DEFINE(FLOAT, r, 0.01)
     DECLARE_AND_DEFINE(FLOAT, s, 70.)
@@ -241,7 +241,7 @@ TEST_CASE("pricer-class equals ddx-sleef-pricer (long call)", "[pricer]") {
 }
 
 
-TEST_CASE("pricer-class equals ddx-sleef-pricer (short call)", "[pricer]") {
+TEST_CASE("pricer-class equals ddx-tw-pricer (short call)", "[pricer]") {
 
     DECLARE_AND_DEFINE(FLOAT, r, 0.01)
     DECLARE_AND_DEFINE(FLOAT, s, 70.)
@@ -286,7 +286,7 @@ TEST_CASE("pricer-class equals ddx-sleef-pricer (short call)", "[pricer]") {
 }
 
 
-TEST_CASE("pricer-class equals ddx-sleef-pricer (long put)", "[pricer]") {
+TEST_CASE("pricer-class equals ddx-tw-pricer (long put)", "[pricer]") {
 
     DECLARE_AND_DEFINE(FLOAT, r, 0.01)
     DECLARE_AND_DEFINE(FLOAT, s, 70.)
@@ -331,7 +331,7 @@ TEST_CASE("pricer-class equals ddx-sleef-pricer (long put)", "[pricer]") {
 }
 
 
-TEST_CASE("pricer-class equals ddx-sleef-pricer (short put)", "[pricer]") {
+TEST_CASE("pricer-class equals ddx-tw-pricer (short put)", "[pricer]") {
 
     DECLARE_AND_DEFINE(FLOAT, r, 0.01)
     DECLARE_AND_DEFINE(FLOAT, s, 70.)
@@ -376,7 +376,7 @@ TEST_CASE("pricer-class equals ddx-sleef-pricer (short put)", "[pricer]") {
 }
 
 
-TEST_CASE("d2dx2_pricer equals ddx-sleef-pricer diff-quot (long call)", "[pricer]") {
+TEST_CASE("d2dx2_pricer equals ddx-tw-pricer diff-quot (long call)", "[pricer]") {
 
     DECLARE_AND_DEFINE(FLOAT, r, 0.01)
     DECLARE_AND_DEFINE(FLOAT, s, 70.)
@@ -429,7 +429,7 @@ TEST_CASE("d2dx2_pricer equals ddx-sleef-pricer diff-quot (long call)", "[pricer
 
 }
 
-TEST_CASE("d2dx2_pricer equals ddx-sleef-pricer diff-quot (long put)", "[pricer]") {
+TEST_CASE("d2dx2_pricer equals ddx-tw-pricer diff-quot (long put)", "[pricer]") {
 
     DECLARE_AND_DEFINE(FLOAT, r, 0.01)
     DECLARE_AND_DEFINE(FLOAT, s, 70.)
@@ -483,7 +483,7 @@ TEST_CASE("d2dx2_pricer equals ddx-sleef-pricer diff-quot (long put)", "[pricer]
 }
 
 
-TEST_CASE("d2dx2_pricer equals ddx-sleef-pricer diff-quot (short call)", "[pricer]") {
+TEST_CASE("d2dx2_pricer equals ddx-tw-pricer diff-quot (short call)", "[pricer]") {
 
     DECLARE_AND_DEFINE(FLOAT, r, 0.01)
     DECLARE_AND_DEFINE(FLOAT, s, 70.)
@@ -536,7 +536,7 @@ TEST_CASE("d2dx2_pricer equals ddx-sleef-pricer diff-quot (short call)", "[price
 
 }
 
-TEST_CASE("d2dx2_pricer equals ddx-sleef-pricer diff-quot (short put)", "[pricer]") {
+TEST_CASE("d2dx2_pricer equals ddx-tw-pricer diff-quot (short put)", "[pricer]") {
 
     DECLARE_AND_DEFINE(FLOAT, r, 0.01)
     DECLARE_AND_DEFINE(FLOAT, s, 70.)
@@ -590,7 +590,7 @@ TEST_CASE("d2dx2_pricer equals ddx-sleef-pricer diff-quot (short put)", "[pricer
 }
 
 
-TEST_CASE("full-sleef-pricer-test", "[pricer]") {
+TEST_CASE("full-tw-pricer-test", "[pricer]") {
 
     DECLARE_AND_DEFINE(FLOAT, r, 0.01)
     DECLARE_AND_DEFINE(FLOAT, s, 70.)
