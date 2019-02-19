@@ -151,4 +151,8 @@ endif ()
 
 if (COMPILER_SUPPORTS_OPENMP)
     message(STATUS "OPENMP supported")
+    list(APPEND CMAKE_C_FLAGS ${OpenMP_C_FLAGS})
+    list(APPEND CMAKE_CXX_FLAGS ${OpenMP_C_FLAGS})
 endif ()
+
+

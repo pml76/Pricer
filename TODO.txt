@@ -6,3 +6,4 @@
  - write black scholes pricing routines
 
  - Documentation of the interface / dependencies
+ - Overhaul compiler flags

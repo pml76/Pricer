@@ -105,6 +105,7 @@ set( COMPUTE_TW_STRIKES_FROM_PREMIUMS_ARGUMENT_TYPES
         Int32_Ptr
         Real_Ptr
         Real_Ptr
+        Real_Ptr
         UINT64
         Real_Ptr
         Real_Ptr

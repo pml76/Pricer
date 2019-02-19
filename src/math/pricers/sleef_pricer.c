@@ -533,14 +533,15 @@ void compute_tw_strikes_from_premiums(
         Int32_Ptr to_structure,
         Real_Ptr offsets_,
         Real_Ptr prices_,
+        Real_Ptr x_tmp_,
         UINT64 m,
         Real_Ptr premiums_,
         Real_Ptr instrument_prices_,
         Real_Ptr instrument_pricesl_,
         Real_Ptr instrument_pricesh_,
+        Real_Ptr x_,
         Real_Ptr xl_,
-        Real_Ptr xh_,
-        Real_Ptr x_) {
+        Real_Ptr xh_) {
 
 
     ASSUME(n % 64 == 0)
@@ -555,6 +556,7 @@ void compute_tw_strikes_from_premiums(
     ASSUME_ALIGNED(to_structure)
     ASSUME_ALIGNED(offsets_)
     ASSUME_ALIGNED(prices_)
+    ASSUME_ALIGNED(x_tmp_)
 
     ASSUME_ALIGNED(premiums_)
     ASSUME_ALIGNED(instrument_prices_)
@@ -592,7 +594,7 @@ void compute_tw_strikes_from_premiums(
             for (uint64_t i = n_begin; i < n_end; i += sizeof(vdouble) / sizeof(double)) {
 
                 xh = vadd_vd_vd_vd( vgather_vd_p_vi(xh_,vloadu_vi_p(&to_structure[i])), vload_vd_p(&offsets_[i]));
-                xh = vadd_vd_vd_vd( vgather_vd_p_vi(xh_,vloadu_vi_p(&to_structure[i])), vload_vd_p(&offsets_[i]));
+                xl = vadd_vd_vd_vd( vgather_vd_p_vi(xl_,vloadu_vi_p(&to_structure[i])), vload_vd_p(&offsets_[i]));
                 x = vdiv_vd_vd_vd(vadd_vd_vd_vd(xl,xh),two);
 
                 s = vload_vd_p(&s_[i]);
@@ -619,6 +621,7 @@ void compute_tw_strikes_from_premiums(
                 price = vmul_vd_vd_vd(vmul_vd_vd_vd(emrt, long_short), price);
 
                 vstore_v_p_vd(&prices_[i], price);
+                vstore_v_p_vd(&x_tmp_[i],x);
             }
 
 
@@ -637,10 +640,19 @@ void compute_tw_strikes_from_premiums(
             ///
             /// aggregate the prices and its first two derivatives
             ///
+            double d;
+
 #pragma omp for schedule(static)
             for (uint64_t i = 0; i < n; ++i) {
+
+                d = x_tmp_[i]-offsets_[i];
+
 #pragma omp atomic update
                 instrument_prices_[to_structure[i]] += prices_[i];
+
+#pragma omp atomic write
+                x_[to_structure[i]] = d;
+
             }
 
 #pragma omp barrier

@@ -585,6 +585,7 @@ TEST_CASE("compute_tw_tsrikes_from_premiums() --- (1)", "[pricer]") {
     DECLARE_AND_DEFINE(64,int32_t, to_structure, 0)
     DECLARE_AND_DEFINE(64,FLOAT, offsets, 0)
     DECLARE_AND_DEFINE(64,FLOAT, prices, 0)
+    DECLARE_AND_DEFINE(64,FLOAT, x_tmp, 0)
 
     DECLARE_AND_DEFINE(64,FLOAT, d1, 0)
     DECLARE_AND_DEFINE(64,FLOAT, d2, 0)
@@ -614,8 +615,8 @@ TEST_CASE("compute_tw_tsrikes_from_premiums() --- (1)", "[pricer]") {
     }
 
     compute_tw_strikes_from_premiums(
-            64,long_short, put_call, s, sigmaA2T2, sigmaAsqrtT, emrt, to_structure, offsets, prices,
-            64,premiums,instrument_prices, instrument_pricesh, instrument_pricesl, x, xh, xl);
+            64,long_short, put_call, s, sigmaA2T2, sigmaAsqrtT, emrt, to_structure, offsets, prices, x_tmp,
+            64,premiums,instrument_prices, instrument_pricesl, instrument_pricesh, x, xl, xh);
 
 }
 
