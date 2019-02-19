@@ -243,18 +243,19 @@ file(APPEND ${CMAKE_BINARY_DIR}/dispatcher.cc "}\n\n")
 
 
 foreach(SIMD ${PRICER_SUPPORTED_EXTENSIONS})
-    file(APPEND ${CMAKE_BINARY_DIR}/dispatcher.cc "#define IF_ARCH_${SIMD}(x) (cpuSupports${SIMD}()?x:nullptr);\n\n")
+    file(APPEND ${CMAKE_BINARY_DIR}/dispatcher.cc "#define IF_ARCH_${SIMD}(p,x) if(cpuSupports${SIMD}()){p=x;return;}\n\n")
 endforeach()
 
 foreach(FUNCTION_NAME ${FUNCTION_NAMES})
     file(APPEND ${CMAKE_BINARY_DIR}/dispatcher.cc "${FUNCTION_NAME}_t ${FUNCTION_NAME}_v;\n\n")
 
     file(APPEND ${CMAKE_BINARY_DIR}/dispatcher.cc "${FUNCTION_NAME}_t::${FUNCTION_NAME}_t(){\n")
+    file(APPEND ${CMAKE_BINARY_DIR}/dispatcher.cc "p=nullptr;\n\n")
 
     foreach(SIMD ${PRICER_SUPPORTED_EXTENSIONS})
         string(TOLOWER ${SIMD} vecarch)
         file(APPEND ${CMAKE_BINARY_DIR}/dispatcher.cc "#ifdef ENABLE_${SIMD}\n" )
-        file(APPEND ${CMAKE_BINARY_DIR}/dispatcher.cc "p = IF_ARCH_${SIMD}(${FUNCTION_NAME}_${vecarch})\n")
+        file(APPEND ${CMAKE_BINARY_DIR}/dispatcher.cc "IF_ARCH_${SIMD}(p,${FUNCTION_NAME}_${vecarch})\n")
         file(APPEND ${CMAKE_BINARY_DIR}/dispatcher.cc "#endif\n\n" )
     endforeach()
     file(APPEND ${CMAKE_BINARY_DIR}/dispatcher.cc "}\n\n")
