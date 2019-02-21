@@ -618,6 +618,12 @@ TEST_CASE("compute_tw_tsrikes_from_premiums() --- (1)", "[pricer]") {
             64,long_short, put_call, s, sigmaA2T2, sigmaAsqrtT, emrt, to_structure, offsets, prices, x_tmp,
             64,premiums,instrument_prices, instrument_pricesl, instrument_pricesh, x, xl, xh);
 
+    tw_pricer(64, long_short, put_call, s, xl, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, instrument_pricesl);
+    tw_pricer(64, long_short, put_call, s, xh, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, instrument_pricesh);
+
+    REQUIRE(abs(instrument_pricesl[0] - premiums[0]) < 1.0e-4);
+    REQUIRE(abs(instrument_pricesh[0] - premiums[0]) < 1.0e-4);
+
 }
 
 TEST_CASE("d2dx2_pricer equals ddx-tw-pricer diff-quot (short put)", "[pricer]") {
