@@ -12,11 +12,11 @@ set(TARGET_PRICER_MKL_HEADERS
         )
 
 set(TARGET_PRICER_SOURCES
-        math/pricers/sleef_pricer.c)
+        math/pricers/sleef_pricer.c memory/memory.cc math/IO/R/R-IO.cc)
 
 set(TARGET_PRICER_HEADERS
         math/pricers/pricer-base.h
-        math/pricers/sleef_pricer.h)
+        math/pricers/sleef_pricer.h memory/memory.h math/IO/R/R-IO.h)
 
 
 set(FUNCTION_NAMES

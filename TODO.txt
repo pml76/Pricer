@@ -7,3 +7,7 @@
 
  - Documentation of the interface / dependencies
  - Overhaul compiler flags
+
+ - Write R interface
+
+
