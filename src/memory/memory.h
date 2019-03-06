@@ -46,7 +46,12 @@ namespace Pricer {
 
     class pricer_context {
     public:
-        pricer_context(uint64_t flags, uint64_t n_max, uint64_t inc = 1024 * 1024 * ALIGN_TO);
+        pricer_context(uint64_t flags, uint64_t n_max, uint64_t inc = 1024 * 1024 * ALIGN_TO) :
+            m__flags(flags),
+            m__n(0),
+            m__inc(inc) {
+                alloc_mem(n_max);
+        }
 
         void add_data(uint64_t n, Real_Ptr s, Real_Ptr sigma, Real_Ptr t, Real_Ptr tau, Real_Ptr r);
 
@@ -55,11 +60,13 @@ namespace Pricer {
 #define PRICER_FLAG_TW_PRICER 1
 
         void alloc_mem(uint64_t n);
+        void inc_mem();
 
 
         uint64_t m__flags;
         uint64_t m__n_max;
         uint64_t m__n;
+        uint64_t m__inc;
 
         Real_Ptr  m__price;
         Real_Ptr m__d1;
