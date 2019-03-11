@@ -324,7 +324,6 @@ set_target_properties(${TARGET_LIBPRICER} PROPERTIES
         ${COMMON_TARGET_PROPERTIES}
         )
 
-
 foreach(SIMD ${PRICER_SUPPORTED_EXTENSIONS})
     if(COMPILER_SUPPORTS_${SIMD})
         target_compile_definitions( ${TARGET_LIBPRICER} PRIVATE ENABLE_${SIMD}=1)
@@ -332,6 +331,7 @@ foreach(SIMD ${PRICER_SUPPORTED_EXTENSIONS})
     endif()
 endforeach()
 
+# target_link_libraries(${TARGET_LIBPRICER} ${TARGET_ASMLIB})
 
 
 

@@ -98,3 +98,4 @@ set(ASMLIB_SOURCES
         ${CMAKE_SOURCE_DIR}/3rdParty/asmlib/asm/cachesize64.asm)
 
 add_library( ${TARGET_ASMLIB} STATIC ${ASMLIB_SOURCES})
+

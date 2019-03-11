@@ -25,6 +25,11 @@ set(CMAKE_PREFIX_PATH "S{CMAKE_PREFIX_PATH} S{CMAKE_SOURCE_DIR}/cmake/")
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
 
+#
+# shared libraries are not supported by libasm ... so make sure that we create a  static library
+#
+set(BUILD_SHARED_LIBS OFF)
+
 include(cmake/CCache.cmake)
 
 

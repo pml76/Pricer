@@ -18,6 +18,8 @@
 #include <memory/context.h>
 #include <cstdint>
 
+#include "../../3rdParty/asmlib/asmlib.h"
+
 #define MEM_ALLOC(type,p) {m__n_max = Private::allocate_memory<FLOAT>(n * sizeof(type), &p); if (m__n_max == 0) return;}
 #define COND_MEM_ALLOC(flag,type,p) {if(m__flags & flag) MEM_ALLOC(type,p)}
 
@@ -40,5 +42,6 @@ namespace Pricer {
         COND_MEM_ALLOC(PRICER_FLAG_TW_PRICER, FLOAT, m__d2)
         COND_MEM_ALLOC(PRICER_FLAG_TW_PRICER, FLOAT, m__price)
 
+        A_memcpy(m__d2, m__d1, 40);
     }
 }

@@ -35,4 +35,5 @@ target_link_libraries(${TARGET_PRICER_TEST}
         ${Arb_LIBRARIES}
         sleef
         ${TARGET_LIBPRICER}
+        ${TARGET_ASMLIB}
         Catch2::Catch2)
