@@ -27,6 +27,31 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
 include(cmake/CCache.cmake)
 
+
+
+#
+# library of routines for quick memory management
+set(TARGET_ASMLIB asmlib)
+
+#
+# needed to build asmlib
+set(TARGET_OBJCONV objconv)
+
+#
+# builds libpricer
+set(TARGET_LIBPRICER "pricer")
+set(PRICER_VERSION 0)
+set(PRICER_SOVERSION 1)
+
+set(TARGET_LIBPRICER_MKL "pricer_mkl")
+
+# builds the test-executable
+set(TARGET_PRICER_TEST "pricer-test")
+
+# builds the benchmark executable
+set(TARGET_PRICER_BENCHMARK "pricer-benchmark")
+
+
 # add the third party projects ....
 add_subdirectory("3rdParty" "3rdParty")
 
@@ -64,19 +89,6 @@ ENDIF ("${isSystemDir}" STREQUAL "-1")
 # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -fopenmp -Ofast -march=native -fno-omit-frame-pointer -ffp-contract=off -fno-math-errno -fno-trapping-math -O3 -fPIC")
 
 
-#
-# builds libpricer
-set(TARGET_LIBPRICER "pricer")
-set(PRICER_VERSION 0)
-set(PRICER_SOVERSION 1)
-
-set(TARGET_LIBPRICER_MKL "pricer_mkl")
-
-# builds the test-executable
-set(TARGET_PRICER_TEST "pricer-test")
-
-# builds the benchmark executable
-set(TARGET_PRICER_BENCHMARK "pricer-benchmark")
 
 
 add_subdirectory(src)

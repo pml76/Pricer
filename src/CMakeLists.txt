@@ -12,11 +12,11 @@ set(TARGET_PRICER_MKL_HEADERS
         )
 
 set(TARGET_PRICER_SOURCES
-        math/pricers/sleef_pricer.c memory/memory.cc math/IO/R/R-IO.cc)
+        math/pricers/sleef_pricer.c memory/context.cc math/IO/R/R-IO.cc)
 
 set(TARGET_PRICER_HEADERS
         math/pricers/pricer-base.h
-        math/pricers/sleef_pricer.h memory/memory.h math/IO/R/R-IO.h)
+        math/pricers/sleef_pricer.h memory/context.h math/IO/R/R-IO.h)
 
 
 set(FUNCTION_NAMES
@@ -297,26 +297,43 @@ foreach(SIMD ${PRICER_SUPPORTED_EXTENSIONS})
     endif()
 endforeach()
 
+
+
+
+set(MEMORY_SOURCES  memory/context.cc)
+set(MEMORY_HEADERS ${CMAKE_SOURCE_DIR}/3rdParty/asmlib/asmlib.h memory/context.h)
+
 add_library(${TARGET_LIBPRICER}
         ${CMAKE_BINARY_DIR}/dispatcher.cc
         ${CMAKE_BINARY_DIR}/pricer.h
         ${TARGET_PRICER_MKL_SOURCES}
-        ${TARGET_PRICER_MKL_HEADERS} )
+        ${TARGET_PRICER_MKL_HEADERS}
+        ${MEMORY_SOURSES}
+        ${MEMORY_HEADERS}
+        ${ASMLIB_SOURCES})
+target_include_directories(${TARGET_LIBPRICER} PRIVATE
+        ./
+        $ENV{SPACK_TRANSITIVE_INCLUDE_PATH}
+        ${CMAKE_BINARY_DIR}
+        ${MKL_INCLUDE_DIRS}
+        ${CMAKE_SOURCE_DIR}/3rdParty/asmlib/
+        ${CMAKE_BINARY_DIR} )
+set_target_properties(${TARGET_LIBPRICER} PROPERTIES
+        VERSION ${PRICER_VERSION}
+        SOVERSION ${PRICER_SOVERSION}
+        ${COMMON_TARGET_PROPERTIES}
+        )
+
 
 foreach(SIMD ${PRICER_SUPPORTED_EXTENSIONS})
     if(COMPILER_SUPPORTS_${SIMD})
         target_compile_definitions( ${TARGET_LIBPRICER} PRIVATE ENABLE_${SIMD}=1)
-        target_include_directories(${TARGET_LIBPRICER} PRIVATE
-                ./
-                ${CMAKE_BINARY_DIR} )
-        set_target_properties(${TARGET_LIBPRICER} PROPERTIES
-                VERSION ${PRICER_VERSION}
-                SOVERSION ${PRICER_SOVERSION}
-                ${COMMON_TARGET_PROPERTIES}
-                )
         target_link_libraries(${TARGET_LIBPRICER} ${TARGET_LIBPRICER}_${SIMD})
     endif()
 endforeach()
+
+
+
 
 
 #add_compile_definitions(ENABLE_AVX=1)
