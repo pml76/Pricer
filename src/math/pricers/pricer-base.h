@@ -32,6 +32,12 @@ extern "C" {
 #endif
 
 #ifdef __GNUC__
+
+#ifdef INLINE
+#undef INLINE
+#endif
+#define INLINE __attribute__((always_inline))
+
 #ifdef ASSUME_ALIGNED
 #undef ASSUME_ALIGNED
 #endif
@@ -60,6 +66,12 @@ extern "C" {
 
 #ifdef __clang__
 
+#ifdef INLINE
+#undef INLINE
+#endif
+#define INLINE __attribute__((always_inline))
+
+
 #ifdef ASSUME_ALIGNED
 #undef ASSUME_ALIGNED
 #endif
@@ -82,6 +94,12 @@ extern "C" {
 #endif
 
 #ifdef __INTEL_COMPILER
+
+#ifdef INLINE
+#undef INLINE
+#endif
+#define INLINE __attribute__((always_inline))
+
 
 #ifdef ASSUME_ALIGNED
 #undef ASSUME_ALIGNED

@@ -53,6 +53,10 @@ namespace Pricer {
                 alloc_mem(n_max);
         }
 
+        ~pricer_context() {
+            dealloc_mem();
+        };
+
         void add_data(uint64_t n, Real_Ptr s, Real_Ptr sigma, Real_Ptr t, Real_Ptr tau, Real_Ptr r);
 
     private:
@@ -60,7 +64,9 @@ namespace Pricer {
 #define PRICER_FLAG_TW_PRICER 1
 
         void alloc_mem(uint64_t n);
-        void inc_mem();
+        void dealloc_mem();
+
+        void inc_mem(uint64_t n);
 
 
         uint64_t m__flags;
@@ -68,7 +74,7 @@ namespace Pricer {
         uint64_t m__n;
         uint64_t m__inc;
 
-        Real_Ptr  m__price;
+        Real_Ptr m__price;
         Real_Ptr m__d1;
         Real_Ptr m__d2;
         Real_Ptr m__long_short;
