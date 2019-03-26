@@ -17,17 +17,17 @@
 
 #include <memory/context.h>
 #include <cstdint>
+#include <cstring>
 
-#include "../../3rdParty/asmlib/asmlib.h"
 
 #define MEM_ALLOC(type,p) {m__n_max = Private::allocate_memory<type>(n * sizeof(type), &p); if (m__n_max == 0) return;}
-#define COND_MEM_ALLOC(flag,type,p) {if(m__flags & flag == flag) MEM_ALLOC(type,p)}
+#define COND_MEM_ALLOC(flag,type,p) {if((m__flags & flag) == flag) MEM_ALLOC(type,p)}
 
-#define MEM_REALLOC(type,type2, p) {type2 tmp; m__n_max=Private::allocate_memory<type>(n*sizeof(type),&tmp); if(m__n_max==0); A_memcpy(tmp,p,m__n); p=tmp;}
-#define COND_MEM_REALLOC(flag, type, type2, p) {if(m__flags & flag == flag) MEM_REALLOC(type,type2,p)}
+#define MEM_REALLOC(type,type2, p) {type2 tmp; m__n_max=Private::allocate_memory<type>(n*sizeof(type),&tmp); if(m__n_max==0); std::memcpy(tmp,p,m__n); p=tmp;}
+#define COND_MEM_REALLOC(flag, type, type2, p) {if((m__flags & flag) == flag) MEM_REALLOC(type,type2,p)}
 
 #define MEM_DEALLOC(type, p) {Private::deallocate_memory<type>(p);};
-#define COND_MEM_DEALLOC(flags, type, p) {if(m__flags & flags == flags) MEM_DEALLOC(type, p)}
+#define COND_MEM_DEALLOC(flags, type, p) {if((m__flags & flags) == flags) MEM_DEALLOC(type, p)}
 
 namespace Pricer {
     void pricer_context::alloc_mem(uint64_t n) {
@@ -47,6 +47,7 @@ namespace Pricer {
         COND_MEM_ALLOC(PRICER_FLAG_TW_PRICER, FLOAT, m__d1)
         COND_MEM_ALLOC(PRICER_FLAG_TW_PRICER, FLOAT, m__d2)
         COND_MEM_ALLOC(PRICER_FLAG_TW_PRICER, FLOAT, m__price)
+        COND_MEM_ALLOC(PRICER_FLAG_TW_PRICER, FLOAT, m__x)
 
     }
 
@@ -67,10 +68,11 @@ namespace Pricer {
         COND_MEM_DEALLOC(PRICER_FLAG_TW_PRICER, FLOAT, m__d1)
         COND_MEM_DEALLOC(PRICER_FLAG_TW_PRICER, FLOAT, m__d2)
         COND_MEM_DEALLOC(PRICER_FLAG_TW_PRICER, FLOAT, m__price)
+        COND_MEM_DEALLOC(PRICER_FLAG_TW_PRICER, FLOAT, m__x)
 
     }
 
-    void pricer_context::inc_mem(uint64_t n) {
+    void pricer_context::realloc_mem(uint64_t n) {
         MEM_REALLOC(FLOAT, Real_Ptr , m__s)
         MEM_REALLOC(FLOAT, Real_Ptr , m__sigma)
         MEM_REALLOC(FLOAT, Real_Ptr , m__t)
@@ -87,19 +89,10 @@ namespace Pricer {
         COND_MEM_REALLOC(PRICER_FLAG_TW_PRICER, FLOAT, Real_Ptr , m__d1)
         COND_MEM_REALLOC(PRICER_FLAG_TW_PRICER, FLOAT, Real_Ptr , m__d2)
         COND_MEM_REALLOC(PRICER_FLAG_TW_PRICER, FLOAT, Real_Ptr , m__price)
+        COND_MEM_REALLOC(PRICER_FLAG_TW_PRICER, FLOAT, Real_Ptr , m__x)
 
     }
 
-    void pricer_context::add_data(uint64_t n, Real_Ptr s, Real_Ptr sigma, Real_Ptr t, Real_Ptr tau, Real_Ptr r) {
-        if(m__n_max < m__n + n) {
-            inc_mem(m__n + n);
-        }
 
-        A_memcpy(&m__s[m__n], s, n);
-        A_memcpy(&m__sigma[m__n], sigma, n);
-        A_memcpy(&m__t[m__n], t, n);
-        A_memcpy(&m__tau[m__n], tau, n);
-        A_memcpy(&m__r[m__n],r, n);
-        m__n += n;
-    }
+
 }

@@ -26,7 +26,7 @@
 
 #include <math/pricers/sleef_pricer.h>
 
-#include <pricer.h>
+#include <pricer-dispatcher.h>
 
 
 typedef double *__restrict__ __attribute__((aligned(ALIGN_TO))) Real_Ptr;

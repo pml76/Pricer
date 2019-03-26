@@ -44,12 +44,15 @@ namespace Pricer {
         }
     }
 
+#define DEFINE_VARIABLE(type,x) private:type m__ ## x; public:type get_ ## x() const{return m__ ## x;}
+
+#define PRICER_FLAG_TW_PRICER 1
     class pricer_context {
+
     public:
-        pricer_context(uint64_t flags, uint64_t n_max, uint64_t inc = 1024 * 1024 * ALIGN_TO) :
+        pricer_context(uint64_t flags, uint64_t n_max) :
             m__flags(flags),
-            m__n(0),
-            m__inc(inc) {
+            m__n(0) {
                 alloc_mem(n_max);
         }
 
@@ -57,38 +60,35 @@ namespace Pricer {
             dealloc_mem();
         };
 
-        void add_data(uint64_t n, Real_Ptr s, Real_Ptr sigma, Real_Ptr t, Real_Ptr tau, Real_Ptr r);
+        void realloc_mem(uint64_t n);
 
     private:
-
-#define PRICER_FLAG_TW_PRICER 1
 
         void alloc_mem(uint64_t n);
         void dealloc_mem();
 
-        void inc_mem(uint64_t n);
 
 
-        uint64_t m__flags;
-        uint64_t m__n_max;
-        uint64_t m__n;
-        uint64_t m__inc;
+        DEFINE_VARIABLE(uint64_t,flags)
+        DEFINE_VARIABLE(uint64_t, n_max)
+        DEFINE_VARIABLE(uint64_t, n)
 
-        Real_Ptr m__price;
-        Real_Ptr m__d1;
-        Real_Ptr m__d2;
-        Real_Ptr m__long_short;
-        Real_Ptr m__put_call;
-        Real_Ptr m__s;
-        Real_Ptr m__sigma;
-        Real_Ptr m__t;
-        Real_Ptr m__tau;
-        Real_Ptr m__r;
-        Real_Ptr m__sigmaA;
-        Real_Ptr m__sigmaA2T2;
-        Real_Ptr m__sigmaAsqrtT;
-        Real_Ptr m__emrt;
-        Real_Ptr m__d2dx2_prep;
+        DEFINE_VARIABLE(Real_Ptr, price)
+        DEFINE_VARIABLE(Real_Ptr, d1)
+        DEFINE_VARIABLE(Real_Ptr, d2)
+        DEFINE_VARIABLE(Real_Ptr, long_short)
+        DEFINE_VARIABLE(Real_Ptr, put_call)
+        DEFINE_VARIABLE(Real_Ptr, x)
+        DEFINE_VARIABLE(Real_Ptr, s)
+        DEFINE_VARIABLE(Real_Ptr, sigma)
+        DEFINE_VARIABLE(Real_Ptr, t)
+        DEFINE_VARIABLE(Real_Ptr, tau)
+        DEFINE_VARIABLE(Real_Ptr, r)
+        DEFINE_VARIABLE(Real_Ptr, sigmaA)
+        DEFINE_VARIABLE(Real_Ptr, sigmaA2T2)
+        DEFINE_VARIABLE(Real_Ptr, sigmaAsqrtT)
+        DEFINE_VARIABLE(Real_Ptr, emrt)
+        DEFINE_VARIABLE(Real_Ptr, d2dx2_prep)
     };
 
 }

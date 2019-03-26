@@ -19,7 +19,7 @@
 #include <catch2/catch.hpp>
 #include <math/pricers/sleef_pricer.h>
 #include <math/pricers/Pricer.h>
-#include <pricer.h>
+#include <pricer-dispatcher.h>
 
 
 #define DECLARE_AND_DEFINE(n, type, x, y) \
