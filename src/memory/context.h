@@ -40,20 +40,24 @@ namespace Pricer {
 
         template <typename T> inline
         void deallocate_memory(T *ptr) {
-            free(ptr);
+            if(ptr) {
+                free(ptr);
+            }
+            ptr = nullptr;
         }
     }
 
-#define DEFINE_VARIABLE(type,x) private:type m__ ## x; public:type get_ ## x() const{return m__ ## x;}
+#define DEFINE_VARIABLE(type,x) private:type m__ ## x; public:inline type& INLINE get_ ## x() {return m__ ## x;}
 
-#define PRICER_FLAG_TW_PRICER 1
+#define PRICER_FLAG_TW_PRICER                           1
+#define PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES   2
     class pricer_context {
 
     public:
-        pricer_context(uint64_t flags, uint64_t n_max) :
+        pricer_context(uint64_t flags, uint64_t n_max, uint64_t m_max = 0) :
             m__flags(flags),
-            m__n(0) {
-                alloc_mem(n_max);
+            m__n(0), m__m(0) {
+                alloc_mem(n_max, m_max);
         }
 
         ~pricer_context() {
@@ -64,7 +68,7 @@ namespace Pricer {
 
     private:
 
-        void alloc_mem(uint64_t n);
+        void alloc_mem(uint64_t n, uint64_t m);
         void dealloc_mem();
 
 
@@ -73,7 +77,7 @@ namespace Pricer {
         DEFINE_VARIABLE(uint64_t, n_max)
         DEFINE_VARIABLE(uint64_t, n)
 
-        DEFINE_VARIABLE(Real_Ptr, price)
+        DEFINE_VARIABLE(Real_Ptr, prices)
         DEFINE_VARIABLE(Real_Ptr, d1)
         DEFINE_VARIABLE(Real_Ptr, d2)
         DEFINE_VARIABLE(Real_Ptr, long_short)
@@ -89,6 +93,21 @@ namespace Pricer {
         DEFINE_VARIABLE(Real_Ptr, sigmaAsqrtT)
         DEFINE_VARIABLE(Real_Ptr, emrt)
         DEFINE_VARIABLE(Real_Ptr, d2dx2_prep)
+
+        DEFINE_VARIABLE(Int32_Ptr, to_structure)
+        DEFINE_VARIABLE(Real_Ptr, offsets)
+
+        DEFINE_VARIABLE(uint64_t, m)
+        DEFINE_VARIABLE(uint64_t, m_max)
+        DEFINE_VARIABLE(Real_Ptr, premiums)
+        DEFINE_VARIABLE(Real_Ptr, instrument_prices)
+        DEFINE_VARIABLE(Real_Ptr, instrument_pricesl)
+        DEFINE_VARIABLE(Real_Ptr, instrument_pricesh)
+        DEFINE_VARIABLE(Real_Ptr, x_)
+        DEFINE_VARIABLE(Real_Ptr, xl_)
+        DEFINE_VARIABLE(Real_Ptr, xh_)
+
+
     };
 
 }

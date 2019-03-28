@@ -54,7 +54,7 @@ DECLARE_AND_DEFINE(double, r, 0.01)
     DECLARE_AND_DEFINE(FLOAT, d2, 0.)
 
     DECLARE_AND_DEFINE(FLOAT, price, 0.)
-    DECLARE_AND_DEFINE(UINT64, flags, 0)
+    DECLARE_AND_DEFINE(uint64_t , flags, 0)
 
 
     Pricer p;
@@ -101,7 +101,7 @@ TEST_CASE("pricer-class equals mkl-pricer (short call)", "[pricer]") {
     DECLARE_AND_DEFINE(FLOAT, d2, 0.)
 
     DECLARE_AND_DEFINE(FLOAT, price, 0.)
-    DECLARE_AND_DEFINE(UINT64, flags, 2)
+    DECLARE_AND_DEFINE(uint64_t , flags, 2)
 
 
     Pricer p;
@@ -148,7 +148,7 @@ TEST_CASE("pricer-class equals mkl-pricer (long put)", "[pricer]") {
     DECLARE_AND_DEFINE(FLOAT, d2, 0.)
 
     DECLARE_AND_DEFINE(FLOAT, price, 0.)
-    DECLARE_AND_DEFINE(UINT64, flags, 1)
+    DECLARE_AND_DEFINE(uint64_t , flags, 1)
 
 
     Pricer p;
@@ -194,7 +194,7 @@ TEST_CASE("pricer-class equals mkl-pricer (short put)", "[pricer]") {
     DECLARE_AND_DEFINE(FLOAT, d2, 0.)
 
     DECLARE_AND_DEFINE(FLOAT, price, 0.)
-    DECLARE_AND_DEFINE(UINT64, flags, 3)
+    DECLARE_AND_DEFINE(uint64_t , flags, 3)
 
 
     Pricer p;
@@ -242,7 +242,7 @@ TEST_CASE("pricer-class equals ddx-mkl-pricer (long call)", "[pricer]") {
     DECLARE_AND_DEFINE(FLOAT, d2, 0.)
 
     DECLARE_AND_DEFINE(FLOAT, price, 0.)
-    DECLARE_AND_DEFINE(UINT64, flags, 0)
+    DECLARE_AND_DEFINE(uint64_t , flags, 0)
 
     const FLOAT eps = 1.0e-10;
 
@@ -292,7 +292,7 @@ TEST_CASE("pricer-class equals ddx-mkl-pricer (short call)", "[pricer]") {
     DECLARE_AND_DEFINE(FLOAT, d2, 0.)
 
     DECLARE_AND_DEFINE(FLOAT, price, 0.)
-    DECLARE_AND_DEFINE(UINT64, flags, 2)
+    DECLARE_AND_DEFINE(uint64_t , flags, 2)
 
     const FLOAT eps = 1.0e-10;
 
@@ -341,7 +341,7 @@ TEST_CASE("pricer-class equals ddx-mkl-pricer (long put)", "[pricer]") {
     DECLARE_AND_DEFINE(FLOAT, d2, 0.)
 
     DECLARE_AND_DEFINE(FLOAT, price, 0.)
-    DECLARE_AND_DEFINE(UINT64, flags, 1)
+    DECLARE_AND_DEFINE(uint64_t , flags, 1)
 
     const FLOAT eps = 1.0e-10;
 
@@ -391,7 +391,7 @@ TEST_CASE("pricer-class equals ddx-mkl-pricer (short put)", "[pricer]") {
     DECLARE_AND_DEFINE(FLOAT, d2, 0.)
 
     DECLARE_AND_DEFINE(FLOAT, price, 0.)
-    DECLARE_AND_DEFINE(UINT64, flags, 3)
+    DECLARE_AND_DEFINE(uint64_t , flags, 3)
 
     const FLOAT eps = 1.0e-10;
 
@@ -443,7 +443,7 @@ TEST_CASE("d2dx2_pricer equals ddx-mkl-pricer diff-quot (long call)", "[pricer]"
     DECLARE_AND_DEFINE(FLOAT, d2, 0.)
 
     DECLARE_AND_DEFINE(FLOAT, price, 0.)
-    DECLARE_AND_DEFINE(UINT64, flags, 0)
+    DECLARE_AND_DEFINE(uint64_t , flags, 0)
     FLOAT eps = 1.0e-10;
 
     Pricer p;
@@ -501,7 +501,7 @@ TEST_CASE("d2dx2_pricer equals ddx-mkl-pricer diff-quot (short call)", "[pricer]
     DECLARE_AND_DEFINE(FLOAT, d2, 0.)
 
     DECLARE_AND_DEFINE(FLOAT, price, 0.)
-    DECLARE_AND_DEFINE(UINT64, flags, 2)
+    DECLARE_AND_DEFINE(uint64_t , flags, 2)
     FLOAT eps = 1.0e-10;
 
     Pricer p;
@@ -558,7 +558,7 @@ TEST_CASE("d2dx2_pricer equals ddx-mkl-pricer diff-quot (long put)", "[pricer]")
     DECLARE_AND_DEFINE(FLOAT, d2, 0.)
 
     DECLARE_AND_DEFINE(FLOAT, price, 0.)
-    DECLARE_AND_DEFINE(UINT64, flags, 1)
+    DECLARE_AND_DEFINE(uint64_t , flags, 1)
     FLOAT eps = 1.0e-10;
 
     Pricer p;
@@ -616,7 +616,7 @@ TEST_CASE("d2dx2_pricer equals ddx-mkl-pricer diff-quot (short put)", "[pricer]"
     DECLARE_AND_DEFINE(FLOAT, d2, 0.)
 
     DECLARE_AND_DEFINE(FLOAT, price, 0.)
-    DECLARE_AND_DEFINE(UINT64, flags, 3)
+    DECLARE_AND_DEFINE(uint64_t , flags, 3)
     FLOAT eps = 1.0e-10;
 
     Pricer p;

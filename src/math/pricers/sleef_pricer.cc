@@ -16,7 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
+#include <memory/context.h>
+#include <iostream>
 
 #include "misc.h"
 
@@ -190,7 +191,9 @@ void init_tw_pricer() {
 }
 
 
-void prepare_tw_pricer(
+void prepare_tw_pricer( Pricer::pricer_context context ) {
+
+/*
         UINT64 n,
         Real_Ptr s_,                 /// [in] future price
         Real_Ptr sigma_,             /// [in] vola
@@ -202,19 +205,20 @@ void prepare_tw_pricer(
         Real_Ptr sigmaAsqrtT_,      /// [out] sigmaA*sqrt(t)
         Real_Ptr emrt_,             /// [out] exp(-rt)/2
         Real_Ptr d2dx2_prep_) {
+*/
 
-    ASSUME(n % 64 == 0)
+    ASSUME(context.get_n() % 64 == 0)
 
-    ASSUME_ALIGNED(s_)
-    ASSUME_ALIGNED(sigma_)
-    ASSUME_ALIGNED(t_)
-    ASSUME_ALIGNED(tau_)
-    ASSUME_ALIGNED(r_)
-    ASSUME_ALIGNED(sigmaA_)
-    ASSUME_ALIGNED(sigmaA2T2_)
-    ASSUME_ALIGNED(sigmaAsqrtT_)
-    ASSUME_ALIGNED(emrt_)
-    ASSUME_ALIGNED(d2dx2_prep_)
+    ASSUME_ALIGNED(Real_Ptr ,context.get_s())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_sigma())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_t())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_tau())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_r())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_sigmaA())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_sigmaA2T2())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_sigmaAsqrtT())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_emrt())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_d2dx2_prep())
 
 
 
@@ -224,7 +228,7 @@ void prepare_tw_pricer(
         vdouble tt1, tt3;
         vdouble s, sigma, t, tau, r, sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep;
 
-        uint64_t n2 = n / (64 / sizeof(double));
+        uint64_t n2 = context.get_n() / (64 / sizeof(double));
         uint64_t tid = omp_get_thread_num();
         uint64_t num_threads = omp_get_num_threads();
         uint64_t begin = ((tid * n2) / num_threads) * (64 / sizeof(double));
@@ -232,11 +236,11 @@ void prepare_tw_pricer(
 
         for (uint64_t i = begin; i < end; i += sizeof(vdouble) / sizeof(double)) {
 
-            s = vload_vd_p(&s_[i]);
-            sigma = vload_vd_p(&sigma_[i]);
-            t = vload_vd_p(&t_[i]);
-            tau = vload_vd_p(&tau_[i]);
-            r = vload_vd_p(&r_[i]);
+            s = vload_vd_p(&context.get_s()[i]);
+            sigma = vload_vd_p(&context.get_sigma()[i]);
+            t = vload_vd_p(&context.get_t()[i]);
+            tau = vload_vd_p(&context.get_tau()[i]);
+            r = vload_vd_p(&context.get_r()[i]);
 
             tt1 = vmul_vd_vd_vd(sigma, sigma);
             tmp1 = vadd_vd_vd_vd(ln_of_2, vmul_vd_vd_vd(tt1, t));
@@ -259,19 +263,20 @@ void prepare_tw_pricer(
             tmp1 = vdiv_vd_vd_vd(vmul_vd_vd_vd(two, s), vmul_vd_vd_vd(pi2, sigmaA2T2));
             d2dx2_prep = vmul_vd_vd_vd(xsqrt(tmp1), vmul_vd_vd_vd(tmp2, emrt));
 
-            vstore_v_p_vd(&sigmaA_[i], sigmaA);
-            vstore_v_p_vd(&emrt_[i], emrt);
-            vstore_v_p_vd(&sigmaA2T2_[i], sigmaA2T2);
-            vstore_v_p_vd(&sigmaAsqrtT_[i], sigmaAsqrtT);
-            vstore_v_p_vd(&d2dx2_prep_[i], d2dx2_prep);
+            vstore_v_p_vd(&context.get_sigmaA()[i], sigmaA);
+            vstore_v_p_vd(&context.get_emrt()[i], emrt);
+            vstore_v_p_vd(&context.get_sigmaA2T2()[i], sigmaA2T2);
+            vstore_v_p_vd(&context.get_sigmaAsqrtT()[i], sigmaAsqrtT);
+            vstore_v_p_vd(&context.get_d2dx2_prep()[i], d2dx2_prep);
 
         }
     }
 
 }
 
-void tw_pricer(
-        UINT64 n,
+void tw_pricer( Pricer::pricer_context context ) {
+
+/*        UINT64 n,
         Real_Ptr long_short_,     // 1 == long option // -1 == short option
         Real_Ptr put_call_,       // -1 == put // 1 == call
         Real_Ptr s_,                /// [in] stock price
@@ -282,26 +287,27 @@ void tw_pricer(
         Real_Ptr d1_,               /// [out] d1
         Real_Ptr d2_,
         Real_Ptr price_) {            /// [out] d2
+*/
 
-    ASSUME(n % 64 == 0)
+    ASSUME(context.get_n() % 64 == 0)
 
-    ASSUME_ALIGNED(x_)
-    ASSUME_ALIGNED(s_)
-    ASSUME_ALIGNED(sigmaA2T2_)
-    ASSUME_ALIGNED(sigmaAsqrtT_)
-    ASSUME_ALIGNED(emrt_)
-    ASSUME_ALIGNED(d1_)
-    ASSUME_ALIGNED(d2_)
-    ASSUME_ALIGNED(price_)
-    ASSUME_ALIGNED(long_short_)
-    ASSUME_ALIGNED(put_call_)
+    ASSUME_ALIGNED(Real_Ptr ,context.get_x())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_s())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_sigmaA2T2())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_sigmaAsqrtT())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_emrt())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_d1())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_d2())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_prices())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_long_short())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_put_call())
 
 #pragma omp parallel
     {
         vdouble tmp1, tmp2, tmp3, tmp4, x, s, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price;
         vdouble long_short, put_call;
 
-        uint64_t n2 = n / (64 / sizeof(double));
+        uint64_t n2 = context.get_n() / (64 / sizeof(double));
         uint64_t tid = omp_get_thread_num();
         uint64_t num_threads = omp_get_num_threads();
         uint64_t begin = ((tid * n2) / num_threads) * (64 / sizeof(double));
@@ -309,13 +315,13 @@ void tw_pricer(
 
         for (uint64_t i = begin; i < end; i += sizeof(vdouble) / sizeof(double)) {
 
-            s = vload_vd_p(&s_[i]);
-            x = vload_vd_p(&x_[i]);
-            sigmaA2T2 = vload_vd_p(&sigmaA2T2_[i]);
-            sigmaAsqrtT = vload_vd_p(&sigmaAsqrtT_[i]);
-            emrt = vload_vd_p(&emrt_[i]);
-            long_short = vload_vd_p(&long_short_[i]);
-            put_call = vload_vd_p(&put_call_[i]);
+            s = vload_vd_p(&context.get_s()[i]);
+            x = vload_vd_p(&context.get_x()[i]);
+            sigmaA2T2 = vload_vd_p(&context.get_sigmaA2T2()[i]);
+            sigmaAsqrtT = vload_vd_p(&context.get_sigmaAsqrtT()[i]);
+            emrt = vload_vd_p(&context.get_emrt()[i]);
+            long_short = vload_vd_p(&context.get_long_short()[i]);
+            put_call = vload_vd_p(&context.get_put_call()[i]);
 
 
             tmp2 = xlog(vdiv_vd_vd_vd(s, x));
@@ -333,9 +339,9 @@ void tw_pricer(
                     vmul_vd_vd_vd(put_call, vmul_vd_vd_vd(x, tmp2)));
             price = vmul_vd_vd_vd(vmul_vd_vd_vd(emrt, long_short), price);
 
-            vstore_v_p_vd(&d1_[i], d1);
-            vstore_v_p_vd(&d2_[i], d2);
-            vstore_v_p_vd(&price_[i], price);
+            vstore_v_p_vd(&context.get_d1()[i], d1);
+            vstore_v_p_vd(&context.get_d2()[i], d2);
+            vstore_v_p_vd(&context.get_prices()[i], price);
         }
     }
 
@@ -352,11 +358,11 @@ void ddx_tw_pricer(
         Real_Ptr ddx_price_) {
     ASSUME(n % 64 == 0)
 
-    ASSUME_ALIGNED(long_short_)
-    ASSUME_ALIGNED(put_call_)
-    ASSUME_ALIGNED(d2_)
-    ASSUME_ALIGNED(emrt_)
-    ASSUME_ALIGNED(ddx_price_)
+    ASSUME_ALIGNED(Real_Ptr ,long_short_)
+    ASSUME_ALIGNED(Real_Ptr ,put_call_)
+    ASSUME_ALIGNED(Real_Ptr ,d2_)
+    ASSUME_ALIGNED(Real_Ptr ,emrt_)
+    ASSUME_ALIGNED(Real_Ptr ,ddx_price_)
 
 #pragma omp parallel
     {
@@ -398,12 +404,12 @@ void d2dx2_tw_pricer(
 
     ASSUME(n % 64 == 0)
 
-    ASSUME_ALIGNED(long_short_)
-    ASSUME_ALIGNED(s_)
-    ASSUME_ALIGNED(x_)
-    ASSUME_ALIGNED(d2dx2_prep_)
-    ASSUME_ALIGNED(sigmaA2T2_)
-    ASSUME_ALIGNED(d2dx2_)
+    ASSUME_ALIGNED(Real_Ptr ,long_short_)
+    ASSUME_ALIGNED(Real_Ptr ,s_)
+    ASSUME_ALIGNED(Real_Ptr ,x_)
+    ASSUME_ALIGNED(Real_Ptr ,d2dx2_prep_)
+    ASSUME_ALIGNED(Real_Ptr ,sigmaA2T2_)
+    ASSUME_ALIGNED(Real_Ptr ,d2dx2_)
 
 #pragma omp parallel
     {
@@ -450,17 +456,17 @@ void full_tw_pricer(
 
     ASSUME(n % 64 == 0)
 
-    ASSUME_ALIGNED(x_)
-    ASSUME_ALIGNED(s_)
-    ASSUME_ALIGNED(sigmaA2T2_)
-    ASSUME_ALIGNED(sigmaAsqrtT_)
-    ASSUME_ALIGNED(emrt_)
-    ASSUME_ALIGNED(price_)
-    ASSUME_ALIGNED(long_short_)
-    ASSUME_ALIGNED(put_call_)
-    ASSUME_ALIGNED(ddx_price_)
-    ASSUME_ALIGNED(d2dx2_)
-    ASSUME_ALIGNED(d2dx2_prep_)
+    ASSUME_ALIGNED(Real_Ptr ,x_)
+    ASSUME_ALIGNED(Real_Ptr ,s_)
+    ASSUME_ALIGNED(Real_Ptr ,sigmaA2T2_)
+    ASSUME_ALIGNED(Real_Ptr ,sigmaAsqrtT_)
+    ASSUME_ALIGNED(Real_Ptr ,emrt_)
+    ASSUME_ALIGNED(Real_Ptr ,price_)
+    ASSUME_ALIGNED(Real_Ptr ,long_short_)
+    ASSUME_ALIGNED(Real_Ptr ,put_call_)
+    ASSUME_ALIGNED(Real_Ptr ,ddx_price_)
+    ASSUME_ALIGNED(Real_Ptr ,d2dx2_)
+    ASSUME_ALIGNED(Real_Ptr ,d2dx2_prep_)
 
 #pragma omp parallel
     {
@@ -522,7 +528,15 @@ void full_tw_pricer(
 }
 
 
-void compute_tw_strikes_from_premiums(
+void compute_tw_strikes_from_premiums( Pricer::pricer_context context ) {
+
+    if( (context.get_flags() & PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES)
+                != PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES ) {
+        std::cerr << "compute_tw_strices_from_premiums() called with wrong initialized context" << std::endl;
+        exit(-1);
+    }
+
+/*
         UINT64 n,
         Real_Ptr long_short_,        // 1 == long option // -1 == short option
         Real_Ptr put_call_,          // -1 == put // 1 == call
@@ -534,7 +548,7 @@ void compute_tw_strikes_from_premiums(
         Real_Ptr offsets_,
         Real_Ptr prices_,
         Real_Ptr x_tmp_,
-        UINT64 m,
+        uint64_t m,
         Real_Ptr premiums_,
         Real_Ptr instrument_prices_,
         Real_Ptr instrument_pricesl_,
@@ -542,29 +556,29 @@ void compute_tw_strikes_from_premiums(
         Real_Ptr x_,
         Real_Ptr xl_,
         Real_Ptr xh_) {
+*/
 
+    ASSUME(context.get_n() % 64 == 0)
+    ASSUME(context.get_m() % 64 == 0)
 
-    ASSUME(n % 64 == 0)
-    ASSUME(m % 64 == 0)
+    ASSUME_ALIGNED(Real_Ptr ,context.get_long_short())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_put_call())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_s())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_sigmaA2T2())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_sigmaAsqrtT())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_emrt())
+    ASSUME_ALIGNED(Int32_Ptr,context.get_to_structure())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_offsets())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_prices())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_x())
 
-    ASSUME_ALIGNED(long_short_)
-    ASSUME_ALIGNED(put_call_)
-    ASSUME_ALIGNED(s_)
-    ASSUME_ALIGNED(sigmaA2T2_)
-    ASSUME_ALIGNED(sigmaAsqrtT_)
-    ASSUME_ALIGNED(emrt_)
-    ASSUME_ALIGNED(to_structure)
-    ASSUME_ALIGNED(offsets_)
-    ASSUME_ALIGNED(prices_)
-    ASSUME_ALIGNED(x_tmp_)
-
-    ASSUME_ALIGNED(premiums_)
-    ASSUME_ALIGNED(instrument_prices_)
-    ASSUME_ALIGNED(instrument_pricesh_)
-    ASSUME_ALIGNED(instrument_pricesl_)
-    ASSUME_ALIGNED(x_)
-    ASSUME_ALIGNED(xh_)
-    ASSUME_ALIGNED(xl_)
+    ASSUME_ALIGNED(Real_Ptr ,context.get_premiums())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_instrument_prices())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_instrument_pricesh())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_instrument_pricesl())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_x_())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_xh_())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_xl_())
 
     vdouble err;
     double buffer[sizeof(vdouble)/ sizeof(double)] __attribute__((aligned(ALIGN_TO)));
@@ -580,12 +594,12 @@ void compute_tw_strikes_from_premiums(
             vopmask op;
             vdouble pricel, priceh;
 
-            uint64_t m2 = m / (64 / sizeof(double));
+            uint64_t m2 =context.get_m() / (64 / sizeof(double));
             uint64_t tid = omp_get_thread_num();
             uint64_t num_threads = omp_get_num_threads();
             uint64_t m_begin = ((tid * m2) / num_threads) * (64 / sizeof(double));
             uint64_t m_end = (((tid + 1) * m2) / num_threads) * (64 / sizeof(double));
-            uint64_t n2 = n / (64 / sizeof(double));
+            uint64_t n2 = context.get_n() / (64 / sizeof(double));
             uint64_t n_begin = ((tid * n2) / num_threads) * (64 / sizeof(double));
             uint64_t n_end = (((tid + 1) * n2) / num_threads) * (64 / sizeof(double));
 
@@ -593,17 +607,17 @@ void compute_tw_strikes_from_premiums(
 
             for (uint64_t i = n_begin; i < n_end; i += sizeof(vdouble) / sizeof(double)) {
 
-                xh = vadd_vd_vd_vd( vgather_vd_p_vi(xh_,vloadu_vi_p(&to_structure[i])), vload_vd_p(&offsets_[i]));
-                xl = vadd_vd_vd_vd( vgather_vd_p_vi(xl_,vloadu_vi_p(&to_structure[i])), vload_vd_p(&offsets_[i]));
+                xh = vadd_vd_vd_vd( vgather_vd_p_vi(context.get_xh_(),vloadu_vi_p(&context.get_to_structure()[i])), vload_vd_p(&context.get_offsets()[i]));
+                xl = vadd_vd_vd_vd( vgather_vd_p_vi(context.get_xl_(),vloadu_vi_p(&context.get_to_structure()[i])), vload_vd_p(&context.get_offsets()[i]));
                 x = vdiv_vd_vd_vd(vadd_vd_vd_vd(xl,xh),two);
 
-                s = vload_vd_p(&s_[i]);
+                s = vload_vd_p(&context.get_s()[i]);
 
-                sigmaA2T2 = vload_vd_p(&sigmaA2T2_[i]);
-                sigmaAsqrtT = vload_vd_p(&sigmaAsqrtT_[i]);
-                emrt = vload_vd_p(&emrt_[i]);
-                long_short = vload_vd_p(&long_short_[i]);
-                put_call = vload_vd_p(&put_call_[i]);
+                sigmaA2T2 = vload_vd_p(&context.get_sigmaA2T2()[i]);
+                sigmaAsqrtT = vload_vd_p(&context.get_sigmaAsqrtT()[i]);
+                emrt = vload_vd_p(&context.get_emrt()[i]);
+                long_short = vload_vd_p(&context.get_long_short()[i]);
+                put_call = vload_vd_p(&context.get_put_call()[i]);
 
                 tmp2 = xlog(vdiv_vd_vd_vd(s, x));
                 d1 = vdiv_vd_vd_vd(vadd_vd_vd_vd(tmp2, sigmaA2T2), vmul_vd_vd_vd(sigmaAsqrtT, msqrt2));
@@ -620,8 +634,8 @@ void compute_tw_strikes_from_premiums(
                         vmul_vd_vd_vd(put_call, vmul_vd_vd_vd(x, tmp2)));
                 price = vmul_vd_vd_vd(vmul_vd_vd_vd(emrt, long_short), price);
 
-                vstore_v_p_vd(&prices_[i], price);
-                vstore_v_p_vd(&x_tmp_[i],x);
+                vstore_v_p_vd(&context.get_prices()[i], price);
+                vstore_v_p_vd(&context.get_x()[i],x);
             }
 
 
@@ -631,8 +645,8 @@ void compute_tw_strikes_from_premiums(
             /// set the variables to zero where we are going to aggregate the numbers
             ///
             for (uint64_t i = m_begin; i < m_end; i += sizeof(vdouble) / sizeof(double)) {
-                tmp = vload_vd_p(&premiums_[i]);
-                vstore_v_p_vd(&instrument_prices_[i], vneg_vd_vd(tmp));
+                tmp = vload_vd_p(&context.get_premiums()[i]);
+                vstore_v_p_vd(&context.get_instrument_prices()[i], vneg_vd_vd(tmp));
             }
 
 #pragma omp barrier
@@ -643,15 +657,15 @@ void compute_tw_strikes_from_premiums(
             double d;
 
 #pragma omp for schedule(static)
-            for (uint64_t i = 0; i < n; ++i) {
+            for (uint64_t i = 0; i < context.get_n(); ++i) {
 
-                d = x_tmp_[i]-offsets_[i];
+                d = context.get_x()[i]-context.get_offsets()[i];
 
 #pragma omp atomic update
-                instrument_prices_[to_structure[i]] += prices_[i];
+                context.get_instrument_prices()[context.get_to_structure()[i]] += context.get_prices()[i];
 
 #pragma omp atomic write
-                x_[to_structure[i]] = d;
+                context.get_x_()[context.get_to_structure()[i]] = d;
 
             }
 
@@ -659,13 +673,13 @@ void compute_tw_strikes_from_premiums(
 
             for (uint64_t i = m_begin; i < m_end; i += sizeof(vdouble) / sizeof(double)) {
 
-                price  = vload_vd_p(&instrument_prices_[i]);
-                pricel = vload_vd_p(&instrument_pricesl_[i]);
-                priceh = vload_vd_p(&instrument_pricesh_[i]);
+                price  = vload_vd_p(&context.get_instrument_prices()[i]);
+                pricel = vload_vd_p(&context.get_instrument_pricesl()[i]);
+                priceh = vload_vd_p(&context.get_instrument_pricesh()[i]);
 
-                x  = vload_vd_p(&x_[i]);
-                xl = vload_vd_p(&xl_[i]);
-                xh = vload_vd_p(&xh_[i]);
+                x  = vload_vd_p(&context.get_x_()[i]);
+                xl = vload_vd_p(&context.get_xl_()[i]);
+                xh = vload_vd_p(&context.get_xh_()[i]);
 
                 op     = vgt_vo_vd_vd(vmul_vd_vd_vd(price, pricel), zero);
 
@@ -675,10 +689,10 @@ void compute_tw_strikes_from_premiums(
                 xl     = vsel_vd_vo_vd_vd(op, x, xl);
                 xh     = vsel_vd_vo_vd_vd(op, xh, x);
 
-                vstore_v_p_vd(&instrument_pricesh_[i], priceh);
-                vstore_v_p_vd(&instrument_pricesl_[i], pricel);
-                vstore_v_p_vd(&xl_[i], xl);
-                vstore_v_p_vd(&xh_[i], xh);
+                vstore_v_p_vd(&context.get_instrument_pricesh()[i], priceh);
+                vstore_v_p_vd(&context.get_instrument_pricesl()[i], pricel);
+                vstore_v_p_vd(&context.get_xl_()[i], xl);
+                vstore_v_p_vd(&context.get_xh_()[i], xh);
 
                 tmp = vsub_vd_vd_vd(vmax_vd_vd_vd(xh,xl),vmin_vd_vd_vd(xh,xl));
                 err1 = vadd_vd_vd_vd(err1,vmul_vd_vd_vd(tmp,tmp));

@@ -67,14 +67,14 @@ static inline void __attribute__((always_inline)) compute_d_values(
 
     // for optimization assume that every
     // pointer handed to this function is aligned.
-    ASSUME_ALIGNED(s)
-    ASSUME_ALIGNED(x)
-    ASSUME_ALIGNED(sigmaA2T2)
-    ASSUME_ALIGNED(sigmaAsqrtT)
-    ASSUME_ALIGNED(tmp1)
-    ASSUME_ALIGNED(tmp2)
-    ASSUME_ALIGNED(d1)
-    ASSUME_ALIGNED(d2)
+    ASSUME_ALIGNED(Real_Ptr ,s)
+    ASSUME_ALIGNED(Real_Ptr ,x)
+    ASSUME_ALIGNED(Real_Ptr ,sigmaA2T2)
+    ASSUME_ALIGNED(Real_Ptr ,sigmaAsqrtT)
+    ASSUME_ALIGNED(Real_Ptr ,tmp1)
+    ASSUME_ALIGNED(Real_Ptr ,tmp2)
+    ASSUME_ALIGNED(Real_Ptr ,d1)
+    ASSUME_ALIGNED(Real_Ptr ,d2)
 
 
     for (UINT64 i = 0; i < n; ++i) {
@@ -149,21 +149,21 @@ void prepare_mkl_pricer(
 
     ASSUME(n % 64 == 0)
 
-    ASSUME_ALIGNED(s)
-    ASSUME_ALIGNED(sigma)
-    ASSUME_ALIGNED(t)
-    ASSUME_ALIGNED(tau)
-    ASSUME_ALIGNED(r)
-    ASSUME_ALIGNED(tmp1)
-    ASSUME_ALIGNED(tmp2)
-    ASSUME_ALIGNED(tmp3)
-    ASSUME_ALIGNED(tmp4)
-    ASSUME_ALIGNED(tmp5)
-    ASSUME_ALIGNED(sigmaA)
-    ASSUME_ALIGNED(sigmaA2T2)
-    ASSUME_ALIGNED(sigmaAsqrtT)
-    ASSUME_ALIGNED(emrt)
-    ASSUME_ALIGNED(d2dx2_prep)
+    ASSUME_ALIGNED(Real_Ptr ,s)
+    ASSUME_ALIGNED(Real_Ptr ,sigma)
+    ASSUME_ALIGNED(Real_Ptr ,t)
+    ASSUME_ALIGNED(Real_Ptr ,tau)
+    ASSUME_ALIGNED(Real_Ptr ,r)
+    ASSUME_ALIGNED(Real_Ptr ,tmp1)
+    ASSUME_ALIGNED(Real_Ptr ,tmp2)
+    ASSUME_ALIGNED(Real_Ptr ,tmp3)
+    ASSUME_ALIGNED(Real_Ptr ,tmp4)
+    ASSUME_ALIGNED(Real_Ptr ,tmp5)
+    ASSUME_ALIGNED(Real_Ptr ,sigmaA)
+    ASSUME_ALIGNED(Real_Ptr ,sigmaA2T2)
+    ASSUME_ALIGNED(Real_Ptr ,sigmaAsqrtT)
+    ASSUME_ALIGNED(Real_Ptr ,emrt)
+    ASSUME_ALIGNED(Real_Ptr ,d2dx2_prep)
 
     FLOAT tt1;
     for (UINT64 i = 0; i < n; ++i) {
@@ -261,19 +261,19 @@ void mkl_pricer(
 
     ASSUME(n % 64 == 0)
 
-    ASSUME_ALIGNED(flags)
-    ASSUME_ALIGNED(x)
-    ASSUME_ALIGNED(s)
-    ASSUME_ALIGNED(sigmaA2T2)
-    ASSUME_ALIGNED(sigmaAsqrtT)
-    ASSUME_ALIGNED(emrt)
-    ASSUME_ALIGNED(tmp1)
-    ASSUME_ALIGNED(tmp2)
-    ASSUME_ALIGNED(tmp3)
-    ASSUME_ALIGNED(tmp4)
-    ASSUME_ALIGNED(d1)
-    ASSUME_ALIGNED(d2)
-    ASSUME_ALIGNED(price)
+    ASSUME_ALIGNED(Real_Ptr ,flags)
+    ASSUME_ALIGNED(Real_Ptr ,x)
+    ASSUME_ALIGNED(Real_Ptr ,s)
+    ASSUME_ALIGNED(Real_Ptr ,sigmaA2T2)
+    ASSUME_ALIGNED(Real_Ptr ,sigmaAsqrtT)
+    ASSUME_ALIGNED(Real_Ptr ,emrt)
+    ASSUME_ALIGNED(Real_Ptr ,tmp1)
+    ASSUME_ALIGNED(Real_Ptr ,tmp2)
+    ASSUME_ALIGNED(Real_Ptr ,tmp3)
+    ASSUME_ALIGNED(Real_Ptr ,tmp4)
+    ASSUME_ALIGNED(Real_Ptr ,d1)
+    ASSUME_ALIGNED(Real_Ptr ,d2)
+    ASSUME_ALIGNED(Real_Ptr ,price)
 
     compute_d_values(n, s, x, sigmaA2T2,
                      sigmaAsqrtT,
@@ -340,10 +340,10 @@ void ddx_mkl_pricer(
 
     ASSUME(n % 64 == 0)
 
-    ASSUME_ALIGNED(flags)
-    ASSUME_ALIGNED(d2)
-    ASSUME_ALIGNED(emrt)
-    ASSUME_ALIGNED(ddx_price)
+    ASSUME_ALIGNED(Real_Ptr ,flags)
+    ASSUME_ALIGNED(Real_Ptr ,d2)
+    ASSUME_ALIGNED(Real_Ptr ,emrt)
+    ASSUME_ALIGNED(Real_Ptr ,ddx_price)
 
 
     vdErfc(n, d2, ddx_price);
@@ -382,14 +382,14 @@ void d2dx2_mkl_pricer(
 
     ASSUME(n % 64 == 0)
 
-    ASSUME_ALIGNED(flags)
-    ASSUME_ALIGNED(s)
-    ASSUME_ALIGNED(x)
-    ASSUME_ALIGNED(d2dx2_prep)
-    ASSUME_ALIGNED(sigmaA2T2)
-    ASSUME_ALIGNED(tmp1)
-    ASSUME_ALIGNED(tmp2)
-    ASSUME_ALIGNED(d2dx2)
+    ASSUME_ALIGNED(Real_Ptr ,flags)
+    ASSUME_ALIGNED(Real_Ptr ,s)
+    ASSUME_ALIGNED(Real_Ptr ,x)
+    ASSUME_ALIGNED(Real_Ptr ,d2dx2_prep)
+    ASSUME_ALIGNED(Real_Ptr ,sigmaA2T2)
+    ASSUME_ALIGNED(Real_Ptr ,tmp1)
+    ASSUME_ALIGNED(Real_Ptr ,tmp2)
+    ASSUME_ALIGNED(Real_Ptr ,d2dx2)
 
     for (UINT64 i = 0; i < n; ++i) {
         tmp1[i] = s[i] / x[i];

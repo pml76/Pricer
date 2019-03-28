@@ -10,4 +10,6 @@
 
  - Write R interface
 
+ - drop support for second derivatives in sleef_pricer.cc
+
 

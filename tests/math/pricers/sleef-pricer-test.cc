@@ -49,7 +49,7 @@ TEST_CASE("pricer-class equals sleef-pricer (long call)", "[pricer]") {
     DECLARE_AND_DEFINE(64,FLOAT, long_short, 1)
 
 
-    Pricer p;
+    Vortex::Pricer p;
 
 
     p.set_market_data(sigma[0], t[0], tau[0], r[0], s[0]);
@@ -91,7 +91,7 @@ TEST_CASE("pricer-class equals sleef-pricer (short call)", "[pricer]") {
     DECLARE_AND_DEFINE(64,FLOAT, long_short, -1)
 
 
-    Pricer p;
+    Vortex::Pricer p;
 
 
     p.set_market_data(sigma[0], t[0], tau[0], r[0], s[0]);
@@ -133,7 +133,7 @@ TEST_CASE("pricer-class equals sleef-pricer (long put)", "[pricer]") {
     DECLARE_AND_DEFINE(64,FLOAT, long_short, 1)
 
 
-    Pricer p;
+    Vortex::Pricer p;
 
 
     p.set_market_data(sigma[0], t[0], tau[0], r[0], s[0]);
@@ -175,7 +175,7 @@ TEST_CASE("pricer-class equals sleef-pricer (short put)", "[pricer]") {
     DECLARE_AND_DEFINE(64,FLOAT, long_short, -1)
 
 
-    Pricer p;
+    Vortex::Pricer p;
 
 
     p.set_market_data(sigma[0], t[0], tau[0], r[0], s[0]);
@@ -221,7 +221,7 @@ TEST_CASE("pricer-class equals ddx-tw-pricer (long call)", "[pricer]") {
 
     const FLOAT eps = 1.0e-10;
 
-    Pricer p;
+    Vortex::Pricer p;
 
     p.set_market_data(sigma[0], t[0], tau[0], r[0], s[0]);
 
@@ -266,7 +266,7 @@ TEST_CASE("pricer-class equals ddx-tw-pricer (short call)", "[pricer]") {
 
     const FLOAT eps = 1.0e-10;
 
-    Pricer p;
+    Vortex::Pricer p;
 
     p.set_market_data(sigma[0], t[0], tau[0], r[0], s[0]);
 
@@ -311,7 +311,7 @@ TEST_CASE("pricer-class equals ddx-tw-pricer (long put)", "[pricer]") {
 
     const FLOAT eps = 1.0e-10;
 
-    Pricer p;
+    Vortex::Pricer p;
 
     p.set_market_data(sigma[0], t[0], tau[0], r[0], s[0]);
 
@@ -356,7 +356,7 @@ TEST_CASE("pricer-class equals ddx-tw-pricer (short put)", "[pricer]") {
 
     const FLOAT eps = 1.0e-10;
 
-    Pricer p;
+    Vortex::Pricer p;
 
     p.set_market_data(sigma[0], t[0], tau[0], r[0], s[0]);
 
@@ -402,7 +402,7 @@ TEST_CASE("d2dx2_pricer equals ddx-tw-pricer diff-quot (long call)", "[pricer]")
 
     FLOAT eps = 1.0e-10;
 
-    Pricer p;
+    Vortex::Pricer p;
 
     p.set_market_data(sigma[0], t[0], tau[0], r[0], s[0]);
 
@@ -455,7 +455,7 @@ TEST_CASE("d2dx2_pricer equals ddx-tw-pricer diff-quot (long put)", "[pricer]") 
 
     FLOAT eps = 1.0e-10;
 
-    Pricer p;
+    Vortex::Pricer p;
 
     p.set_market_data(sigma[0], t[0], tau[0], r[0], s[0]);
 
@@ -509,7 +509,7 @@ TEST_CASE("d2dx2_pricer equals ddx-tw-pricer diff-quot (short call)", "[pricer]"
 
     FLOAT eps = 1.0e-10;
 
-    Pricer p;
+    Vortex::Pricer p;
 
     p.set_market_data(sigma[0], t[0], tau[0], r[0], s[0]);
 
@@ -721,7 +721,7 @@ TEST_CASE("d2dx2_pricer equals ddx-tw-pricer diff-quot (short put)", "[pricer]")
 
     FLOAT eps = 1.0e-10;
 
-    Pricer p;
+    Vortex::Pricer p;
 
     p.set_market_data(sigma[0], t[0], tau[0], r[0], s[0]);
 

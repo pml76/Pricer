@@ -41,7 +41,7 @@ extern "C" {
 #ifdef ASSUME_ALIGNED
 #undef ASSUME_ALIGNED
 #endif
-#define ASSUME_ALIGNED(x) x=__builtin_assume_aligned(x,ALIGN_TO);
+#define ASSUME_ALIGNED(type,x) x=(type) __builtin_assume_aligned((void *)x, ALIGN_TO);
 
 #ifdef ASSUME
 #undef ASSUME
@@ -75,7 +75,7 @@ extern "C" {
 #ifdef ASSUME_ALIGNED
 #undef ASSUME_ALIGNED
 #endif
-#define ASSUME_ALIGNED(x) x=__builtin_assume_aligned(x,64);
+#define ASSUME_ALIGNED(type,x) x=(type) __builtin_assume_aligned(x,ALIGN_TO);
 
 #ifdef ASSUME
 #undef ASSUME
@@ -104,7 +104,7 @@ extern "C" {
 #ifdef ASSUME_ALIGNED
 #undef ASSUME_ALIGNED
 #endif
-#define ASSUME_ALIGNED(x) __assume_aligned(x,64);
+#define ASSUME_ALIGNED(type,x) __assume_aligned(x,64);
 
 
 #ifdef ASSUME
@@ -134,7 +134,7 @@ typedef double FLOAT;
 typedef unsigned long long UINT64;
 
 typedef FLOAT *__restrict__ Real_Ptr;
-typedef UINT64 *__restrict__ Uint64_Ptr;
+typedef uint64_t *__restrict__ Uint64_Ptr;
 typedef int32_t *__restrict__ Int32_Ptr;
 
 #ifdef __cplusplus
