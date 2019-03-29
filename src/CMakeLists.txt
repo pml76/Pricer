@@ -33,65 +33,23 @@ set(INIT_TW_PRICER_ARGUMENT_TYPES
 
 set(TW_PRICER_ARGUMENT_TYPES
         void
-        UINT64
-        Real_Ptr
-        Real_Ptr
-        Real_Ptr
-        Real_Ptr
-        Real_Ptr
-        Real_Ptr
-        Real_Ptr
-        Real_Ptr
-        Real_Ptr
-        Real_Ptr )
+        Pricer::pricer_context )
 
 set(PREPARE_TW_PRICER_ARGUMENT_TYPES
         void
-        UINT64
-        Real_Ptr
-        Real_Ptr
-        Real_Ptr
-        Real_Ptr
-        Real_Ptr
-        Real_Ptr
-        Real_Ptr
-        Real_Ptr
-        Real_Ptr
-        Real_Ptr )
+        Pricer::pricer_context )
 
 set( DDX_TW_PRICER_ARGUMENT_TYPES
         void
-        UINT64
-        Real_Ptr
-        Real_Ptr
-        Real_Ptr
-        Real_Ptr
-        Real_Ptr )
+        Pricer::pricer_context )
 
 set( D2DX2_TW_PRICER_ARGUMENT_TYPES
         void
-        UINT64
-        Real_Ptr
-        Real_Ptr
-        Real_Ptr
-        Real_Ptr
-        Real_Ptr
-        Real_Ptr )
+        Pricer::pricer_context )
 
 set( FULL_TW_PRICER_ARGUMENT_TYPES
         void
-        UINT64
-        Real_Ptr
-        Real_Ptr
-        Real_Ptr
-        Real_Ptr
-        Real_Ptr
-        Real_Ptr
-        Real_Ptr
-        Real_Ptr
-        Real_Ptr
-        Real_Ptr
-        Real_Ptr )
+        Pricer::pricer_context )
 
 set( COMPUTE_TW_STRIKES_FROM_PREMIUMS_ARGUMENT_TYPES
         void

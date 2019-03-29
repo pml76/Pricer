@@ -29,6 +29,9 @@
 #define MEM_DEALLOC(type, p) {Private::deallocate_memory<type>(p);};
 #define COND_MEM_DEALLOC(flags, type, p) {if((m__flags & flags) == flags) MEM_DEALLOC(type, p)}
 
+#define MEM_INIT(x,i,v) {x[i]=v;}
+#define COND_MEM_INIT(flags,x,i,v) {if((m__flags & flags) == flags) MEM_INIT(x,i,v)}
+
 namespace Pricer {
     void pricer_context::alloc_mem(uint64_t n, uint64_t m) {
         MEM_ALLOC(FLOAT, n, m__s)
@@ -52,8 +55,6 @@ namespace Pricer {
         COND_MEM_ALLOC(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, int32_t, n, m__to_structure)
         COND_MEM_ALLOC(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, FLOAT, n, m__offsets)
 
-
-
         COND_MEM_ALLOC(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, FLOAT, m, m__premiums)
         COND_MEM_ALLOC(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, FLOAT, m, m__instrument_prices)
         COND_MEM_ALLOC(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, FLOAT, m, m__instrument_pricesl)
@@ -61,6 +62,8 @@ namespace Pricer {
         COND_MEM_ALLOC(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, FLOAT, m, m__x_)
         COND_MEM_ALLOC(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, FLOAT, m, m__xl_)
         COND_MEM_ALLOC(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, FLOAT, m, m__xh_)
+
+        init_memory(0, m__n_max, 0, m__m_max);
 
     }
 
@@ -86,6 +89,9 @@ namespace Pricer {
     }
 
     void pricer_context::realloc_mem(uint64_t n) {
+        uint64_t n_max_old = m__n_max;
+        uint64_t m_max_old = m__m_max;
+
         MEM_REALLOC(FLOAT, Real_Ptr , m__s)
         MEM_REALLOC(FLOAT, Real_Ptr , m__sigma)
         MEM_REALLOC(FLOAT, Real_Ptr , m__t)
@@ -104,8 +110,45 @@ namespace Pricer {
         COND_MEM_REALLOC(PRICER_FLAG_TW_PRICER, FLOAT, Real_Ptr , m__prices)
         COND_MEM_REALLOC(PRICER_FLAG_TW_PRICER, FLOAT, Real_Ptr , m__x)
 
+        init_memory(n_max_old, m__n_max, m_max_old, m__m_max);
     }
 
+    void pricer_context::init_memory(uint64_t n1, uint64_t n2, uint64_t m1, uint64_t m2) {
+
+        for(uint64_t n = n1; n < n2; ++n) {
+            MEM_INIT(m__s,n,70.)
+            MEM_INIT(m__sigma,n,0.3)
+            MEM_INIT(m__t,n,1.)
+            MEM_INIT(m__tau,n,1./12.)
+            MEM_INIT(m__r,n,0.01)
+            MEM_INIT(m__sigmaA,n,0.3)
+            MEM_INIT(m__sigmaA2T2,n,0.3*0.3)
+            MEM_INIT(m__sigmaAsqrtT,n,0.3)
+            MEM_INIT(m__emrt,n,1.)
+            MEM_INIT(m__long_short,n,1.)
+            MEM_INIT(m__put_call,n,1.)
+            MEM_INIT(m__d2dx2_prep,n,0)
+
+            COND_MEM_INIT(PRICER_FLAG_TW_PRICER, m__d1,n,1)
+            COND_MEM_INIT(PRICER_FLAG_TW_PRICER, m__d2,n,1)
+            COND_MEM_INIT(PRICER_FLAG_TW_PRICER, m__prices,n,1)
+            COND_MEM_INIT(PRICER_FLAG_TW_PRICER, m__x,n,72.)
+
+            COND_MEM_INIT(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, m__to_structure,n,get_m_max()-1)
+            COND_MEM_INIT(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, m__offsets,n,0.)
+        }
+
+        for(uint64_t m = m1; m < m2; ++m) {
+           COND_MEM_INIT(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, m__premiums, m, 2.)
+           COND_MEM_INIT(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, m__instrument_prices, m, 0.)
+           COND_MEM_INIT(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, m__instrument_pricesl, m, 0.)
+           COND_MEM_INIT(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, m__instrument_pricesh, m, 0.)
+           COND_MEM_INIT(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, m__x_, m, 0.)
+           COND_MEM_INIT(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, m__xl_, m, 0.)
+           COND_MEM_INIT(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, m__xh_, m, 0.)
+        }
+
+    }
 
 
 }

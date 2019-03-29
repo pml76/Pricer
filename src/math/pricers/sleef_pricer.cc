@@ -207,7 +207,7 @@ void prepare_tw_pricer( Pricer::pricer_context context ) {
         Real_Ptr d2dx2_prep_) {
 */
 
-    ASSUME(context.get_n() % 64 == 0)
+    ASSUME(context.get_n_ALIGNED() % 64 == 0)
 
     ASSUME_ALIGNED(Real_Ptr ,context.get_s())
     ASSUME_ALIGNED(Real_Ptr ,context.get_sigma())
@@ -228,7 +228,7 @@ void prepare_tw_pricer( Pricer::pricer_context context ) {
         vdouble tt1, tt3;
         vdouble s, sigma, t, tau, r, sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep;
 
-        uint64_t n2 = context.get_n() / (64 / sizeof(double));
+        uint64_t n2 = context.get_n_ALIGNED() / (64 / sizeof(double));
         uint64_t tid = omp_get_thread_num();
         uint64_t num_threads = omp_get_num_threads();
         uint64_t begin = ((tid * n2) / num_threads) * (64 / sizeof(double));
@@ -289,7 +289,7 @@ void tw_pricer( Pricer::pricer_context context ) {
         Real_Ptr price_) {            /// [out] d2
 */
 
-    ASSUME(context.get_n() % 64 == 0)
+    ASSUME(context.get_n_ALIGNED() % 64 == 0)
 
     ASSUME_ALIGNED(Real_Ptr ,context.get_x())
     ASSUME_ALIGNED(Real_Ptr ,context.get_s())
@@ -307,7 +307,7 @@ void tw_pricer( Pricer::pricer_context context ) {
         vdouble tmp1, tmp2, tmp3, tmp4, x, s, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price;
         vdouble long_short, put_call;
 
-        uint64_t n2 = context.get_n() / (64 / sizeof(double));
+        uint64_t n2 = context.get_n_ALIGNED() / (64 / sizeof(double));
         uint64_t tid = omp_get_thread_num();
         uint64_t num_threads = omp_get_num_threads();
         uint64_t begin = ((tid * n2) / num_threads) * (64 / sizeof(double));
@@ -349,26 +349,29 @@ void tw_pricer( Pricer::pricer_context context ) {
 }
 
 
-void ddx_tw_pricer(
-        UINT64 n,
+void ddx_tw_pricer( Pricer::pricer_context context ) {
+
+/*        UINT64 n,
         Real_Ptr long_short_,     // 1 == long option // -1 == short option
         Real_Ptr put_call_,       // -1 == put // 1 == call
         Real_Ptr d2_,
         Real_Ptr emrt_,
         Real_Ptr ddx_price_) {
-    ASSUME(n % 64 == 0)
+  */
 
-    ASSUME_ALIGNED(Real_Ptr ,long_short_)
-    ASSUME_ALIGNED(Real_Ptr ,put_call_)
-    ASSUME_ALIGNED(Real_Ptr ,d2_)
-    ASSUME_ALIGNED(Real_Ptr ,emrt_)
-    ASSUME_ALIGNED(Real_Ptr ,ddx_price_)
+    ASSUME(context.get_n_ALIGNED() % 64 == 0)
+
+    ASSUME_ALIGNED(Real_Ptr ,context.get_long_short())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_put_call())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_d2())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_emrt())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_ddx_price())
 
 #pragma omp parallel
     {
         vdouble long_short, put_call, d2, emrt, ddx_price;
 
-        uint64_t n2 = n / (64 / sizeof(double));
+        uint64_t n2 = context.get_n_ALIGNED() / (64 / sizeof(double));
         uint64_t tid = omp_get_thread_num();
         uint64_t num_threads = omp_get_num_threads();
         uint64_t begin = ((tid * n2) / num_threads) * (64 / sizeof(double));
@@ -376,24 +379,25 @@ void ddx_tw_pricer(
 
         for (uint64_t i = begin; i < end; i += sizeof(vdouble) / sizeof(double)) {
 
-            d2 = vload_vd_p(&d2_[i]);
-            put_call = vload_vd_p(&put_call_[i]);
-            long_short = vload_vd_p(&long_short_[i]);
-            emrt = vload_vd_p(&emrt_[i]);
+            d2 = vload_vd_p(&context.get_d2()[i]);
+            put_call = vload_vd_p(&context.get_put_call()[i]);
+            long_short = vload_vd_p(&context.get_long_short()[i]);
+            emrt = vload_vd_p(&context.get_emrt()[i]);
 
             ddx_price = xerfc_u15(d2);
             ddx_price = vsub_vd_vd_vd(vadd_vd_vd_vd(one, vmul_vd_vd_vd(put_call, mone)), ddx_price);
             ddx_price = vmul_vd_vd_vd(vmul_vd_vd_vd(emrt, long_short), ddx_price);
 
-            vstore_v_p_vd(&ddx_price_[i], ddx_price);
+            vstore_v_p_vd(&context.get_ddx_price()[i], ddx_price);
         }
     }
 
 }
 
 
-void d2dx2_tw_pricer(
-        UINT64 n,
+void d2dx2_tw_pricer( Pricer::pricer_context context ) {
+
+/*        UINT64 n,
         Real_Ptr long_short_,
         Real_Ptr s_,
         Real_Ptr x_,
@@ -402,20 +406,22 @@ void d2dx2_tw_pricer(
         Real_Ptr d2dx2_
 ) {
 
-    ASSUME(n % 64 == 0)
+ */
 
-    ASSUME_ALIGNED(Real_Ptr ,long_short_)
-    ASSUME_ALIGNED(Real_Ptr ,s_)
-    ASSUME_ALIGNED(Real_Ptr ,x_)
-    ASSUME_ALIGNED(Real_Ptr ,d2dx2_prep_)
-    ASSUME_ALIGNED(Real_Ptr ,sigmaA2T2_)
-    ASSUME_ALIGNED(Real_Ptr ,d2dx2_)
+    ASSUME(context.get_n_ALIGNED() % 64 == 0)
+
+    ASSUME_ALIGNED(Real_Ptr ,context.get_long_short())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_s())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_x())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_d2dx2_prep())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_sigmaA2T2())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_d2dx2())
 
 #pragma omp parallel
     {
         vdouble long_short, s, x, d2dx2_prep, sigmaA2T2, d2dx2;
 
-        uint64_t n2 = n / (64 / sizeof(double));
+        uint64_t n2 = context.get_n_ALIGNED() / (64 / sizeof(double));
         uint64_t tid = omp_get_thread_num();
         uint64_t num_threads = omp_get_num_threads();
         uint64_t begin = ((tid * n2) / num_threads) * (64 / sizeof(double));
@@ -423,25 +429,26 @@ void d2dx2_tw_pricer(
 
         for (uint64_t i = begin; i < end; i += sizeof(vdouble) / sizeof(double)) {
 
-            long_short = vload_vd_p(&long_short_[i]);
-            s = vload_vd_p(&s_[i]);
-            x = vload_vd_p(&x_[i]);
-            d2dx2_prep = vload_vd_p(&d2dx2_prep_[i]);
-            sigmaA2T2 = vload_vd_p(&sigmaA2T2_[i]);
+            long_short = vload_vd_p(&context.get_long_short()[i]);
+            s = vload_vd_p(&context.get_s()[i]);
+            x = vload_vd_p(&context.get_x()[i]);
+            d2dx2_prep = vload_vd_p(&context.get_d2dx2_prep()[i]);
+            sigmaA2T2 = vload_vd_p(&context.get_sigmaA2T2()[i]);
 
             d2dx2 = xlog(vdiv_vd_vd_vd(s, x));
             d2dx2 = xexp(vneg_vd_vd(vdiv_vd_vd_vd(vmul_vd_vd_vd(d2dx2, d2dx2), vmul_vd_vd_vd(four, sigmaA2T2))));
             d2dx2 = vdiv_vd_vd_vd(vmul_vd_vd_vd(d2dx2, d2dx2_prep), xsqrt(vmul_vd_vd_vd(vmul_vd_vd_vd(x, x), x)));
             d2dx2 = vmul_vd_vd_vd(d2dx2, long_short);
 
-            vstore_v_p_vd(&d2dx2_[i], d2dx2);
+            vstore_v_p_vd(&context.get_d2dx2()[i], d2dx2);
         }
     }
 
 }
 
-void full_tw_pricer(
-        UINT64 n,
+void full_tw_pricer( Pricer::pricer_context context ) {
+
+/*        UINT64 n,
         Real_Ptr long_short_,     // 1 == long option // -1 == short option
         Real_Ptr put_call_,       // -1 == put // 1 == call
         Real_Ptr s_,                /// [in] stock price
@@ -453,20 +460,20 @@ void full_tw_pricer(
         Real_Ptr price_,
         Real_Ptr ddx_price_,
         Real_Ptr d2dx2_) {
+*/
+    ASSUME(context.get_n_ALIGNED() % 64 == 0)
 
-    ASSUME(n % 64 == 0)
-
-    ASSUME_ALIGNED(Real_Ptr ,x_)
-    ASSUME_ALIGNED(Real_Ptr ,s_)
-    ASSUME_ALIGNED(Real_Ptr ,sigmaA2T2_)
-    ASSUME_ALIGNED(Real_Ptr ,sigmaAsqrtT_)
-    ASSUME_ALIGNED(Real_Ptr ,emrt_)
-    ASSUME_ALIGNED(Real_Ptr ,price_)
-    ASSUME_ALIGNED(Real_Ptr ,long_short_)
-    ASSUME_ALIGNED(Real_Ptr ,put_call_)
-    ASSUME_ALIGNED(Real_Ptr ,ddx_price_)
-    ASSUME_ALIGNED(Real_Ptr ,d2dx2_)
-    ASSUME_ALIGNED(Real_Ptr ,d2dx2_prep_)
+    ASSUME_ALIGNED(Real_Ptr ,context.get_x())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_s())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_sigmaA2T2())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_sigmaAsqrtT())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_emrt())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_prices())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_long_short())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_put_call())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_ddx_price())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_d2dx2())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_d2dx2_prep())
 
 #pragma omp parallel
     {
@@ -476,7 +483,7 @@ void full_tw_pricer(
         vdouble ddx_price;
         vdouble d2dx2, d2dx2_prep;
 
-        uint64_t n2 = n / (64 / sizeof(double));
+        uint64_t n2 = context.get_n_ALIGNED() / (64 / sizeof(double));
         uint64_t tid = omp_get_thread_num();
         uint64_t num_threads = omp_get_num_threads();
         uint64_t begin = ((tid * n2) / num_threads) * (64 / sizeof(double));
@@ -484,14 +491,14 @@ void full_tw_pricer(
 
         for (uint64_t i = begin; i < end; i += sizeof(vdouble) / sizeof(double)) {
 
-            s = vload_vd_p(&s_[i]);
-            x = vload_vd_p(&x_[i]);
-            sigmaA2T2 = vload_vd_p(&sigmaA2T2_[i]);
-            sigmaAsqrtT = vload_vd_p(&sigmaAsqrtT_[i]);
-            emrt = vload_vd_p(&emrt_[i]);
-            long_short = vload_vd_p(&long_short_[i]);
-            put_call = vload_vd_p(&put_call_[i]);
-            d2dx2_prep = vload_vd_p(&d2dx2_prep_[i]);
+            s = vload_vd_p(&context.get_s()[i]);
+            x = vload_vd_p(&context.get_x()[i]);
+            sigmaA2T2 = vload_vd_p(&context.get_sigmaA2T2()[i]);
+            sigmaAsqrtT = vload_vd_p(&context.get_sigmaAsqrtT()[i]);
+            emrt = vload_vd_p(&context.get_emrt()[i]);
+            long_short = vload_vd_p(&context.get_long_short()[i]);
+            put_call = vload_vd_p(&context.get_put_call()[i]);
+            d2dx2_prep = vload_vd_p(&context.get_d2dx2_prep()[i]);
 
             tmp2 = xlog(vdiv_vd_vd_vd(s, x));
             d1 = vdiv_vd_vd_vd(vadd_vd_vd_vd(tmp2, sigmaA2T2), vmul_vd_vd_vd(sigmaAsqrtT, msqrt2));
@@ -518,9 +525,9 @@ void full_tw_pricer(
             d2dx2 = vdiv_vd_vd_vd(vmul_vd_vd_vd(d2dx2, d2dx2_prep), xsqrt(vmul_vd_vd_vd(vmul_vd_vd_vd(x, x), x)));
             d2dx2 = vmul_vd_vd_vd(d2dx2, long_short);
 
-            vstore_v_p_vd(&d2dx2_[i], d2dx2);
-            vstore_v_p_vd(&ddx_price_[i], ddx_price);
-            vstore_v_p_vd(&price_[i], price);
+            vstore_v_p_vd(&context.get_d2dx2()[i], d2dx2);
+            vstore_v_p_vd(&context.get_ddx_price()[i], ddx_price);
+            vstore_v_p_vd(&context.get_prices()[i], price);
 
         }
     }
@@ -558,8 +565,8 @@ void compute_tw_strikes_from_premiums( Pricer::pricer_context context ) {
         Real_Ptr xh_) {
 */
 
-    ASSUME(context.get_n() % 64 == 0)
-    ASSUME(context.get_m() % 64 == 0)
+    ASSUME(context.get_n_ALIGNED() % 64 == 0)
+    ASSUME(context.get_m_ALIGNED() % 64 == 0)
 
     ASSUME_ALIGNED(Real_Ptr ,context.get_long_short())
     ASSUME_ALIGNED(Real_Ptr ,context.get_put_call())
@@ -594,12 +601,12 @@ void compute_tw_strikes_from_premiums( Pricer::pricer_context context ) {
             vopmask op;
             vdouble pricel, priceh;
 
-            uint64_t m2 =context.get_m() / (64 / sizeof(double));
+            uint64_t m2 =context.get_m_ALIGNED() / (64 / sizeof(double));
             uint64_t tid = omp_get_thread_num();
             uint64_t num_threads = omp_get_num_threads();
             uint64_t m_begin = ((tid * m2) / num_threads) * (64 / sizeof(double));
             uint64_t m_end = (((tid + 1) * m2) / num_threads) * (64 / sizeof(double));
-            uint64_t n2 = context.get_n() / (64 / sizeof(double));
+            uint64_t n2 = context.get_n_ALIGNED() / (64 / sizeof(double));
             uint64_t n_begin = ((tid * n2) / num_threads) * (64 / sizeof(double));
             uint64_t n_end = (((tid + 1) * n2) / num_threads) * (64 / sizeof(double));
 
@@ -657,7 +664,7 @@ void compute_tw_strikes_from_premiums( Pricer::pricer_context context ) {
             double d;
 
 #pragma omp for schedule(static)
-            for (uint64_t i = 0; i < context.get_n(); ++i) {
+            for (uint64_t i = 0; i < context.get_n_ALIGNED(); ++i) {
 
                 d = context.get_x()[i]-context.get_offsets()[i];
 

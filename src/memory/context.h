@@ -70,7 +70,22 @@ namespace Pricer {
 
         void alloc_mem(uint64_t n, uint64_t m);
         void dealloc_mem();
+        void init_memory(uint64_t n1, uint64_t n2, uint64_t m1, uint64_t m2);
 
+    public:
+        uint64_t get_n_ALIGNED() {
+            if((get_n()%ALIGN_TO) == 0) {
+                return get_n();
+            }
+            return get_n() - (get_n() % ALIGN_TO) + ALIGN_TO;
+        }
+
+        uint64_t get_m_ALIGNED() {
+            if((get_m()%ALIGN_TO) == 0) {
+                return get_m();
+            }
+            return get_m() - (get_m() % ALIGN_TO) + ALIGN_TO;
+        }
 
 
         DEFINE_VARIABLE(uint64_t,flags)
@@ -93,6 +108,8 @@ namespace Pricer {
         DEFINE_VARIABLE(Real_Ptr, sigmaAsqrtT)
         DEFINE_VARIABLE(Real_Ptr, emrt)
         DEFINE_VARIABLE(Real_Ptr, d2dx2_prep)
+        DEFINE_VARIABLE(Real_Ptr, ddx_price)
+        DEFINE_VARIABLE(Real_Ptr, d2dx2)
 
         DEFINE_VARIABLE(Int32_Ptr, to_structure)
         DEFINE_VARIABLE(Real_Ptr, offsets)
