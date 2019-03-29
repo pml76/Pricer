@@ -289,6 +289,12 @@ void tw_pricer( Pricer::pricer_context context ) {
         Real_Ptr price_) {            /// [out] d2
 */
 
+    if( (context.get_flags() & PRICER_FLAG_TW_PRICER ) != PRICER_FLAG_TW_PRICER ) {
+        std::cerr << "tw_pricer() called with improper context." << std::endl;
+        exit(-1);
+    }
+
+
     ASSUME(context.get_n_ALIGNED() % 64 == 0)
 
     ASSUME_ALIGNED(Real_Ptr ,context.get_x())
@@ -359,6 +365,11 @@ void ddx_tw_pricer( Pricer::pricer_context context ) {
         Real_Ptr ddx_price_) {
   */
 
+    if((context.get_flags() & PRICER_FLAG_TW_COMPUTE_DDX) != PRICER_FLAG_TW_COMPUTE_DDX ) {
+        std::cerr << "ddx_tw_pricer() called with improper context." << std::endl;
+        exit(-1);
+    }
+
     ASSUME(context.get_n_ALIGNED() % 64 == 0)
 
     ASSUME_ALIGNED(Real_Ptr ,context.get_long_short())
@@ -407,6 +418,11 @@ void d2dx2_tw_pricer( Pricer::pricer_context context ) {
 ) {
 
  */
+    if((context.get_flags() & PRICER_FLAG_TW_COMPUTE_D2DX2) != PRICER_FLAG_TW_COMPUTE_D2DX2) {
+        std::cerr << "d2dx2_tw_pricer() called with improper context." << std::endl;
+        exit(-1);
+    }
+
 
     ASSUME(context.get_n_ALIGNED() % 64 == 0)
 
@@ -461,6 +477,13 @@ void full_tw_pricer( Pricer::pricer_context context ) {
         Real_Ptr ddx_price_,
         Real_Ptr d2dx2_) {
 */
+
+    if((context.get_flags() & (PRICER_FLAG_TW_PRICER | PRICER_FLAG_TW_COMPUTE_DDX | PRICER_FLAG_TW_COMPUTE_D2DX2) ) !=
+            (PRICER_FLAG_TW_PRICER | PRICER_FLAG_TW_COMPUTE_DDX | PRICER_FLAG_TW_COMPUTE_D2DX2) ) {
+        std::cerr << "full_tw_pricer() called with improper context." << std::endl;
+        exit(-1);
+    }
+
     ASSUME(context.get_n_ALIGNED() % 64 == 0)
 
     ASSUME_ALIGNED(Real_Ptr ,context.get_x())

@@ -23,7 +23,7 @@
 #define MEM_ALLOC(type,n,p) {m__ ## n ## _max = Private::allocate_memory<type>(n * sizeof(type), &p); if (m__ ## n ## _max == 0) return;}
 #define COND_MEM_ALLOC(flag,type,n,p) {if((m__flags & flag) == flag) MEM_ALLOC(type,n,p) else p = nullptr;}
 
-#define MEM_REALLOC(type,type2, p) {type2 tmp; m__n_max=Private::allocate_memory<type>(n*sizeof(type),&tmp); if(m__n_max==0); std::memcpy(tmp,p,m__n); p=tmp;}
+#define MEM_REALLOC(type,type2, p) {type2 tmp; m__n_max=Private::allocate_memory<type>(n,&tmp); if(m__n_max==0); std::memcpy(tmp,p,m__n); p=tmp;}
 #define COND_MEM_REALLOC(flag, type, type2, p) {if((m__flags & flag) == flag) MEM_REALLOC(type,type2,p)}
 
 #define MEM_DEALLOC(type, p) {Private::deallocate_memory<type>(p);};
@@ -63,6 +63,10 @@ namespace Pricer {
         COND_MEM_ALLOC(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, FLOAT, m, m__xl_)
         COND_MEM_ALLOC(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, FLOAT, m, m__xh_)
 
+        COND_MEM_ALLOC(PRICER_FLAG_TW_COMPUTE_DDX, FLOAT, n, m__ddx_price)
+
+        COND_MEM_ALLOC(PRICER_FLAG_TW_COMPUTE_D2DX2, FLOAT, n, m__d2dx2)
+
         init_memory(0, m__n_max, 0, m__m_max);
 
     }
@@ -85,6 +89,10 @@ namespace Pricer {
         COND_MEM_DEALLOC(PRICER_FLAG_TW_PRICER, FLOAT, m__d2)
         COND_MEM_DEALLOC(PRICER_FLAG_TW_PRICER, FLOAT, m__prices)
         COND_MEM_DEALLOC(PRICER_FLAG_TW_PRICER, FLOAT, m__x)
+
+        COND_MEM_DEALLOC(PRICER_FLAG_TW_COMPUTE_DDX, FLOAT, m__ddx_price)
+
+        COND_MEM_DEALLOC(PRICER_FLAG_TW_COMPUTE_D2DX2, FLOAT, m__d2dx2)
 
     }
 
@@ -109,6 +117,10 @@ namespace Pricer {
         COND_MEM_REALLOC(PRICER_FLAG_TW_PRICER, FLOAT, Real_Ptr , m__d2)
         COND_MEM_REALLOC(PRICER_FLAG_TW_PRICER, FLOAT, Real_Ptr , m__prices)
         COND_MEM_REALLOC(PRICER_FLAG_TW_PRICER, FLOAT, Real_Ptr , m__x)
+
+        COND_MEM_REALLOC(PRICER_FLAG_TW_COMPUTE_DDX, FLOAT, Real_Ptr, m__ddx_price)
+
+        COND_MEM_REALLOC(PRICER_FLAG_TW_COMPUTE_D2DX2, FLOAT, Real_Ptr, m__d2dx2)
 
         init_memory(n_max_old, m__n_max, m_max_old, m__m_max);
     }
@@ -136,6 +148,10 @@ namespace Pricer {
 
             COND_MEM_INIT(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, m__to_structure,n,get_m_max()-1)
             COND_MEM_INIT(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, m__offsets,n,0.)
+
+            COND_MEM_INIT(PRICER_FLAG_TW_COMPUTE_DDX, m__ddx_price, n, 0.)
+
+            COND_MEM_INIT(PRICER_FLAG_TW_COMPUTE_D2DX2, m__d2dx2, n, 0.)
         }
 
         for(uint64_t m = m1; m < m2; ++m) {

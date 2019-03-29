@@ -29,8 +29,13 @@ namespace Pricer {
         template <typename T> inline
         uint64_t allocate_memory( int64_t length, T * __restrict__* ptr ) {
 
-            size_t size = (length / ALIGN_TO + 1) * ALIGN_TO;
-            *ptr = static_cast<T *>(aligned_alloc(ALIGN_TO, size));
+            size_t size;
+            if((length % ALIGN_TO) == 0 ) {
+                size = length;
+            } else {
+                size = length - (length % ALIGN_TO) + ALIGN_TO;
+            }
+            *ptr = static_cast<T *>(aligned_alloc(ALIGN_TO, size * sizeof(T)));
 
             if (*ptr)
                 return size;
@@ -50,7 +55,10 @@ namespace Pricer {
 #define DEFINE_VARIABLE(type,x) private:type m__ ## x; public:inline type& INLINE get_ ## x() {return m__ ## x;}
 
 #define PRICER_FLAG_TW_PRICER                           1
-#define PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES   2
+#define PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES   3  // in addition needs pricer tables
+#define PRICER_FLAG_TW_COMPUTE_DDX                      5  // in addition needs pricer tables
+#define PRICER_FLAG_TW_COMPUTE_D2DX2                    8
+
     class pricer_context {
 
     public:

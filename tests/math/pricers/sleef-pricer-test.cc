@@ -20,223 +20,232 @@
 #include <math/pricers/sleef_pricer.h>
 #include <math/pricers/Pricer.h>
 #include <pricer-dispatcher.h>
+#include <memory/context.h>
 
-
-#define DECLARE_AND_DEFINE(n, type, x, y) \
-   type x[n] __attribute__((aligned(ALIGN_TO))); \
+#define DECLARE_AND_DEFINE(n, x, y) \
    for(UINT64 i=0;i<n;i++) x[i]=y;
 
 TEST_CASE("pricer-class equals sleef-pricer (long call)", "[pricer]") {
 
-    DECLARE_AND_DEFINE(64,FLOAT, r, 0.01)
-    DECLARE_AND_DEFINE(64,FLOAT, s, 70.)
-    DECLARE_AND_DEFINE(64,FLOAT, t, 1.2)
-    DECLARE_AND_DEFINE(64,FLOAT, tau, 1. / 12.)
-    DECLARE_AND_DEFINE(64,FLOAT, sigma, 0.3)
-    DECLARE_AND_DEFINE(64,FLOAT, x, 72.)
+    Pricer::pricer_context context(PRICER_FLAG_TW_PRICER, ALIGN_TO,0);
 
-    DECLARE_AND_DEFINE(64,FLOAT, sigmaA, 0.)
-    DECLARE_AND_DEFINE(64,FLOAT, sigmaA2T2, 0.)
-    DECLARE_AND_DEFINE(64,FLOAT, sigmaAsqrtT, 0.)
-    DECLARE_AND_DEFINE(64,FLOAT, emrt, 0.)
-    DECLARE_AND_DEFINE(64,FLOAT, d2dx2_prep, 0.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_r(), 0.01)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_s(), 70.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_t(), 1.2)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_tau(), 1. / 12.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_sigma(), 0.3)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_x(), 72.)
 
-    DECLARE_AND_DEFINE(64,FLOAT, d1, 0.)
-    DECLARE_AND_DEFINE(64,FLOAT, d2, 0.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_sigmaA(), 0.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_sigmaA2T2(), 0.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_sigmaAsqrtT(), 0.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_emrt(), 0.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_d2dx2_prep(), 0.)
 
-    DECLARE_AND_DEFINE(64,FLOAT, price, 0.)
-    DECLARE_AND_DEFINE(64,FLOAT, put_call, 1)
-    DECLARE_AND_DEFINE(64,FLOAT, long_short, 1)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_d1(), 0.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_d2(), 0.)
+
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_prices(), 0.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_put_call(), 1)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_long_short(), 1)
 
 
     Vortex::Pricer p;
 
 
-    p.set_market_data(sigma[0], t[0], tau[0], r[0], s[0]);
+    p.set_market_data(context.get_sigma()[0], context.get_t()[0], context.get_tau()[0],
+            context.get_r()[0], context.get_s()[0]);
 
     init_tw_pricer();
 
-    prepare_tw_pricer(64, s, sigma, t, tau, r,
-                         sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep);
+    prepare_tw_pricer(context);
 
 
 
     // test long call price
-    tw_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price);
-    FLOAT reference_pricer_value = p.compute_call_price(x[0]);
-    REQUIRE(abs(reference_pricer_value - price[0]) < 1.0e-8);
+    tw_pricer(context);
+    FLOAT reference_pricer_value = p.compute_call_price(context.get_x()[0]);
+    REQUIRE(abs(reference_pricer_value - context.get_prices()[0]) < 1.0e-8);
 
 }
 
 TEST_CASE("pricer-class equals sleef-pricer (short call)", "[pricer]") {
 
-    DECLARE_AND_DEFINE(64,FLOAT, r, 0.01)
-    DECLARE_AND_DEFINE(64,FLOAT, s, 70.)
-    DECLARE_AND_DEFINE(64,FLOAT, t, 1.2)
-    DECLARE_AND_DEFINE(64,FLOAT, tau, 1. / 12.)
-    DECLARE_AND_DEFINE(64,FLOAT, sigma, 0.3)
-    DECLARE_AND_DEFINE(64,FLOAT, x, 72.)
+    Pricer::pricer_context context(PRICER_FLAG_TW_PRICER, ALIGN_TO,0);
 
-    DECLARE_AND_DEFINE(64,FLOAT, sigmaA, 0.)
-    DECLARE_AND_DEFINE(64,FLOAT, sigmaA2T2, 0.)
-    DECLARE_AND_DEFINE(64,FLOAT, sigmaAsqrtT, 0.)
-    DECLARE_AND_DEFINE(64,FLOAT, emrt, 0.)
-    DECLARE_AND_DEFINE(64,FLOAT, d2dx2_prep, 0.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_r(), 0.01)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_s(), 70.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_t(), 1.2)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_tau(), 1. / 12.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_sigma(), 0.3)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_x(), 72.)
 
-    DECLARE_AND_DEFINE(64,FLOAT, d1, 0.)
-    DECLARE_AND_DEFINE(64,FLOAT, d2, 0.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_sigmaA(), 0.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_sigmaA2T2(), 0.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_sigmaAsqrtT(), 0.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_emrt(), 0.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_d2dx2_prep(), 0.)
 
-    DECLARE_AND_DEFINE(64,FLOAT, price, 0.)
-    DECLARE_AND_DEFINE(64,FLOAT, put_call, 1)
-    DECLARE_AND_DEFINE(64,FLOAT, long_short, -1)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_d1(), 0.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_d2(), 0.)
+
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_prices(), 0.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_put_call(), 1)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_long_short(), -1)
 
 
     Vortex::Pricer p;
 
 
-    p.set_market_data(sigma[0], t[0], tau[0], r[0], s[0]);
+    p.set_market_data(context.get_sigma()[0], context.get_t()[0], context.get_tau()[0],
+                      context.get_r()[0], context.get_s()[0]);
 
     init_tw_pricer();
 
-    prepare_tw_pricer(64, s, sigma, t, tau, r,
-                         sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep);
+    prepare_tw_pricer(context);
 
 
 
     // test long call price
-    tw_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price);
-    FLOAT reference_pricer_value = p.compute_call_price(x[0]);
-    REQUIRE(abs(reference_pricer_value + price[0]) < 1.0e-8);
+    tw_pricer(context);
+    FLOAT reference_pricer_value = p.compute_call_price(context.get_x()[0]);
+    REQUIRE(abs(reference_pricer_value + context.get_prices()[0]) < 1.0e-8);
 
 }
 
 TEST_CASE("pricer-class equals sleef-pricer (long put)", "[pricer]") {
 
-    DECLARE_AND_DEFINE(64,FLOAT, r, 0.01)
-    DECLARE_AND_DEFINE(64,FLOAT, s, 70.)
-    DECLARE_AND_DEFINE(64,FLOAT, t, 1.2)
-    DECLARE_AND_DEFINE(64,FLOAT, tau, 1. / 12.)
-    DECLARE_AND_DEFINE(64,FLOAT, sigma, 0.3)
-    DECLARE_AND_DEFINE(64,FLOAT, x, 72.)
+    Pricer::pricer_context context(PRICER_FLAG_TW_PRICER, ALIGN_TO,0);
 
-    DECLARE_AND_DEFINE(64,FLOAT, sigmaA, 0.)
-    DECLARE_AND_DEFINE(64,FLOAT, sigmaA2T2, 0.)
-    DECLARE_AND_DEFINE(64,FLOAT, sigmaAsqrtT, 0.)
-    DECLARE_AND_DEFINE(64,FLOAT, emrt, 0.)
-    DECLARE_AND_DEFINE(64,FLOAT, d2dx2_prep, 0.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_r(), 0.01)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_s(), 70.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_t(), 1.2)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_tau(), 1. / 12.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_sigma(), 0.3)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_x(), 72.)
 
-    DECLARE_AND_DEFINE(64,FLOAT, d1, 0.)
-    DECLARE_AND_DEFINE(64,FLOAT, d2, 0.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_sigmaA(), 0.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_sigmaA2T2(), 0.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_sigmaAsqrtT(), 0.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_emrt(), 0.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_d2dx2_prep(), 0.)
 
-    DECLARE_AND_DEFINE(64,FLOAT, price, 0.)
-    DECLARE_AND_DEFINE(64,FLOAT, put_call, -1)
-    DECLARE_AND_DEFINE(64,FLOAT, long_short, 1)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_d1(), 0.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_d2(), 0.)
+
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_prices(), 0.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_put_call(), -1)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_long_short(), 1)
 
 
     Vortex::Pricer p;
 
 
-    p.set_market_data(sigma[0], t[0], tau[0], r[0], s[0]);
+    p.set_market_data(context.get_sigma()[0], context.get_t()[0], context.get_tau()[0],
+                      context.get_r()[0], context.get_s()[0]);
 
     init_tw_pricer();
 
-    prepare_tw_pricer(64, s, sigma, t, tau, r,
-                         sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep);
+    prepare_tw_pricer(context);
 
 
 
     // test long call price
-    tw_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price);
-    FLOAT reference_pricer_value = p.compute_put_price(x[0]);
-    REQUIRE(abs(reference_pricer_value - price[0]) < 1.0e-8);
+    tw_pricer(context);
+    FLOAT reference_pricer_value = p.compute_put_price(context.get_x()[0]);
+    REQUIRE(abs(reference_pricer_value - context.get_prices()[0]) < 1.0e-8);
 
 }
 
 TEST_CASE("pricer-class equals sleef-pricer (short put)", "[pricer]") {
 
-    DECLARE_AND_DEFINE(64,FLOAT, r, 0.01)
-    DECLARE_AND_DEFINE(64,FLOAT, s, 70.)
-    DECLARE_AND_DEFINE(64,FLOAT, t, 1.2)
-    DECLARE_AND_DEFINE(64,FLOAT, tau, 1. / 12.)
-    DECLARE_AND_DEFINE(64,FLOAT, sigma, 0.3)
-    DECLARE_AND_DEFINE(64,FLOAT, x, 72.)
+    Pricer::pricer_context context(PRICER_FLAG_TW_PRICER, ALIGN_TO,0);
 
-    DECLARE_AND_DEFINE(64,FLOAT, sigmaA, 0.)
-    DECLARE_AND_DEFINE(64,FLOAT, sigmaA2T2, 0.)
-    DECLARE_AND_DEFINE(64,FLOAT, sigmaAsqrtT, 0.)
-    DECLARE_AND_DEFINE(64,FLOAT, emrt, 0.)
-    DECLARE_AND_DEFINE(64,FLOAT, d2dx2_prep, 0.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_r(), 0.01)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_s(), 70.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_t(), 1.2)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_tau(), 1. / 12.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_sigma(), 0.3)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_x(), 72.)
 
-    DECLARE_AND_DEFINE(64,FLOAT, d1, 0.)
-    DECLARE_AND_DEFINE(64,FLOAT, d2, 0.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_sigmaA(), 0.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_sigmaA2T2(), 0.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_sigmaAsqrtT(), 0.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_emrt(), 0.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_d2dx2_prep(), 0.)
 
-    DECLARE_AND_DEFINE(64,FLOAT, price, 0.)
-    DECLARE_AND_DEFINE(64,FLOAT, put_call, -1)
-    DECLARE_AND_DEFINE(64,FLOAT, long_short, -1)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_d1(), 0.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_d2(), 0.)
+
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_prices(), 0.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_put_call(), -1)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_long_short(), -1)
 
 
     Vortex::Pricer p;
 
 
-    p.set_market_data(sigma[0], t[0], tau[0], r[0], s[0]);
+    p.set_market_data(context.get_sigma()[0], context.get_t()[0], context.get_tau()[0],
+                      context.get_r()[0], context.get_s()[0]);
 
     init_tw_pricer();
 
-    prepare_tw_pricer(64, s, sigma, t, tau, r,
-                         sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep);
+    prepare_tw_pricer(context);
 
 
 
     // test long call price
-    tw_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price);
-    FLOAT reference_pricer_value = p.compute_put_price(x[0]);
+    tw_pricer(context);
+    FLOAT reference_pricer_value = p.compute_put_price(context.get_x()[0]);
 
-    REQUIRE(abs(reference_pricer_value + price[0]) < 1.0e-8);
+    REQUIRE(abs(reference_pricer_value + context.get_prices()[0]) < 1.0e-8);
 
 }
 
 
 TEST_CASE("pricer-class equals ddx-tw-pricer (long call)", "[pricer]") {
 
-    DECLARE_AND_DEFINE(64,FLOAT, r, 0.01)
-    DECLARE_AND_DEFINE(64,FLOAT, s, 70.)
-    DECLARE_AND_DEFINE(64,FLOAT, t, 1.2)
-    DECLARE_AND_DEFINE(64,FLOAT, tau, 1. / 12.)
-    DECLARE_AND_DEFINE(64,FLOAT, sigma, 0.3)
-    DECLARE_AND_DEFINE(64,FLOAT, x, 72.)
+    Pricer::pricer_context context(PRICER_FLAG_TW_COMPUTE_DDX, ALIGN_TO,0);
 
-    DECLARE_AND_DEFINE(64,FLOAT, sigmaA, 0.)
-    DECLARE_AND_DEFINE(64,FLOAT, sigmaA2T2, 0.)
-    DECLARE_AND_DEFINE(64,FLOAT, sigmaAsqrtT, 0.)
-    DECLARE_AND_DEFINE(64,FLOAT, emrt, 0.)
-    DECLARE_AND_DEFINE(64,FLOAT, d2dx2_prep, 0.)
-    DECLARE_AND_DEFINE(64,FLOAT, ddx_price, 0.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_r(), 0.01)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_s(), 70.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_t(), 1.2)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_tau(), 1. / 12.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_sigma(), 0.3)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_x(), 72.)
 
-    DECLARE_AND_DEFINE(64,FLOAT, d1, 0.)
-    DECLARE_AND_DEFINE(64,FLOAT, d2, 0.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_sigmaA(), 0.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_sigmaA2T2(), 0.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_sigmaAsqrtT(), 0.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_emrt(), 0.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_d2dx2_prep(), 0.)
 
-    DECLARE_AND_DEFINE(64,FLOAT, price, 0.)
-    DECLARE_AND_DEFINE(64,FLOAT, long_short, 1)
-    DECLARE_AND_DEFINE(64,FLOAT, put_call, 1)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_d1(), 0.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_d2(), 0.)
+
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_prices(), 0.)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_put_call(), 1)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_long_short(), 1)
 
     const FLOAT eps = 1.0e-10;
-
     Vortex::Pricer p;
 
-    p.set_market_data(sigma[0], t[0], tau[0], r[0], s[0]);
+
+    p.set_market_data(context.get_sigma()[0], context.get_t()[0], context.get_tau()[0],
+                      context.get_r()[0], context.get_s()[0]);
 
     init_tw_pricer();
-    prepare_tw_pricer(64, s, sigma, t, tau, r,
-                         sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep);
+
+    prepare_tw_pricer(context);
 
 
     // test long call price
-    tw_pricer(64, long_short, put_call, s, x, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price);
-    ddx_tw_pricer(64, long_short, put_call, d2, emrt, ddx_price);
-    FLOAT reference_pricer_value1 = p.compute_call_price(x[0]);
-    FLOAT reference_pricer_value2 = p.compute_call_price(x[0] + eps);
+    tw_pricer(context);
+    ddx_tw_pricer(context);
+    FLOAT reference_pricer_value1 = p.compute_call_price(context.get_x()[0]);
+    FLOAT reference_pricer_value2 = p.compute_call_price(context.get_x()[0] + eps);
 
-    REQUIRE(abs((reference_pricer_value2 - reference_pricer_value1) / eps - ddx_price[0]) < 1.0e-4);
+    REQUIRE(abs((reference_pricer_value2 - reference_pricer_value1) / eps - context.get_ddx_price()[0]) < 1.0e-4);
 
 }
 
