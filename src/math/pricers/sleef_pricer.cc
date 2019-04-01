@@ -617,7 +617,7 @@ void compute_tw_strikes_from_premiums( Pricer::pricer_context context ) {
     // respectively.
 #pragma omp parallel
     {
-        vdouble tmp, tmp1, tmp2, tmp3, tmp4, x, xl, xh, s, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price;
+        vdouble tmp1, tmp2, tmp3, tmp4, x, s, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price;
         vdouble long_short, put_call;
 
 
