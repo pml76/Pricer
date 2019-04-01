@@ -57,7 +57,7 @@ namespace Pricer {
 #define PRICER_FLAG_TW_PRICER                           1
 #define PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES   3  // in addition needs pricer tables
 #define PRICER_FLAG_TW_COMPUTE_DDX                      5  // in addition needs pricer tables
-#define PRICER_FLAG_TW_COMPUTE_D2DX2                    8
+#define PRICER_FLAG_TW_COMPUTE_D2DX2                    13 // in addition needs pricer- and ddx-tables
 
     class pricer_context {
 

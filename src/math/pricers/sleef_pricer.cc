@@ -613,6 +613,75 @@ void compute_tw_strikes_from_premiums( Pricer::pricer_context context ) {
     vdouble err;
     double buffer[sizeof(vdouble)/ sizeof(double)] __attribute__((aligned(ALIGN_TO)));
 
+    // fill the instrument_priceh and instrument_pricel arrays with the prices evaluated at xh_ and xl_,
+    // respectively.
+#pragma omp parallel
+    {
+        vdouble tmp, tmp1, tmp2, tmp3, tmp4, x, xl, xh, s, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price;
+        vdouble long_short, put_call;
+
+
+        uint64_t tid = omp_get_thread_num();
+        uint64_t num_threads = omp_get_num_threads();
+        uint64_t n2 = context.get_n_ALIGNED() / (64 / sizeof(double));
+        uint64_t n_begin = ((tid * n2) / num_threads) * (64 / sizeof(double));
+        uint64_t n_end = (((tid + 1) * n2) / num_threads) * (64 / sizeof(double));
+
+        for (uint64_t i = n_begin; i < n_end; i += sizeof(vdouble) / sizeof(double)) {
+
+            s = vload_vd_p(&context.get_s()[i]);
+            x = vload_vd_p(&context.get_xh_()[i]);
+            sigmaA2T2 = vload_vd_p(&context.get_sigmaA2T2()[i]);
+            sigmaAsqrtT = vload_vd_p(&context.get_sigmaAsqrtT()[i]);
+            emrt = vload_vd_p(&context.get_emrt()[i]);
+            long_short = vload_vd_p(&context.get_long_short()[i]);
+            put_call = vload_vd_p(&context.get_put_call()[i]);
+
+
+            tmp2 = xlog(vdiv_vd_vd_vd(s, x));
+            d1 = vdiv_vd_vd_vd(vadd_vd_vd_vd(tmp2, sigmaA2T2), vmul_vd_vd_vd(sigmaAsqrtT, msqrt2));
+            d2 = vsub_vd_vd_vd(d1, vdiv_vd_vd_vd(sigmaAsqrtT, msqrt2));
+
+            tmp3 = vmul_vd_vd_vd(put_call, d1);
+            tmp4 = vmul_vd_vd_vd(put_call, d2);
+
+            tmp1 = xerfc_u15(tmp3);
+            tmp2 = xerfc_u15(tmp4);
+
+            price = vsub_vd_vd_vd(
+                    vmul_vd_vd_vd(put_call, vmul_vd_vd_vd(s, tmp1)),
+                    vmul_vd_vd_vd(put_call, vmul_vd_vd_vd(x, tmp2)));
+            price = vmul_vd_vd_vd(vmul_vd_vd_vd(emrt, long_short), price);
+
+            vstore_v_p_vd(&context.get_instrument_pricesh()[i], price);
+
+
+
+            x = vload_vd_p(&context.get_xl_()[i]);
+
+            tmp2 = xlog(vdiv_vd_vd_vd(s, x));
+            d1 = vdiv_vd_vd_vd(vadd_vd_vd_vd(tmp2, sigmaA2T2), vmul_vd_vd_vd(sigmaAsqrtT, msqrt2));
+            d2 = vsub_vd_vd_vd(d1, vdiv_vd_vd_vd(sigmaAsqrtT, msqrt2));
+
+            tmp3 = vmul_vd_vd_vd(put_call, d1);
+            tmp4 = vmul_vd_vd_vd(put_call, d2);
+
+            tmp1 = xerfc_u15(tmp3);
+            tmp2 = xerfc_u15(tmp4);
+
+            price = vsub_vd_vd_vd(
+                    vmul_vd_vd_vd(put_call, vmul_vd_vd_vd(s, tmp1)),
+                    vmul_vd_vd_vd(put_call, vmul_vd_vd_vd(x, tmp2)));
+            price = vmul_vd_vd_vd(vmul_vd_vd_vd(emrt, long_short), price);
+
+            vstore_v_p_vd(&context.get_instrument_pricesl()[i], price);
+
+        }
+
+
+    }
+
+
     do {
         err = zero;
 #pragma omp parallel
@@ -632,7 +701,6 @@ void compute_tw_strikes_from_premiums( Pricer::pricer_context context ) {
             uint64_t n2 = context.get_n_ALIGNED() / (64 / sizeof(double));
             uint64_t n_begin = ((tid * n2) / num_threads) * (64 / sizeof(double));
             uint64_t n_end = (((tid + 1) * n2) / num_threads) * (64 / sizeof(double));
-
 
 
             for (uint64_t i = n_begin; i < n_end; i += sizeof(vdouble) / sizeof(double)) {
