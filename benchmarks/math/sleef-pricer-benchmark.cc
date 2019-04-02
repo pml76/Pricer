@@ -33,36 +33,7 @@ typedef double *__restrict__ __attribute__((aligned(ALIGN_TO))) Real_Ptr;
 
 static void BM_Pricer_Sleef(benchmark::State &state) {
 
-
-    Real_Ptr ss = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
-    Real_Ptr xs = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
-    Real_Ptr rs = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
-    Real_Ptr sigmas = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
-    Real_Ptr ts = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
-    Real_Ptr taus = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
-    Real_Ptr prices = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
-    Real_Ptr long_short = (Real_Ptr) aligned_alloc(ALIGN_TO,
-                                                   ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
-    Real_Ptr put_call = (Real_Ptr) aligned_alloc(ALIGN_TO,
-                                                 ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
-
-    Real_Ptr tmp1 = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
-    Real_Ptr tmp2 = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
-    Real_Ptr tmp3 = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
-    Real_Ptr tmp4 = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
-    Real_Ptr tmp5 = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
-
-    Real_Ptr sigmaA = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
-    Real_Ptr sigmaA2T2 = (Real_Ptr) aligned_alloc(ALIGN_TO,
-                                                  ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
-    Real_Ptr sigmaAsqrtT = (Real_Ptr) aligned_alloc(ALIGN_TO,
-                                                    ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
-    Real_Ptr emrt = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
-    Real_Ptr d1 = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
-    Real_Ptr d2 = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
-
-    Real_Ptr d2dx2_prep = (Real_Ptr) aligned_alloc(ALIGN_TO,
-                                                   ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
+    Pricer::pricer_context context(PRICER_FLAG_TW_PRICER, state.range(0));
 
 
     // First create an instance of an engine.
@@ -106,73 +77,29 @@ static void BM_Pricer_Sleef(benchmark::State &state) {
 
         state.PauseTiming();
 
-        prices[0] = prices[0] / 2;
-        std::generate(ss, &ss[state.range(0)], ss_gen);
-        std::generate(xs, &xs[state.range(0)], ss_gen);
-        std::generate(rs, &rs[state.range(0)], rs_gen);
-        std::generate(sigmas, &sigmas[state.range(0)], sigmas_gen);
-        std::generate(ts, &ts[state.range(0)], ts_gen);
-        std::generate(taus, &taus[state.range(0)], taus_gen);
-        std::generate(long_short, &long_short[state.range(0)], flags_gen);
-        std::generate(put_call, &put_call[state.range(0)], flags_gen);
+        context.get_prices()[0] = context.get_prices()[0] / 2;
+        std::generate(context.get_s(), &context.get_s()[state.range(0)], ss_gen);
+        std::generate(context.get_x(), &context.get_x()[state.range(0)], ss_gen);
+        std::generate(context.get_r(), &context.get_r()[state.range(0)], rs_gen);
+        std::generate(context.get_sigma(), &context.get_sigma()[state.range(0)], sigmas_gen);
+        std::generate(context.get_t(), &context.get_t()[state.range(0)], ts_gen);
+        std::generate(context.get_tau(), &context.get_tau()[state.range(0)], taus_gen);
+        std::generate(context.get_long_short(), &context.get_long_short()[state.range(0)], flags_gen);
+        std::generate(context.get_put_call(), &context.get_put_call()[state.range(0)], flags_gen);
 
-        for (UINT64 i = 0; i < state.range(0); ++i) {
-            ts[i] += taus[i];
+        for (int64_t i = 0; i < state.range(0); ++i) {
+            context.get_t()[i] += context.get_tau()[i];
         }
 
         init_tw_pricer();
 
-        prepare_tw_pricer(
-                state.range(0),
-                ss,
-                sigmas,
-                ts,
-                taus,
-                rs,
-                sigmaA,
-                sigmaA2T2,
-                sigmaAsqrtT,
-                emrt,
-                d2dx2_prep);
+        prepare_tw_pricer(context);
 
         state.ResumeTiming();
 
-        tw_pricer(
-                state.range(0),
-                long_short,
-                put_call,
-                ss,
-                xs,
-                sigmaA2T2,
-                sigmaAsqrtT,
-                emrt,
-                d1,
-                d2,
-                prices);
+        tw_pricer(context);
 
     }
-
-    free(ss);
-    free(xs);
-    free(rs);
-    free(sigmas);
-    free(ts);
-    free(taus);
-    free(prices);
-    free(put_call);
-    free(long_short);
-    free(tmp1);
-    free(tmp2);
-    free(tmp3);
-    free(tmp4);
-    free(tmp5);
-    free(sigmaA);
-    free(sigmaA2T2);
-    free(sigmaAsqrtT);
-    free(emrt);
-    free(d1);
-    free(d2);
-    free(d2dx2_prep);
 
 
 }
@@ -183,37 +110,7 @@ BENCHMARK(BM_Pricer_Sleef)->Arg(1 << 20)->Arg(1 << 21)->Arg(1 << 22);
 static void BM_Pricer_Full_Sleef(benchmark::State &state) {
 
 
-    Real_Ptr ss = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
-    Real_Ptr xs = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
-    Real_Ptr rs = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
-    Real_Ptr sigmas = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
-    Real_Ptr ts = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
-    Real_Ptr taus = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
-    Real_Ptr prices = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
-    Real_Ptr long_short = (Real_Ptr) aligned_alloc(ALIGN_TO,
-                                                   ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
-    Real_Ptr put_call = (Real_Ptr) aligned_alloc(ALIGN_TO,
-                                                 ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
-
-    Real_Ptr tmp1 = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
-    Real_Ptr tmp2 = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
-    Real_Ptr tmp3 = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
-    Real_Ptr tmp4 = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
-    Real_Ptr tmp5 = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
-
-    Real_Ptr sigmaA = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
-    Real_Ptr sigmaA2T2 = (Real_Ptr) aligned_alloc(ALIGN_TO,
-                                                  ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
-    Real_Ptr sigmaAsqrtT = (Real_Ptr) aligned_alloc(ALIGN_TO,
-                                                    ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
-    Real_Ptr emrt = (Real_Ptr) aligned_alloc(ALIGN_TO, ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
-    Real_Ptr ddx_prices = (Real_Ptr) aligned_alloc(ALIGN_TO,
-                                                   ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
-    Real_Ptr d2dx2_prices = (Real_Ptr) aligned_alloc(ALIGN_TO,
-                                                     ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
-
-    Real_Ptr d2dx2_prep = (Real_Ptr) aligned_alloc(ALIGN_TO,
-                                                   ((sizeof(FLOAT) * state.range(0)) / ALIGN_TO + 1) * ALIGN_TO);
+    Pricer::pricer_context context(PRICER_FLAG_TW_COMPUTE_D2DX2, state.range(0));
 
 
     // First create an instance of an engine.
@@ -257,75 +154,29 @@ static void BM_Pricer_Full_Sleef(benchmark::State &state) {
 
         state.PauseTiming();
 
-        prices[0] = prices[0] / 2;
-        std::generate(ss, &ss[state.range(0)], ss_gen);
-        std::generate(xs, &xs[state.range(0)], ss_gen);
-        std::generate(rs, &rs[state.range(0)], rs_gen);
-        std::generate(sigmas, &sigmas[state.range(0)], sigmas_gen);
-        std::generate(ts, &ts[state.range(0)], ts_gen);
-        std::generate(taus, &taus[state.range(0)], taus_gen);
-        std::generate(long_short, &long_short[state.range(0)], flags_gen);
-        std::generate(put_call, &put_call[state.range(0)], flags_gen);
+        context.get_prices()[0] = context.get_prices()[0] / 2;
+        std::generate(context.get_s(), &context.get_s()[state.range(0)], ss_gen);
+        std::generate(context.get_x(), &context.get_x()[state.range(0)], ss_gen);
+        std::generate(context.get_r(), &context.get_r()[state.range(0)], rs_gen);
+        std::generate(context.get_sigma(), &context.get_sigma()[state.range(0)], sigmas_gen);
+        std::generate(context.get_t(), &context.get_t()[state.range(0)], ts_gen);
+        std::generate(context.get_tau(), &context.get_tau()[state.range(0)], taus_gen);
+        std::generate(context.get_long_short(), &context.get_long_short()[state.range(0)], flags_gen);
+        std::generate(context.get_put_call(), &context.get_put_call()[state.range(0)], flags_gen);
 
-        for (UINT64 i = 0; i < state.range(0); ++i) {
-            ts[i] += taus[i];
+        for (int64_t i = 0; i < state.range(0); ++i) {
+            context.get_t()[i] += context.get_tau()[i];
         }
 
         init_tw_pricer();
 
-        prepare_tw_pricer(
-                state.range(0),
-                ss,
-                sigmas,
-                ts,
-                taus,
-                rs,
-                sigmaA,
-                sigmaA2T2,
-                sigmaAsqrtT,
-                emrt,
-                d2dx2_prep);
+        prepare_tw_pricer(context);
 
         state.ResumeTiming();
 
-        full_tw_pricer(
-                state.range(0),
-                long_short,
-                put_call,
-                ss,
-                xs,
-                sigmaA2T2,
-                sigmaAsqrtT,
-                emrt,
-                d2dx2_prep,
-                prices,
-                ddx_prices,
-                d2dx2_prices);
+        full_tw_pricer(context);
 
     }
-
-    free(ss);
-    free(xs);
-    free(rs);
-    free(sigmas);
-    free(ts);
-    free(taus);
-    free(prices);
-    free(put_call);
-    free(long_short);
-    free(tmp1);
-    free(tmp2);
-    free(tmp3);
-    free(tmp4);
-    free(tmp5);
-    free(sigmaA);
-    free(sigmaA2T2);
-    free(sigmaAsqrtT);
-    free(emrt);
-    free(ddx_prices);
-    free(d2dx2_prices);
-    free(d2dx2_prep);
-
 
 }
 // Register the function as a benchmark

@@ -20,8 +20,8 @@
 #include <cstring>
 
 
-#define MEM_ALLOC(type,n,p) {m__ ## n ## _max = Private::allocate_memory<type>(n * sizeof(type), &p); if (m__ ## n ## _max == 0) return;}
-#define COND_MEM_ALLOC(flag,type,n,p) {if((m__flags & flag) == flag) MEM_ALLOC(type,n,p) else p = nullptr;}
+#define MEM_ALLOC(type,n,p) {m__ ## n ## _max = Private::allocate_memory<type>(n, &p); if (m__ ## n ## _max == 0) return;}
+#define COND_MEM_ALLOC(flag,type,n,p) {if((m__flags & flag) == flag) MEM_ALLOC(type,n,p) else {p = nullptr;}}
 
 #define MEM_REALLOC(type,type2, p) {type2 tmp; m__n_max=Private::allocate_memory<type>(n,&tmp); if(m__n_max==0); std::memcpy(tmp,p,m__n); p=tmp;}
 #define COND_MEM_REALLOC(flag, type, type2, p) {if((m__flags & flag) == flag) MEM_REALLOC(type,type2,p)}
@@ -34,6 +34,8 @@
 
 namespace Pricer {
     void pricer_context::alloc_mem(uint64_t n, uint64_t m) {
+
+
         MEM_ALLOC(FLOAT, n, m__s)
         MEM_ALLOC(FLOAT, n, m__sigma)
         MEM_ALLOC(FLOAT, n, m__t)
@@ -165,6 +167,6 @@ namespace Pricer {
         }
 
     }
-
+    // eiae
 
 }

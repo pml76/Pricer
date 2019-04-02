@@ -64,7 +64,7 @@ namespace Pricer {
     public:
         pricer_context(uint64_t flags, uint64_t n_max, uint64_t m_max = 0) :
             m__flags(flags),
-            m__n(0), m__m(0) {
+            m__n(0), m__m(0), m__m_max(0), m__n_max(0) {
                 alloc_mem(n_max, m_max);
         }
 
@@ -81,20 +81,6 @@ namespace Pricer {
         void init_memory(uint64_t n1, uint64_t n2, uint64_t m1, uint64_t m2);
 
     public:
-        uint64_t get_n_ALIGNED() {
-            if((get_n()%ALIGN_TO) == 0) {
-                return get_n();
-            }
-            return get_n() - (get_n() % ALIGN_TO) + ALIGN_TO;
-        }
-
-        uint64_t get_m_ALIGNED() {
-            if((get_m()%ALIGN_TO) == 0) {
-                return get_m();
-            }
-            return get_m() - (get_m() % ALIGN_TO) + ALIGN_TO;
-        }
-
 
         DEFINE_VARIABLE(uint64_t,flags)
         DEFINE_VARIABLE(uint64_t, n_max)

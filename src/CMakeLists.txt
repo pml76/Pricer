@@ -12,11 +12,12 @@ set(TARGET_PRICER_MKL_HEADERS
         )
 
 set(TARGET_PRICER_SOURCES
-        math/pricers/sleef_pricer.cc memory/context.cc math/IO/R/R-IO.cc)
+        math/pricers/sleef_pricer.cc )
 
 set(TARGET_PRICER_HEADERS
         math/pricers/pricer-base.h
-        math/pricers/sleef_pricer.h memory/context.h math/IO/R/R-IO.h)
+        math/pricers/sleef_pricer.h
+        memory/context.h )
 
 
 set(FUNCTION_NAMES
@@ -33,27 +34,27 @@ set(INIT_TW_PRICER_ARGUMENT_TYPES
 
 set(TW_PRICER_ARGUMENT_TYPES
         void
-        Pricer::pricer_context )
+        Pricer::pricer_context& )
 
 set(PREPARE_TW_PRICER_ARGUMENT_TYPES
         void
-        Pricer::pricer_context )
+        Pricer::pricer_context& )
 
 set( DDX_TW_PRICER_ARGUMENT_TYPES
         void
-        Pricer::pricer_context )
+        Pricer::pricer_context& )
 
 set( D2DX2_TW_PRICER_ARGUMENT_TYPES
         void
-        Pricer::pricer_context )
+        Pricer::pricer_context& )
 
 set( FULL_TW_PRICER_ARGUMENT_TYPES
         void
-        Pricer::pricer_context )
+        Pricer::pricer_context& )
 
 set( COMPUTE_TW_STRIKES_FROM_PREMIUMS_ARGUMENT_TYPES
         void
-        Pricer::pricer_context )
+        Pricer::pricer_context& )
 
 
 
@@ -168,6 +169,8 @@ foreach(SIMD ${PRICER_SUPPORTED_EXTENSIONS})
 endforeach()
 file(APPEND ${CMAKE_BINARY_DIR}/dispatcher.cc " return \"n/a\";\n}\n\n")
 
+file(APPEND ${CMAKE_BINARY_DIR}/dispatcher.cc "}\n\n")
+
 foreach(FUNCTION_NAME ${FUNCTION_NAMES})
     STRING(TOUPPER ${FUNCTION_NAME} FUNCTION_ARG)
     foreach(SIMD ${PRICER_SUPPORTED_EXTENSIONS})
@@ -189,7 +192,6 @@ foreach(FUNCTION_NAME ${FUNCTION_NAMES})
     endforeach()
 endforeach()
 
-file(APPEND ${CMAKE_BINARY_DIR}/dispatcher.cc "}\n\n")
 
 
 foreach(SIMD ${PRICER_SUPPORTED_EXTENSIONS})
@@ -249,7 +251,7 @@ add_library(${TARGET_LIBPRICER}
         ${CMAKE_BINARY_DIR}/pricer-dispatcher.h
         ${TARGET_PRICER_MKL_SOURCES}
         ${TARGET_PRICER_MKL_HEADERS}
-        ${MEMORY_SOURSES}
+        ${MEMORY_SOURCES}
         ${MEMORY_HEADERS}
         ${ASMLIB_SOURCES})
 target_include_directories(${TARGET_LIBPRICER} PRIVATE

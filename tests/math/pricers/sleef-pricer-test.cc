@@ -635,87 +635,16 @@ TEST_CASE("compute_tw_tsrikes_from_premiums() --- (1)", "[pricer]") {
 
 
     for(int32_t i = 0; i < 64; ++i) {
-        to_structure[i] = i;
+        context.get_to_structure()[i] = i;
     }
 
-    compute_tw_strikes_from_premiums(
-            64,long_short, put_call, s, sigmaA2T2, sigmaAsqrtT, emrt, to_structure, offsets, prices, x_tmp,
-            64,premiums,instrument_prices, instrument_pricesl, instrument_pricesh, x, xl, xh);
+    compute_tw_strikes_from_premiums(context);
 
-    tw_pricer(64, long_short, put_call, s, xl, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, instrument_pricesl);
-    tw_pricer(64, long_short, put_call, s, xh, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, instrument_pricesh);
-
-    REQUIRE(abs(instrument_pricesl[0] - premiums[0]) < 1.0e-4);
-    REQUIRE(abs(instrument_pricesh[0] - premiums[0]) < 1.0e-4);
+    REQUIRE(abs(context.get_instrument_pricesl()[0] - context.get_premiums()[0]) < 1.0e-4);
+    REQUIRE(abs(context.get_instrument_pricesh()[0] - context.get_premiums()[0]) < 1.0e-4);
 
 }
 
-TEST_CASE("compute_tw_tsrikes_from_premiums() --- (2)", "[pricer]") {
-    DECLARE_AND_DEFINE(128,FLOAT, r, 0.01)
-    DECLARE_AND_DEFINE(128,FLOAT, s, 70.)
-    DECLARE_AND_DEFINE(128,FLOAT, t, 1.2)
-    DECLARE_AND_DEFINE(128,FLOAT, tau, 1. / 12.)
-    DECLARE_AND_DEFINE(128,FLOAT, sigma, 0.3)
-    DECLARE_AND_DEFINE(128,FLOAT, x, 72.)
-
-    DECLARE_AND_DEFINE(128,FLOAT, sigmaA, 0.)
-    DECLARE_AND_DEFINE(128,FLOAT, sigmaA2T2, 0.)
-    DECLARE_AND_DEFINE(128,FLOAT, sigmaAsqrtT, 0.)
-    DECLARE_AND_DEFINE(128,FLOAT, emrt, 0.)
-    DECLARE_AND_DEFINE(128,FLOAT, d2dx2_prep, 0.)
-
-    DECLARE_AND_DEFINE(128,int32_t, to_structure, 0)
-    DECLARE_AND_DEFINE(128,FLOAT, offsets, 0)
-    DECLARE_AND_DEFINE(128,FLOAT, prices, 0)
-    DECLARE_AND_DEFINE(128,FLOAT, x_tmp, 0)
-
-    DECLARE_AND_DEFINE(128,FLOAT, d1, 0)
-    DECLARE_AND_DEFINE(128,FLOAT, d2, 0)
-
-    DECLARE_AND_DEFINE(64,FLOAT, premiums, 5.)
-    DECLARE_AND_DEFINE(64,FLOAT, instrument_prices,0)
-    DECLARE_AND_DEFINE(64,FLOAT, instrument_pricesl,0)
-    DECLARE_AND_DEFINE(64,FLOAT, instrument_pricesh,0)
-
-    DECLARE_AND_DEFINE(64,FLOAT, xl,1)
-    DECLARE_AND_DEFINE(64,FLOAT, xh,1000)
-
-
-    DECLARE_AND_DEFINE(128,FLOAT, long_short, 1)
-    DECLARE_AND_DEFINE(128,FLOAT, put_call, 1)
-
-    init_tw_pricer();
-    prepare_tw_pricer(128, s, sigma, t, tau, r,
-                      sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep);
-
-    tw_pricer(128, long_short, put_call, s, xl, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, instrument_pricesl);
-    tw_pricer(128, long_short, put_call, s, xh, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, instrument_pricesh);
-
-
-    for(int32_t i = 0; i < 64; ++i) {
-        to_structure[2*i]   = i;
-        to_structure[2*i+1] = i;
-
-        put_call[2*i]       = 1;
-        put_call[2*i+1]     = -1;
-
-        long_short[2*i]     = 1;
-        long_short[2*i+1]   = -1;
-
-
-    }
-
-    compute_tw_strikes_from_premiums(
-            128,long_short, put_call, s, sigmaA2T2, sigmaAsqrtT, emrt, to_structure, offsets, prices, x_tmp,
-            64,premiums,instrument_prices, instrument_pricesl, instrument_pricesh, x, xl, xh);
-
-    tw_pricer(128, long_short, put_call, s, xl, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, instrument_pricesl);
-    tw_pricer(128, long_short, put_call, s, xh, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, instrument_pricesh);
-
-    REQUIRE(abs(instrument_pricesl[0] - premiums[0]) < 1.0e-4);
-    REQUIRE(abs(instrument_pricesh[0] - premiums[0]) < 1.0e-4);
-
-}
 
 TEST_CASE("d2dx2_pricer equals ddx-tw-pricer diff-quot (short put)", "[pricer]") {
 
