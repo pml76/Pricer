@@ -589,7 +589,7 @@ TEST_CASE("used architecture", "[pricer]") {
 
 
 
-TEST_CASE("compute_tw_tsrikes_from_premiums() --- (1)", "[pricer]") {
+TEST_CASE("compute_tw_strikes_from_premiums() --- (1)", "[pricer]") {
 
     Pricer::pricer_context context(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, ALIGN_TO,ALIGN_TO);
 
@@ -631,8 +631,6 @@ TEST_CASE("compute_tw_tsrikes_from_premiums() --- (1)", "[pricer]") {
 
     init_tw_pricer();
     prepare_tw_pricer(context);
-
-
 
     for(int32_t i = 0; i < 64; ++i) {
         context.get_to_structure()[i] = i;
