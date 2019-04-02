@@ -591,7 +591,7 @@ TEST_CASE("used architecture", "[pricer]") {
 
 TEST_CASE("compute_tw_tsrikes_from_premiums() --- (1)", "[pricer]") {
 
-    Pricer::pricer_context context(PRICER_FLAG_TW_PRICER, ALIGN_TO,0);
+    Pricer::pricer_context context(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, ALIGN_TO,ALIGN_TO);
 
     DECLARE_AND_DEFINE(ALIGN_TO, context.get_r(), 0.01)
     DECLARE_AND_DEFINE(ALIGN_TO, context.get_s(), 70.)
