@@ -619,20 +619,50 @@ void compute_tw_strikes_from_premiums( Pricer::pricer_context &context ) {
     // respectively.
 #pragma omp parallel
     {
-        vdouble tmp1, tmp2, tmp3, tmp4, x, s, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price;
+        vdouble tmp, tmp1, tmp2, tmp3, tmp4, x, s, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price;
         vdouble long_short, put_call;
 
 
+        uint64_t m2 =context.get_m_max() / (64 / sizeof(double));
         uint64_t tid = omp_get_thread_num();
         uint64_t num_threads = omp_get_num_threads();
+        uint64_t m_begin = ((tid * m2) / num_threads) * (64 / sizeof(double));
+        uint64_t m_end = (((tid + 1) * m2) / num_threads) * (64 / sizeof(double));
         uint64_t n2 = context.get_n_max() / (64 / sizeof(double));
         uint64_t n_begin = ((tid * n2) / num_threads) * (64 / sizeof(double));
         uint64_t n_end = (((tid + 1) * n2) / num_threads) * (64 / sizeof(double));
 
+        ///
+        /// set the variables to zero where we are going to aggregate the numbers
+        ///
+        for (uint64_t i = m_begin; i < m_end; i += sizeof(vdouble) / sizeof(double)) {
+            tmp = vneg_vd_vd(vload_vd_p(&context.get_premiums()[i]));
+            vstore_v_p_vd(&context.get_instrument_pricesh()[i], tmp);
+            vstore_v_p_vd(&context.get_instrument_pricesl()[i], tmp);
+        }
+
+#pragma omp barrier
+
+        ///
+        /// aggregate the prices and its first two derivatives
+        ///
+        double d;
+
+#pragma omp for schedule(static)
+        for (uint64_t i = 0; i < context.get_n_max(); ++i) {
+#pragma omp atomic update
+            context.get_instrument_prices()[context.get_to_structure()[i]] += context.get_prices()[i];
+        }
+
+#pragma omp barrier
+
         for (uint64_t i = n_begin; i < n_end; i += sizeof(vdouble) / sizeof(double)) {
 
+
+            tmp = vload_vd_p(&context.get_offsets()[i]);
+
             s = vload_vd_p(&context.get_s()[i]);
-            x = vload_vd_p(&context.get_xh_()[i]);
+            x = vadd_vd_vd_vd(vload_vd_p(&context.get_xh_()[i]),tmp);
             sigmaA2T2 = vload_vd_p(&context.get_sigmaA2T2()[i]);
             sigmaAsqrtT = vload_vd_p(&context.get_sigmaAsqrtT()[i]);
             emrt = vload_vd_p(&context.get_emrt()[i]);
@@ -655,11 +685,11 @@ void compute_tw_strikes_from_premiums( Pricer::pricer_context &context ) {
                     vmul_vd_vd_vd(put_call, vmul_vd_vd_vd(x, tmp2)));
             price = vmul_vd_vd_vd(vmul_vd_vd_vd(emrt, long_short), price);
 
-            vstore_v_p_vd(&context.get_instrument_pricesh()[i], price);
+            vstore_v_p_vd(&context.get_prices()[i], price);
 
 
 
-            x = vload_vd_p(&context.get_xl_()[i]);
+            x = vadd_vd_vd_vd(vload_vd_p(&context.get_xl_()[i]),tmp);
 
             tmp2 = xlog(vdiv_vd_vd_vd(s, x));
             d1 = vdiv_vd_vd_vd(vadd_vd_vd_vd(tmp2, sigmaA2T2), vmul_vd_vd_vd(sigmaAsqrtT, msqrt2));
@@ -683,6 +713,10 @@ void compute_tw_strikes_from_premiums( Pricer::pricer_context &context ) {
 
     }
 
+
+    /*
+     *  Main loop starts here.
+     */
 
     do {
         err = zero;
