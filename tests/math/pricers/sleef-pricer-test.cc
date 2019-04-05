@@ -611,7 +611,7 @@ TEST_CASE("compute_tw_strikes_from_premiums() --- (1)", "[pricer]") {
 
     DECLARE_AND_DEFINE(ALIGN_TO, context.get_prices(), 0.)
     DECLARE_AND_DEFINE(ALIGN_TO, context.get_put_call(), 1)
-    DECLARE_AND_DEFINE(ALIGN_TO, context.get_long_short(), -1)
+    DECLARE_AND_DEFINE(ALIGN_TO, context.get_long_short(), 1)
 
 
     DECLARE_AND_DEFINE(ALIGN_TO, context.get_to_structure(), 0)
@@ -637,9 +637,6 @@ TEST_CASE("compute_tw_strikes_from_premiums() --- (1)", "[pricer]") {
     }
 
     compute_tw_strikes_from_premiums(context);
-
-    WARN("context.get_intstrument_pricesl()[0] = " <<  context.get_instrument_pricesl()[0] <<
-         ", context.get_premiums()[0] = " << context.get_premiums()[0] );
 
     REQUIRE(abs(context.get_instrument_pricesl()[0] - context.get_premiums()[0]) < 1.0e-4);
     // REQUIRE(abs(context.get_instrument_pricesh()[0] - context.get_premiums()[0]) < 1.0e-4);
@@ -795,7 +792,9 @@ TEST_CASE("full-tw-pricer-test", "[pricer]") {
         FLOAT reference_pricer_value1 = p.compute_call_price(context.get_x()[0]);
         FLOAT reference_pricer_value2 = p.compute_call_price(context.get_x()[0] + eps);
 
-        REQUIRE(abs((reference_pricer_value2 - reference_pricer_value1) / eps - context.get_ddx_price()[0]) < 1.0e-4);
+        FLOAT diff_quot = (reference_pricer_value2 - reference_pricer_value1) / eps;
+
+        REQUIRE(abs(diff_quot - context.get_ddx_price()[0]) < 1.0e-4);
     }
 
     SECTION("short-call-derivative-test") {
@@ -838,13 +837,17 @@ TEST_CASE("full-tw-pricer-test", "[pricer]") {
         // test long call price
         full_tw_pricer(context);
 
-        FLOAT ddx_price2 = context.get_ddx_price()[0];
+        FLOAT ddx_price = context.get_ddx_price()[0];
+        FLOAT d2dx2 = context.get_d2dx2()[0];
 
         for (UINT64 i = 0; i < ALIGN_TO; i++) context.get_x()[i] += eps;
         full_tw_pricer(context);
+        FLOAT ddx_price2 = context.get_ddx_price()[0];
         for (UINT64 i = 0; i < ALIGN_TO; i++) context.get_x()[i] -= eps;
 
-        REQUIRE(abs((ddx_price2 - context.get_ddx_price()[0]) / eps - context.get_d2dx2()[0]) < 1.0e-4);
+        FLOAT diff_quot = (ddx_price2 - ddx_price) / eps;
+
+        REQUIRE(abs(diff_quot - d2dx2) < 1.0e-4);
     }
 
     SECTION("short-call-second-derivative-test") {
@@ -853,14 +856,17 @@ TEST_CASE("full-tw-pricer-test", "[pricer]") {
         // test long call price
         full_tw_pricer(context);
 
-        FLOAT ddx_price2 = context.get_ddx_price()[0];
+        FLOAT ddx_price = context.get_ddx_price()[0];
+        FLOAT d2dx2 = context.get_d2dx2()[0];
 
         for (UINT64 i = 0; i < ALIGN_TO; i++) context.get_x()[i] += eps;
         full_tw_pricer(context);
+        FLOAT ddx_price2 = context.get_ddx_price()[0];
         for (UINT64 i = 0; i < ALIGN_TO; i++) context.get_x()[i] -= eps;
 
-        REQUIRE(abs((ddx_price2 - context.get_ddx_price()[0]) / eps - context.get_d2dx2()[0]) < 1.0e-4);
-    }
+        FLOAT diff_quot = (ddx_price2 - ddx_price) / eps;
+
+        REQUIRE(abs(diff_quot - d2dx2) < 1.0e-4);    }
 
     SECTION("long-put-second-derivative-test") {
         DECLARE_AND_DEFINE(ALIGN_TO, context.get_put_call(), -1)
@@ -868,14 +874,17 @@ TEST_CASE("full-tw-pricer-test", "[pricer]") {
         // test long call price
         full_tw_pricer(context);
 
-        FLOAT ddx_price2 = context.get_ddx_price()[0];
+        FLOAT ddx_price = context.get_ddx_price()[0];
+        FLOAT d2dx2 = context.get_d2dx2()[0];
 
         for (UINT64 i = 0; i < ALIGN_TO; i++) context.get_x()[i] += eps;
         full_tw_pricer(context);
+        FLOAT ddx_price2 = context.get_ddx_price()[0];
         for (UINT64 i = 0; i < ALIGN_TO; i++) context.get_x()[i] -= eps;
 
-        REQUIRE(abs((ddx_price2 - context.get_ddx_price()[0]) / eps - context.get_d2dx2()[0]) < 1.0e-4);
-    }
+        FLOAT diff_quot = (ddx_price2 - ddx_price) / eps;
+
+        REQUIRE(abs(diff_quot - d2dx2) < 1.0e-4);    }
 
     SECTION("short-put-second-derivative-test") {
         DECLARE_AND_DEFINE(ALIGN_TO, context.get_put_call(), -1)
@@ -883,13 +892,17 @@ TEST_CASE("full-tw-pricer-test", "[pricer]") {
         // test long call price
         full_tw_pricer(context);
 
-        FLOAT ddx_price2 = context.get_ddx_price()[0];
+        FLOAT ddx_price = context.get_ddx_price()[0];
+        FLOAT d2dx2 = context.get_d2dx2()[0];
 
         for (UINT64 i = 0; i < ALIGN_TO; i++) context.get_x()[i] += eps;
         full_tw_pricer(context);
+        FLOAT ddx_price2 = context.get_ddx_price()[0];
         for (UINT64 i = 0; i < ALIGN_TO; i++) context.get_x()[i] -= eps;
 
-        REQUIRE(abs((ddx_price2 - context.get_ddx_price()[0]) / eps - context.get_d2dx2()[0]) < 1.0e-4);
+        FLOAT diff_quot = (ddx_price2 - ddx_price) / eps;
+
+        REQUIRE(abs(diff_quot - d2dx2) < 1.0e-4);
     }
 }
 
