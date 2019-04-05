@@ -910,13 +910,12 @@ void compute_tw_strikes_from_premiums( Pricer::pricer_context &context ) {
 
         for (uint64_t i = m_begin; i < m_end; i += sizeof(vdouble) / sizeof(double)) {
             vstore_v_p_vd(
-                    &context.get_instrument_pricesl()[i],
+                    &context.get_instrument_prices()[i],
                     vadd_vd_vd_vd(
                             vload_vd_p(&context.get_instrument_pricesl()[i]),
                             vload_vd_p(&context.get_premiums()[i])
                     )
             );
-
         }
     }
 

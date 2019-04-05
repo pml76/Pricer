@@ -126,11 +126,12 @@ namespace Pricer {
 
     /**
      * class ddx_pricer_context. Memory management for for computing option prices and their first
-     * partial derivatives of the strikes.
+     * partial derivatives with respect to the strikes.
      *
      * The memory managed by this class contains the input and the output of the calculation of the option price
-     * as well as the calculation of the first partial derivative of the strike. See the class pricer_context and
-     * below to find out which fields are input, which fields are output, and which are for internal use.
+     * as well as the calculation of the first partial derivative with respect to the strike. See the class
+     * pricer_context and below to find out which fields are input, which fields are output, and which are for
+     * internal use.
      *
      * NOTE: A caller has to adhere to the following workflow:
      *      1. call init_tw_pricer()
@@ -163,11 +164,35 @@ namespace Pricer {
 
     public:
 
-        DEFINE_VARIABLE(Real_Ptr, ddx_price)
+        DEFINE_VARIABLE(Real_Ptr, ddx_price)  /// [output]. The value of the first partial derivative
+                                              /// of the price function with respect to the strike.
 
     };
 
 
+    /**
+     * class d2dx2_pricer_context. Memory management for computing option prices and their first and second
+     * partial derivatives with respect to the strikes.
+     *
+     * The memory managed by this class contains the input and the output of the calculation of the option price
+     * as well as the calculation of the first and second partial derivative of the price function with respect to
+     * the strike. See the class ddx_pricer_context and below to find out which fields are input,
+     * which fields are output, and which are for internal use.
+     *
+     * NOTE: Computation of the first derivative is optional. The computation of the price, however, is mandatory
+     * in order to compute the values fo the second derivative.
+     *
+     * NOTE: A caller has to adhere to the following workflow:
+     *      1. call init_tw_pricer()
+     *      2. create a dd_pricer_context opject and fill the necessary arrays.
+     *      3. call prep_tw_pricer()
+     *      4. call tw_pricer()
+     *      5. optionally call ddx_tw_pricer()
+     *      6. call d2dx2_tw_pricer()
+     *
+     * After modifying the input data, steps 3. to 6. have to be repeated to ensure that everything
+     * in upto date.
+     */
     class d2dx2_pricer_context : public ddx_pricer_context {
 
     public:
@@ -190,14 +215,46 @@ namespace Pricer {
 
     public:
 
-        DEFINE_VARIABLE(Real_Ptr, d2dx2_price)
+        DEFINE_VARIABLE(Real_Ptr, d2dx2_price) /// [output]. Holds the values of the second derivatives of
+                                               /// the price-function after the call to d2dx2_tw_pricer()
 
     };
 
-    class compute_strikes_from_premiums_context : public d2dx2_pricer_context {
+
+
+    class compute_prices_of_instruments_context : public pricer_context {
+    public:
+        compute_prices_of_instruments_context(uint64_t n_max) : pricer_context( n_max ){
+                alloc_mem( n_max);
+        }
+
+        ~compute_prices_of_instruments_context() {
+            dealloc_mem();
+        };
+
+        void realloc_mem(uint64_t n);
+        void init_memory(uint64_t n1, uint64_t n2);
+
+    private:
+
+        void alloc_mem(uint64_t n);
+        void dealloc_mem();
 
     public:
-        compute_strikes_from_premiums_context(uint64_t n_max, uint64_t m_max) : d2dx2_pricer_context( n_max ){
+        DEFINE_VARIABLE(Int32_Ptr, to_structure)     /// [input]
+
+        DEFINE_VARIABLE(uint64_t, m_max)             ///
+        DEFINE_VARIABLE(Real_Ptr, instrument_prices) /// [output]
+    };
+
+
+    class compute_strikes_from_premiums_context : virtual public d2dx2_pricer_context
+                                                , virtual public compute_prices_of_instruments_context {
+
+    public:
+        compute_strikes_from_premiums_context(uint64_t n_max, uint64_t m_max)
+            : d2dx2_pricer_context( n_max )
+            , compute_prices_of_instruments_context(n_max) {
             alloc_mem( n_max, m_max );
         }
 
@@ -216,18 +273,14 @@ namespace Pricer {
 
     public:
 
-        DEFINE_VARIABLE(Int32_Ptr, to_structure)
-        DEFINE_VARIABLE(Real_Ptr, offsets)
+        DEFINE_VARIABLE(Real_Ptr, offsets)             /// [input]
 
-        DEFINE_VARIABLE(uint64_t, m)
-        DEFINE_VARIABLE(uint64_t, m_max)
-        DEFINE_VARIABLE(Real_Ptr, premiums)
-        DEFINE_VARIABLE(Real_Ptr, instrument_prices)
-        DEFINE_VARIABLE(Real_Ptr, instrument_pricesl)
-        DEFINE_VARIABLE(Real_Ptr, instrument_pricesh)
-        DEFINE_VARIABLE(Real_Ptr, x_)
-        DEFINE_VARIABLE(Real_Ptr, xl_)
-        DEFINE_VARIABLE(Real_Ptr, xh_)
+        DEFINE_VARIABLE(Real_Ptr, premiums)            /// [input]
+        DEFINE_VARIABLE(Real_Ptr, instrument_pricesl)  /// [internal use]
+        DEFINE_VARIABLE(Real_Ptr, instrument_pricesh)  /// [internal use]
+        DEFINE_VARIABLE(Real_Ptr, x_)                  /// [internal use]
+        DEFINE_VARIABLE(Real_Ptr, xl_)                 /// [output]
+        DEFINE_VARIABLE(Real_Ptr, xh_)                 /// [internal use]
     };
 
 /*
