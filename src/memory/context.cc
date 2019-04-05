@@ -20,20 +20,13 @@
 #include <cstring>
 
 
-#define MEM_ALLOC(type,n,p) {m__ ## n ## _max = Private::allocate_memory<type>(n, &p); if (m__ ## n ## _max == 0) return;}
-#define COND_MEM_ALLOC(flag,type,n,p) {if((m__flags & flag) == flag) MEM_ALLOC(type,n,p) else {p = nullptr;}}
-
+#define MEM_ALLOC(type,n,p) {get_ ## n ## _max() = Private::allocate_memory<type>(n, &p); if (get_ ## n ## _max() == 0) return;}
 #define MEM_REALLOC(type,type2, p) {type2 tmp; m__n_max=Private::allocate_memory<type>(n,&tmp); if(m__n_max==0); std::memcpy(tmp,p,m__n); p=tmp;}
-#define COND_MEM_REALLOC(flag, type, type2, p) {if((m__flags & flag) == flag) MEM_REALLOC(type,type2,p)}
-
 #define MEM_DEALLOC(type, p) {Private::deallocate_memory<type>(p);};
-#define COND_MEM_DEALLOC(flags, type, p) {if((m__flags & flags) == flags) MEM_DEALLOC(type, p)}
-
 #define MEM_INIT(x,i,v) {x[i]=v;}
-#define COND_MEM_INIT(flags,x,i,v) {if((m__flags & flags) == flags) MEM_INIT(x,i,v)}
 
 namespace Pricer {
-    void pricer_context::alloc_mem(uint64_t n, uint64_t m) {
+    void pricer_context::alloc_mem(uint64_t n) {
 
 
         MEM_ALLOC(FLOAT, n, m__s)
@@ -49,11 +42,12 @@ namespace Pricer {
         MEM_ALLOC(FLOAT, n, m__put_call)
         MEM_ALLOC(FLOAT, n, m__d2dx2_prep)
 
-        COND_MEM_ALLOC(PRICER_FLAG_TW_PRICER, FLOAT, n, m__d1)
-        COND_MEM_ALLOC(PRICER_FLAG_TW_PRICER, FLOAT, n, m__d2)
-        COND_MEM_ALLOC(PRICER_FLAG_TW_PRICER, FLOAT, n, m__prices)
-        COND_MEM_ALLOC(PRICER_FLAG_TW_PRICER, FLOAT, n, m__x)
+        MEM_ALLOC(FLOAT, n, m__d1)
+        MEM_ALLOC(FLOAT, n, m__d2)
+        MEM_ALLOC(FLOAT, n, m__prices)
+        MEM_ALLOC(FLOAT, n, m__x)
 
+        /*
         COND_MEM_ALLOC(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, int32_t, n, m__to_structure)
         COND_MEM_ALLOC(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, FLOAT, n, m__offsets)
 
@@ -68,9 +62,27 @@ namespace Pricer {
         COND_MEM_ALLOC(PRICER_FLAG_TW_COMPUTE_DDX, FLOAT, n, m__ddx_price)
 
         COND_MEM_ALLOC(PRICER_FLAG_TW_COMPUTE_D2DX2, FLOAT, n, m__d2dx2)
+*/
+        init_memory(0, m__n_max);
+    }
 
-        init_memory(0, m__n_max, 0, m__m_max);
+    void ddx_pricer_context::alloc_mem(uint64_t n) {
 
+        MEM_ALLOC(FLOAT, n, m__ddx_price)
+    }
+
+    void d2dx2_pricer_context::alloc_mem(uint64_t n) {
+
+        MEM_ALLOC(FLOAT, n, m__d2dx2_price)
+
+    }
+
+    void ddx_pricer_context::dealloc_mem() {
+        MEM_DEALLOC(FLOAT, m__ddx_price)
+    }
+
+    void d2dx2_pricer_context::dealloc_mem() {
+        MEM_DEALLOC(FLOAT, m__d2dx2_price)
     }
 
     void pricer_context::dealloc_mem() {
@@ -87,20 +99,45 @@ namespace Pricer {
         MEM_DEALLOC(FLOAT, m__put_call)
         MEM_DEALLOC(FLOAT, m__d2dx2_prep)
 
-        COND_MEM_DEALLOC(PRICER_FLAG_TW_PRICER, FLOAT, m__d1)
-        COND_MEM_DEALLOC(PRICER_FLAG_TW_PRICER, FLOAT, m__d2)
-        COND_MEM_DEALLOC(PRICER_FLAG_TW_PRICER, FLOAT, m__prices)
-        COND_MEM_DEALLOC(PRICER_FLAG_TW_PRICER, FLOAT, m__x)
+        MEM_DEALLOC(FLOAT, m__d1)
+        MEM_DEALLOC(FLOAT, m__d2)
+        MEM_DEALLOC(FLOAT, m__prices)
+        MEM_DEALLOC(FLOAT, m__x)
 
+        /*
         COND_MEM_DEALLOC(PRICER_FLAG_TW_COMPUTE_DDX, FLOAT, m__ddx_price)
 
         COND_MEM_DEALLOC(PRICER_FLAG_TW_COMPUTE_D2DX2, FLOAT, m__d2dx2)
+        */
+    }
+
+    void ddx_pricer_context::realloc_mem(uint64_t n) {
+
+        pricer_context::realloc_mem(n);
+
+        uint64_t n_max_old = get_n_max();
+
+        MEM_REALLOC(FLOAT, Real_Ptr, m__ddx_price)
+
+        init_memory( n_max_old, get_n_max());
+
+    }
+
+    void d2dx2_pricer_context::realloc_mem(uint64_t n) {
+
+        ddx_pricer_context::realloc_mem(n);
+
+        uint64_t n_max_old = get_n_max();
+
+        MEM_REALLOC(FLOAT, Real_Ptr, m__d2dx2_price)
+
+        init_memory( n_max_old, get_n_max());
 
     }
 
     void pricer_context::realloc_mem(uint64_t n) {
         uint64_t n_max_old = m__n_max;
-        uint64_t m_max_old = m__m_max;
+     //   uint64_t m_max_old = m__m_max;
 
         MEM_REALLOC(FLOAT, Real_Ptr , m__s)
         MEM_REALLOC(FLOAT, Real_Ptr , m__sigma)
@@ -115,19 +152,36 @@ namespace Pricer {
         MEM_REALLOC(FLOAT, Real_Ptr , m__put_call)
         MEM_REALLOC(FLOAT, Real_Ptr , m__d2dx2_prep)
 
-        COND_MEM_REALLOC(PRICER_FLAG_TW_PRICER, FLOAT, Real_Ptr , m__d1)
-        COND_MEM_REALLOC(PRICER_FLAG_TW_PRICER, FLOAT, Real_Ptr , m__d2)
-        COND_MEM_REALLOC(PRICER_FLAG_TW_PRICER, FLOAT, Real_Ptr , m__prices)
-        COND_MEM_REALLOC(PRICER_FLAG_TW_PRICER, FLOAT, Real_Ptr , m__x)
+        MEM_REALLOC(FLOAT, Real_Ptr , m__d1)
+        MEM_REALLOC(FLOAT, Real_Ptr , m__d2)
+        MEM_REALLOC(FLOAT, Real_Ptr , m__prices)
+        MEM_REALLOC(FLOAT, Real_Ptr , m__x)
 
+        /*
         COND_MEM_REALLOC(PRICER_FLAG_TW_COMPUTE_DDX, FLOAT, Real_Ptr, m__ddx_price)
 
         COND_MEM_REALLOC(PRICER_FLAG_TW_COMPUTE_D2DX2, FLOAT, Real_Ptr, m__d2dx2)
-
-        init_memory(n_max_old, m__n_max, m_max_old, m__m_max);
+*/
+        init_memory(n_max_old, m__n_max);
     }
 
-    void pricer_context::init_memory(uint64_t n1, uint64_t n2, uint64_t m1, uint64_t m2) {
+    void ddx_pricer_context::init_memory(uint64_t n1, uint64_t n2) {
+        pricer_context::init_memory(n1, n2);
+
+        for (uint64_t n = n1; n < n2; ++n) {
+            MEM_INIT(m__ddx_price, n, 0.)
+        }
+    }
+
+    void d2dx2_pricer_context::init_memory(uint64_t n1, uint64_t n2) {
+        ddx_pricer_context::init_memory(n1,n2);
+
+        for (uint64_t n = n1; n < n2; ++n) {
+            MEM_INIT(m__d2dx2_price, n, 0.)
+        }
+    }
+
+    void pricer_context::init_memory(uint64_t n1, uint64_t n2) {
 
         for(uint64_t n = n1; n < n2; ++n) {
             MEM_INIT(m__s,n,70.)
@@ -143,6 +197,7 @@ namespace Pricer {
             MEM_INIT(m__put_call,n,1.)
             MEM_INIT(m__d2dx2_prep,n,0)
 
+            /*
             COND_MEM_INIT(PRICER_FLAG_TW_PRICER, m__d1,n,1)
             COND_MEM_INIT(PRICER_FLAG_TW_PRICER, m__d2,n,1)
             COND_MEM_INIT(PRICER_FLAG_TW_PRICER, m__prices,n,1)
@@ -154,8 +209,10 @@ namespace Pricer {
             COND_MEM_INIT(PRICER_FLAG_TW_COMPUTE_DDX, m__ddx_price, n, 0.)
 
             COND_MEM_INIT(PRICER_FLAG_TW_COMPUTE_D2DX2, m__d2dx2, n, 0.)
+             */
         }
 
+        /*
         for(uint64_t m = m1; m < m2; ++m) {
            COND_MEM_INIT(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, m__premiums, m, 2.)
            COND_MEM_INIT(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, m__instrument_prices, m, 0.)
@@ -165,8 +222,7 @@ namespace Pricer {
            COND_MEM_INIT(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, m__xl_, m, 0.)
            COND_MEM_INIT(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, m__xh_, m, 0.)
         }
-
+    */
     }
-    // eiae
 
 }
