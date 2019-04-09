@@ -27,6 +27,7 @@ set(FUNCTION_NAMES
         ddx_tw_pricer
         d2dx2_tw_pricer
         full_tw_pricer
+        compute_tw_prices_of_instruments
         compute_tw_strikes_from_premiums )
 
 set(INIT_TW_PRICER_ARGUMENT_TYPES
@@ -55,6 +56,10 @@ set( FULL_TW_PRICER_ARGUMENT_TYPES
 set( COMPUTE_TW_STRIKES_FROM_PREMIUMS_ARGUMENT_TYPES
         void
         Pricer::compute_instrument_strikes_from_premiums_context& )
+
+set( COMPUTE_TW_PRICES_OF_INSTRUMENTS_ARGUMENT_TYPES
+        void
+        Pricer::compute_prices_of_instruments_context& )
 
 
 

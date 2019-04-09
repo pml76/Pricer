@@ -19,6 +19,8 @@
 #include <memory/context.h>
 #include <iostream>
 
+extern "C" {
+
 #include "misc.h"
 
 extern const double rempitabdp[];
@@ -157,6 +159,7 @@ extern const double rempitabdp[];
 #endif /* DORENAME */
 #endif /* ENABLE_SVE */
 
+}
 //
 
 #include <math/pricers/pricer-base.h>
@@ -558,12 +561,14 @@ void compute_tw_prices_of_instruments( Pricer::compute_prices_of_instruments_con
         uint64_t num_threads = omp_get_num_threads();
         uint64_t m_begin = ((tid * m2) / num_threads) * (64 / sizeof(double));
         uint64_t m_end = (((tid + 1) * m2) / num_threads) * (64 / sizeof(double));
-        uint64_t n2 = context.get_n_max() / (64 / sizeof(double));
 
         for(uint64_t i = m_begin; i < m_end; i += sizeof(vdouble) / sizeof(double)) {
             vstore_v_p_vd(&context.get_instrument_prices()[i], zero);
         }
 
+#pragma omp barrier
+
+#pragma omp for schedule(static)
         for (uint64_t i = 0; i < context.get_n_max(); ++i) {
 #pragma omp atomic update
             context.get_instrument_prices()[context.get_to_structure()[i]] += context.get_prices()[i];

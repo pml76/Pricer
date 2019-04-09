@@ -21,7 +21,6 @@
 
 
 #define MEM_ALLOC(type,n,p) {get_ ## n ## _max() = Private::allocate_memory<type>(n, &p); if (get_ ## n ## _max() == 0) return;}
-#define MEM_REALLOC(type,type2, p) {type2 tmp; m__n_max=Private::allocate_memory<type>(n,&tmp); if(m__n_max==0); std::memcpy(tmp,p,m__n); p=tmp;}
 #define MEM_DEALLOC(type, p) {Private::deallocate_memory<type>(p);};
 #define MEM_INIT(x,i,v) {x[i]=v;}
 
@@ -47,39 +46,29 @@ namespace Pricer {
         MEM_ALLOC(FLOAT, n, m__prices)
         MEM_ALLOC(FLOAT, n, m__x)
 
-        /*
-        COND_MEM_ALLOC(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, int32_t, n, m__to_structure)
-        COND_MEM_ALLOC(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, FLOAT, n, m__offsets)
-
-        COND_MEM_ALLOC(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, FLOAT, m, m__premiums)
-        COND_MEM_ALLOC(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, FLOAT, m, m__instrument_prices)
-        COND_MEM_ALLOC(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, FLOAT, m, m__instrument_pricesl)
-        COND_MEM_ALLOC(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, FLOAT, m, m__instrument_pricesh)
-        COND_MEM_ALLOC(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, FLOAT, m, m__x_)
-        COND_MEM_ALLOC(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, FLOAT, m, m__xl_)
-        COND_MEM_ALLOC(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, FLOAT, m, m__xh_)
-
-        COND_MEM_ALLOC(PRICER_FLAG_TW_COMPUTE_DDX, FLOAT, n, m__ddx_price)
-
-        COND_MEM_ALLOC(PRICER_FLAG_TW_COMPUTE_D2DX2, FLOAT, n, m__d2dx2)
-*/
         init_memory(0, m__n_max);
     }
 
     void ddx_pricer_context::alloc_mem(uint64_t n) {
 
         MEM_ALLOC(FLOAT, n, m__ddx_price)
+
+        init_memory(0, get_n_max());
     }
 
     void d2dx2_pricer_context::alloc_mem(uint64_t n) {
 
         MEM_ALLOC(FLOAT, n, m__d2dx2_price)
 
+        init_memory(0, get_n_max());
+
     }
 
     void compute_prices_of_instruments_context::alloc_mem(uint64_t n, uint64_t m) {
         MEM_ALLOC(int32_t , n, m__to_structure)
         MEM_ALLOC(FLOAT, m, m__instrument_prices)
+
+        init_memory(0, get_n_max(), 0, get_m_max());
     }
 
     void compute_instrument_strikes_from_premiums_context::alloc_mem(uint64_t n, uint64_t m) {
@@ -91,6 +80,8 @@ namespace Pricer {
         MEM_ALLOC(FLOAT, m, m__x_)
         MEM_ALLOC(FLOAT, m, m__xl_)
         MEM_ALLOC(FLOAT, m, m__xh_)
+
+        init_memory(0, get_n_max(), 0, get_m_max());
     }
 
     void compute_instrument_strikes_from_premiums_context::dealloc_mem() {
@@ -137,11 +128,6 @@ namespace Pricer {
         MEM_DEALLOC(FLOAT, m__prices)
         MEM_DEALLOC(FLOAT, m__x)
 
-        /*
-        COND_MEM_DEALLOC(PRICER_FLAG_TW_COMPUTE_DDX, FLOAT, m__ddx_price)
-
-        COND_MEM_DEALLOC(PRICER_FLAG_TW_COMPUTE_D2DX2, FLOAT, m__d2dx2)
-        */
     }
 
 
@@ -209,32 +195,8 @@ namespace Pricer {
             MEM_INIT(m__put_call,n,1.)
             MEM_INIT(m__d2dx2_prep,n,0)
 
-            /*
-            COND_MEM_INIT(PRICER_FLAG_TW_PRICER, m__d1,n,1)
-            COND_MEM_INIT(PRICER_FLAG_TW_PRICER, m__d2,n,1)
-            COND_MEM_INIT(PRICER_FLAG_TW_PRICER, m__prices,n,1)
-            COND_MEM_INIT(PRICER_FLAG_TW_PRICER, m__x,n,72.)
-
-            COND_MEM_INIT(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, m__to_structure,n,get_m_max()-1)
-            COND_MEM_INIT(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, m__offsets,n,0.)
-
-            COND_MEM_INIT(PRICER_FLAG_TW_COMPUTE_DDX, m__ddx_price, n, 0.)
-
-            COND_MEM_INIT(PRICER_FLAG_TW_COMPUTE_D2DX2, m__d2dx2, n, 0.)
-             */
         }
 
-        /*
-        for(uint64_t m = m1; m < m2; ++m) {
-           COND_MEM_INIT(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, m__premiums, m, 2.)
-           COND_MEM_INIT(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, m__instrument_prices, m, 0.)
-           COND_MEM_INIT(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, m__instrument_pricesl, m, 0.)
-           COND_MEM_INIT(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, m__instrument_pricesh, m, 0.)
-           COND_MEM_INIT(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, m__x_, m, 0.)
-           COND_MEM_INIT(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, m__xl_, m, 0.)
-           COND_MEM_INIT(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, m__xh_, m, 0.)
-        }
-    */
     }
 
 }
