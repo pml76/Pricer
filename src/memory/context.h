@@ -81,7 +81,6 @@ namespace Pricer {
             dealloc_mem();
         };
 
-        void realloc_mem(uint64_t n);
         void init_memory(uint64_t n1, uint64_t n2);
 
     private:
@@ -143,7 +142,7 @@ namespace Pricer {
      * After modifying the input data, steps 3. to 5. have to be repeated to ensure that everything
      * in upto date.
      */
-    class ddx_pricer_context : public pricer_context {
+    class ddx_pricer_context : virtual public pricer_context {
 
     public:
         ddx_pricer_context(uint64_t n_max) : pricer_context( n_max ){
@@ -154,7 +153,6 @@ namespace Pricer {
             dealloc_mem();
         };
 
-        void realloc_mem(uint64_t n);
         void init_memory(uint64_t n1, uint64_t n2);
 
     private:
@@ -196,7 +194,7 @@ namespace Pricer {
     class d2dx2_pricer_context : public ddx_pricer_context {
 
     public:
-        d2dx2_pricer_context(uint64_t n_max) : ddx_pricer_context( n_max ){
+        d2dx2_pricer_context(uint64_t n_max) : pricer_context(n_max), ddx_pricer_context( n_max ){
             alloc_mem( n_max);
         }
 
@@ -204,7 +202,6 @@ namespace Pricer {
             dealloc_mem();
         };
 
-        void realloc_mem(uint64_t n);
         void init_memory(uint64_t n1, uint64_t n2);
 
     private:
@@ -222,22 +219,21 @@ namespace Pricer {
 
 
 
-    class compute_prices_of_instruments_context : public pricer_context {
+    class compute_prices_of_instruments_context : virtual public pricer_context {
     public:
-        compute_prices_of_instruments_context(uint64_t n_max) : pricer_context( n_max ){
-                alloc_mem( n_max);
+        compute_prices_of_instruments_context(uint64_t n_max, uint64_t m_max) : pricer_context( n_max ){
+                alloc_mem( n_max, m_max );
         }
 
         ~compute_prices_of_instruments_context() {
             dealloc_mem();
         };
 
-        void realloc_mem(uint64_t n);
-        void init_memory(uint64_t n1, uint64_t n2);
+        void init_memory(uint64_t n1, uint64_t n2, uint64_t m1, uint64_t m2);
 
     private:
 
-        void alloc_mem(uint64_t n);
+        void alloc_mem(uint64_t n, uint64_t m);
         void dealloc_mem();
 
     public:
@@ -248,21 +244,20 @@ namespace Pricer {
     };
 
 
-    class compute_strikes_from_premiums_context : virtual public d2dx2_pricer_context
+    class compute_instrument_strikes_from_premiums_context : virtual public d2dx2_pricer_context
                                                 , virtual public compute_prices_of_instruments_context {
 
     public:
-        compute_strikes_from_premiums_context(uint64_t n_max, uint64_t m_max)
-            : d2dx2_pricer_context( n_max )
-            , compute_prices_of_instruments_context(n_max) {
+        compute_instrument_strikes_from_premiums_context(uint64_t n_max, uint64_t m_max)
+            : pricer_context(n_max),  d2dx2_pricer_context( n_max )
+            , compute_prices_of_instruments_context(n_max, m_max) {
             alloc_mem( n_max, m_max );
         }
 
-        ~compute_strikes_from_premiums_context() {
+        ~compute_instrument_strikes_from_premiums_context() {
             dealloc_mem();
         };
 
-        void realloc_mem(uint64_t n, uint64_t m);
         void init_memory(uint64_t n1, uint64_t n2, uint64_t m1, uint64_t m2);
 
     private:
@@ -278,8 +273,8 @@ namespace Pricer {
         DEFINE_VARIABLE(Real_Ptr, premiums)            /// [input]
         DEFINE_VARIABLE(Real_Ptr, instrument_pricesl)  /// [internal use]
         DEFINE_VARIABLE(Real_Ptr, instrument_pricesh)  /// [internal use]
-        DEFINE_VARIABLE(Real_Ptr, x_)                  /// [internal use]
-        DEFINE_VARIABLE(Real_Ptr, xl_)                 /// [output]
+        DEFINE_VARIABLE(Real_Ptr, x_)                  /// [output]
+        DEFINE_VARIABLE(Real_Ptr, xl_)                 /// [internal use]
         DEFINE_VARIABLE(Real_Ptr, xh_)                 /// [internal use]
     };
 

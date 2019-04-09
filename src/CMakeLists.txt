@@ -42,19 +42,19 @@ set(PREPARE_TW_PRICER_ARGUMENT_TYPES
 
 set( DDX_TW_PRICER_ARGUMENT_TYPES
         void
-        Pricer::pricer_context& )
+        Pricer::ddx_pricer_context& )
 
 set( D2DX2_TW_PRICER_ARGUMENT_TYPES
         void
-        Pricer::pricer_context& )
+        Pricer::d2dx2_pricer_context& )
 
 set( FULL_TW_PRICER_ARGUMENT_TYPES
         void
-        Pricer::pricer_context& )
+        Pricer::d2dx2_pricer_context& )
 
 set( COMPUTE_TW_STRIKES_FROM_PREMIUMS_ARGUMENT_TYPES
         void
-        Pricer::pricer_context& )
+        Pricer::compute_instrument_strikes_from_premiums_context& )
 
 
 

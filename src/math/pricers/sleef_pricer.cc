@@ -291,11 +291,6 @@ void tw_pricer( Pricer::pricer_context &context ) {
         Real_Ptr price_) {            /// [out] d2
 */
 
-    if( (context.get_flags() & PRICER_FLAG_TW_PRICER ) != PRICER_FLAG_TW_PRICER ) {
-        std::cerr << "tw_pricer() called with improper context." << std::endl;
-        exit(-1);
-    }
-
 
     ASSUME(context.get_n_max() % 64 == 0)
 
@@ -357,7 +352,7 @@ void tw_pricer( Pricer::pricer_context &context ) {
 }
 
 
-void ddx_tw_pricer( Pricer::pricer_context &context ) {
+void ddx_tw_pricer( Pricer::ddx_pricer_context &context ) {
 
 /*        UINT64 n,
         Real_Ptr long_short_,     // 1 == long option // -1 == short option
@@ -366,11 +361,6 @@ void ddx_tw_pricer( Pricer::pricer_context &context ) {
         Real_Ptr emrt_,
         Real_Ptr ddx_price_) {
   */
-
-    if((context.get_flags() & PRICER_FLAG_TW_COMPUTE_DDX) != PRICER_FLAG_TW_COMPUTE_DDX ) {
-        std::cerr << "ddx_tw_pricer() called with improper context." << std::endl;
-        exit(-1);
-    }
 
     ASSUME(context.get_n_max() % 64 == 0)
 
@@ -408,7 +398,7 @@ void ddx_tw_pricer( Pricer::pricer_context &context ) {
 }
 
 
-void d2dx2_tw_pricer( Pricer::pricer_context &context ) {
+void d2dx2_tw_pricer( Pricer::d2dx2_pricer_context &context ) {
 
 /*        UINT64 n,
         Real_Ptr long_short_,
@@ -420,11 +410,6 @@ void d2dx2_tw_pricer( Pricer::pricer_context &context ) {
 ) {
 
  */
-    if((context.get_flags() & PRICER_FLAG_TW_COMPUTE_D2DX2) != PRICER_FLAG_TW_COMPUTE_D2DX2) {
-        std::cerr << "d2dx2_tw_pricer() called with improper context." << std::endl;
-        exit(-1);
-    }
-
 
     ASSUME(context.get_n_max() % 64 == 0)
 
@@ -433,7 +418,7 @@ void d2dx2_tw_pricer( Pricer::pricer_context &context ) {
     ASSUME_ALIGNED(Real_Ptr ,context.get_x())
     ASSUME_ALIGNED(Real_Ptr ,context.get_d2dx2_prep())
     ASSUME_ALIGNED(Real_Ptr ,context.get_sigmaA2T2())
-    ASSUME_ALIGNED(Real_Ptr ,context.get_d2dx2())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_d2dx2_price())
 
 #pragma omp parallel
     {
@@ -458,13 +443,13 @@ void d2dx2_tw_pricer( Pricer::pricer_context &context ) {
             d2dx2 = vdiv_vd_vd_vd(vmul_vd_vd_vd(d2dx2, d2dx2_prep), xsqrt(vmul_vd_vd_vd(vmul_vd_vd_vd(x, x), x)));
             d2dx2 = vmul_vd_vd_vd(d2dx2, long_short);
 
-            vstore_v_p_vd(&context.get_d2dx2()[i], d2dx2);
+            vstore_v_p_vd(&context.get_d2dx2_price()[i], d2dx2);
         }
     }
 
 }
 
-void full_tw_pricer( Pricer::pricer_context &context ) {
+void full_tw_pricer( Pricer::d2dx2_pricer_context &context ) {
 
 /*        UINT64 n,
         Real_Ptr long_short_,     // 1 == long option // -1 == short option
@@ -480,12 +465,6 @@ void full_tw_pricer( Pricer::pricer_context &context ) {
         Real_Ptr d2dx2_) {
 */
 
-    if((context.get_flags() & (PRICER_FLAG_TW_PRICER | PRICER_FLAG_TW_COMPUTE_DDX | PRICER_FLAG_TW_COMPUTE_D2DX2) ) !=
-            (PRICER_FLAG_TW_PRICER | PRICER_FLAG_TW_COMPUTE_DDX | PRICER_FLAG_TW_COMPUTE_D2DX2) ) {
-        std::cerr << "full_tw_pricer() called with improper context." << std::endl;
-        exit(-1);
-    }
-
     ASSUME(context.get_n_max() % 64 == 0)
 
     ASSUME_ALIGNED(Real_Ptr ,context.get_x())
@@ -497,7 +476,7 @@ void full_tw_pricer( Pricer::pricer_context &context ) {
     ASSUME_ALIGNED(Real_Ptr ,context.get_long_short())
     ASSUME_ALIGNED(Real_Ptr ,context.get_put_call())
     ASSUME_ALIGNED(Real_Ptr ,context.get_ddx_price())
-    ASSUME_ALIGNED(Real_Ptr ,context.get_d2dx2())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_d2dx2_price())
     ASSUME_ALIGNED(Real_Ptr ,context.get_d2dx2_prep())
 
 #pragma omp parallel
@@ -550,7 +529,7 @@ void full_tw_pricer( Pricer::pricer_context &context ) {
             d2dx2 = vdiv_vd_vd_vd(vmul_vd_vd_vd(d2dx2, d2dx2_prep), xsqrt(vmul_vd_vd_vd(vmul_vd_vd_vd(x, x), x)));
             d2dx2 = vmul_vd_vd_vd(d2dx2, long_short);
 
-            vstore_v_p_vd(&context.get_d2dx2()[i], d2dx2);
+            vstore_v_p_vd(&context.get_d2dx2_price()[i], d2dx2);
             vstore_v_p_vd(&context.get_ddx_price()[i], ddx_price);
             vstore_v_p_vd(&context.get_prices()[i], price);
 
@@ -560,13 +539,40 @@ void full_tw_pricer( Pricer::pricer_context &context ) {
 }
 
 
-void compute_tw_strikes_from_premiums( Pricer::pricer_context &context ) {
+void compute_tw_prices_of_instruments( Pricer::compute_prices_of_instruments_context &context) {
 
-    if( (context.get_flags() & PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES)
-                != PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES ) {
-        std::cerr << "compute_tw_strices_from_premiums() called with wrong initialized context" << std::endl;
-        exit(-1);
+
+    ASSUME(context.get_n_max() % 64 == 0)
+    ASSUME(context.get_m_max() % 64 == 0)
+
+    ASSUME_ALIGNED(Real_Ptr ,context.get_instrument_prices())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_prices())
+    ASSUME_ALIGNED(Int32_Ptr,context.get_to_structure())
+
+    tw_pricer(context);
+
+#pragma omp parallel
+    {
+        uint64_t m2 =context.get_m_max() / (64 / sizeof(double));
+        uint64_t tid = omp_get_thread_num();
+        uint64_t num_threads = omp_get_num_threads();
+        uint64_t m_begin = ((tid * m2) / num_threads) * (64 / sizeof(double));
+        uint64_t m_end = (((tid + 1) * m2) / num_threads) * (64 / sizeof(double));
+        uint64_t n2 = context.get_n_max() / (64 / sizeof(double));
+
+        for(uint64_t i = m_begin; i < m_end; i += sizeof(vdouble) / sizeof(double)) {
+            vstore_v_p_vd(&context.get_instrument_prices()[i], zero);
+        }
+
+        for (uint64_t i = 0; i < context.get_n_max(); ++i) {
+#pragma omp atomic update
+            context.get_instrument_prices()[context.get_to_structure()[i]] += context.get_prices()[i];
+        }
+
     }
+}
+
+void compute_tw_strikes_from_premiums( Pricer::compute_instrument_strikes_from_premiums_context &context ) {
 
 /*
         UINT64 n,
@@ -916,6 +922,7 @@ void compute_tw_strikes_from_premiums( Pricer::pricer_context &context ) {
                             vload_vd_p(&context.get_premiums()[i])
                     )
             );
+            vstore_v_p_vd(&context.get_x_()[i], vload_vd_p(&context.get_xl_()[i]));
         }
     }
 

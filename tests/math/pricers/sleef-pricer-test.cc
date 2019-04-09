@@ -23,16 +23,30 @@
 #include <memory/context.h>
 
 #define SET_EQUAL_TO(n, x, y) \
-   for(UINT64 i=0;i<n;i++) x[i]=y;
+   for(uint64_t i=0;i<n;i++) x[i]=y;
    
    
 SCENARIO("Pricer::pricer_context implementation") {
 
-    GIVEN("a context of a size")
+    GIVEN("a request for a context of size < ALIGN_TO") {
+        Pricer::pricer_context context(ALIGN_TO/4);
 
+        THEN("we get a context of size equal to ALIGN_TO") {
+            REQUIRE(context.get_n_max() == ALIGN_TO);
+        }
+    }
+
+    GIVEN("a request for a context of size x where x % ALIGN_TO != 0") {
+        Pricer::pricer_context context(12345);
+
+        THEN("we get a context of size y where y > x and y % ALIGN_TO == 0") {
+            REQUIRE(context.get_n_max() > 12345);
+            REQUIRE((context.get_n_max() % ALIGN_TO) == 0);
+        }
+    }
 
     GIVEN("a context for simple price computations") {
-        Pricer::pricer_context context(PRICER_FLAG_TW_PRICER, ALIGN_TO, 0);
+        Pricer::pricer_context context( ALIGN_TO );
         
         THEN("only those entries should have values not equal to zero that are used") {
             REQUIRE(context.get_s()           != nullptr);
@@ -52,6 +66,7 @@ SCENARIO("Pricer::pricer_context implementation") {
             REQUIRE(context.get_prices()      != nullptr);
             REQUIRE(context.get_x()           != nullptr);
 
+            /*
             REQUIRE(context.get_to_structure()       == nullptr);
             REQUIRE(context.get_offsets()            == nullptr);
             REQUIRE(context.get_premiums()           == nullptr);
@@ -63,38 +78,203 @@ SCENARIO("Pricer::pricer_context implementation") {
             REQUIRE(context.get_xh_()                == nullptr);
             REQUIRE(context.get_ddx_price()          == nullptr);
             REQUIRE(context.get_d2dx2()              == nullptr);
+             */
         }
 
         THEN("the pointers are ALIGN_TO-bytes aligned (needed for usage of SIMD instructions)") {
-            REQUIRE((((unsigned long long int) context.get_s())           & (ALIGN_TO-1)) == 0);
-            REQUIRE((((unsigned long long int) context.get_sigma())       & (ALIGN_TO-1)) == 0);
-            REQUIRE((((unsigned long long int) context.get_t())           & (ALIGN_TO-1)) == 0);
-            REQUIRE((((unsigned long long int) context.get_tau())         & (ALIGN_TO-1)) == 0);
-            REQUIRE((((unsigned long long int) context.get_r())           & (ALIGN_TO-1)) == 0);
-            REQUIRE((((unsigned long long int) context.get_sigmaA())      & (ALIGN_TO-1)) == 0);
-            REQUIRE((((unsigned long long int) context.get_sigmaA2T2())   & (ALIGN_TO-1)) == 0);
-            REQUIRE((((unsigned long long int) context.get_sigmaAsqrtT()) & (ALIGN_TO-1)) == 0);
-            REQUIRE((((unsigned long long int) context.get_emrt())        & (ALIGN_TO-1)) == 0);
-            REQUIRE((((unsigned long long int) context.get_long_short())  & (ALIGN_TO-1)) == 0);
-            REQUIRE((((unsigned long long int) context.get_put_call())    & (ALIGN_TO-1)) == 0);
-            REQUIRE((((unsigned long long int) context.get_d2dx2_prep())  & (ALIGN_TO-1)) == 0);
-            REQUIRE((((unsigned long long int) context.get_d1())          & (ALIGN_TO-1)) == 0);
-            REQUIRE((((unsigned long long int) context.get_d2())          & (ALIGN_TO-1)) == 0);
-            REQUIRE((((unsigned long long int) context.get_prices())      & (ALIGN_TO-1)) == 0);
-            REQUIRE((((unsigned long long int) context.get_x())           & (ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_s())           & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_sigma())       & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_t())           & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_tau())         & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_r())           & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_sigmaA())      & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_sigmaA2T2())   & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_sigmaAsqrtT()) & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_emrt())        & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_long_short())  & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_put_call())    & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_d2dx2_prep())  & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_d1())          & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_d2())          & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_prices())      & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_x())           & ((unsigned long long int) ALIGN_TO-1)) == 0);
         }
 
 
     }
 
 }
-   
+
+
+SCENARIO("Pricer::ddx_pricer_context implementation") {
+
+    GIVEN("a request for a context of size < ALIGN_TO") {
+        Pricer::ddx_pricer_context context(ALIGN_TO/4);
+
+        THEN("we get a context of size equal to ALIGN_TO") {
+            REQUIRE(context.get_n_max() == ALIGN_TO);
+        }
+    }
+
+    GIVEN("a request for a context of size x where x % ALIGN_TO != 0") {
+        Pricer::ddx_pricer_context context(12345);
+
+        THEN("we get a context of size y where y > x and y % ALIGN_TO == 0") {
+            REQUIRE(context.get_n_max() > 12345);
+            REQUIRE((context.get_n_max() % ALIGN_TO) == 0);
+        }
+    }
+
+
+    GIVEN("a context for simple price and first derivative computations (wrt. strike)") {
+        Pricer::ddx_pricer_context context( ALIGN_TO );
+
+        THEN("only those entries should have values not equal to zero that are used") {
+            REQUIRE(context.get_s()           != nullptr);
+            REQUIRE(context.get_sigma()       != nullptr);
+            REQUIRE(context.get_t()           != nullptr);
+            REQUIRE(context.get_tau()         != nullptr);
+            REQUIRE(context.get_r()           != nullptr);
+            REQUIRE(context.get_sigmaA()      != nullptr);
+            REQUIRE(context.get_sigmaA2T2()   != nullptr);
+            REQUIRE(context.get_sigmaAsqrtT() != nullptr);
+            REQUIRE(context.get_emrt()        != nullptr);
+            REQUIRE(context.get_long_short()  != nullptr);
+            REQUIRE(context.get_put_call()    != nullptr);
+            REQUIRE(context.get_d2dx2_prep()  != nullptr);
+            REQUIRE(context.get_d1()          != nullptr);
+            REQUIRE(context.get_d2()          != nullptr);
+            REQUIRE(context.get_prices()      != nullptr);
+            REQUIRE(context.get_x()           != nullptr);
+            REQUIRE(context.get_ddx_price()   != nullptr);
+
+            /*
+            REQUIRE(context.get_to_structure()       == nullptr);
+            REQUIRE(context.get_offsets()            == nullptr);
+            REQUIRE(context.get_premiums()           == nullptr);
+            REQUIRE(context.get_instrument_prices()  == nullptr);
+            REQUIRE(context.get_instrument_pricesl() == nullptr);
+            REQUIRE(context.get_instrument_pricesh() == nullptr);
+            REQUIRE(context.get_x_()                 == nullptr);
+            REQUIRE(context.get_xl_()                == nullptr);
+            REQUIRE(context.get_xh_()                == nullptr);
+            REQUIRE(context.get_d2dx2()              == nullptr);
+             */
+        }
+
+        THEN("the pointers are ALIGN_TO-bytes aligned (needed for usage of SIMD instructions)") {
+            REQUIRE((((unsigned long long int) context.get_s())           & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_sigma())       & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_t())           & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_tau())         & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_r())           & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_sigmaA())      & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_sigmaA2T2())   & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_sigmaAsqrtT()) & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_emrt())        & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_long_short())  & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_put_call())    & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_d2dx2_prep())  & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_d1())          & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_d2())          & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_prices())      & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_x())           & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_ddx_price())   & ((unsigned long long int) ALIGN_TO-1)) == 0);
+        }
+
+
+    }
+
+}
+
+
+SCENARIO("Pricer::d2dx2_pricer_context implementation") {
+
+    GIVEN("a request for a context of size < ALIGN_TO") {
+        Pricer::d2dx2_pricer_context context(ALIGN_TO/4);
+
+        THEN("we get a context of size equal to ALIGN_TO") {
+            REQUIRE(context.get_n_max() == ALIGN_TO);
+        }
+    }
+
+    GIVEN("a request for a context of size x where x % ALIGN_TO != 0") {
+        Pricer::d2dx2_pricer_context context(12345);
+
+        THEN("we get a context of size y where y > x and y % ALIGN_TO == 0") {
+            REQUIRE(context.get_n_max() > 12345);
+            REQUIRE((context.get_n_max() % ALIGN_TO) == 0);
+        }
+    }
+
+    GIVEN("a context for simple price and first derivative computations (wrt. strike)") {
+        Pricer::d2dx2_pricer_context context( ALIGN_TO );
+
+        THEN("only those entries should have values not equal to zero that are used") {
+            REQUIRE(context.get_s()           != nullptr);
+            REQUIRE(context.get_sigma()       != nullptr);
+            REQUIRE(context.get_t()           != nullptr);
+            REQUIRE(context.get_tau()         != nullptr);
+            REQUIRE(context.get_r()           != nullptr);
+            REQUIRE(context.get_sigmaA()      != nullptr);
+            REQUIRE(context.get_sigmaA2T2()   != nullptr);
+            REQUIRE(context.get_sigmaAsqrtT() != nullptr);
+            REQUIRE(context.get_emrt()        != nullptr);
+            REQUIRE(context.get_long_short()  != nullptr);
+            REQUIRE(context.get_put_call()    != nullptr);
+            REQUIRE(context.get_d2dx2_prep()  != nullptr);
+            REQUIRE(context.get_d1()          != nullptr);
+            REQUIRE(context.get_d2()          != nullptr);
+            REQUIRE(context.get_prices()      != nullptr);
+            REQUIRE(context.get_x()           != nullptr);
+            REQUIRE(context.get_ddx_price()   != nullptr);
+            REQUIRE(context.get_d2dx2_price() != nullptr);
+
+            /*
+            REQUIRE(context.get_to_structure()       == nullptr);
+            REQUIRE(context.get_offsets()            == nullptr);
+            REQUIRE(context.get_premiums()           == nullptr);
+            REQUIRE(context.get_instrument_prices()  == nullptr);
+            REQUIRE(context.get_instrument_pricesl() == nullptr);
+            REQUIRE(context.get_instrument_pricesh() == nullptr);
+            REQUIRE(context.get_x_()                 == nullptr);
+            REQUIRE(context.get_xl_()                == nullptr);
+            REQUIRE(context.get_xh_()                == nullptr);
+             */
+        }
+
+        THEN("the pointers are ALIGN_TO-bytes aligned (needed for usage of SIMD instructions)") {
+            REQUIRE((((unsigned long long int) context.get_s())           & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_sigma())       & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_t())           & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_tau())         & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_r())           & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_sigmaA())      & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_sigmaA2T2())   & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_sigmaAsqrtT()) & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_emrt())        & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_long_short())  & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_put_call())    & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_d2dx2_prep())  & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_d1())          & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_d2())          & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_prices())      & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_x())           & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_ddx_price())   & ((unsigned long long int) ALIGN_TO-1)) == 0);
+            REQUIRE((((unsigned long long int) context.get_d2dx2_price()) & ((unsigned long long int) ALIGN_TO-1)) == 0);
+        }
+
+
+    }
+
+}
+
 
 SCENARIO("Pricer computations are correct") {
 
     GIVEN("An instance of a Pricer::pricer_context class and a correspondingly initialized Vortex::Pricer object") {
 
-        Pricer::pricer_context context(PRICER_FLAG_TW_PRICER, ALIGN_TO, 0);
+        Pricer::pricer_context context( ALIGN_TO );
 
         SET_EQUAL_TO(ALIGN_TO, context.get_r(), 0.01)
         SET_EQUAL_TO(ALIGN_TO, context.get_s(), 70.)
@@ -136,6 +316,13 @@ SCENARIO("Pricer computations are correct") {
             THEN("the computed prices of Vortex::Pricer and tw_pricer() are equal") {
                 REQUIRE(abs(reference_pricer_value - context.get_prices()[0]) < 1.0e-8);
             }
+
+            THEN("all computed prices of tw_pricer() are equal") {
+                for(uint64_t i = 0; i < ALIGN_TO; ++i) {
+                    REQUIRE(abs(reference_pricer_value - context.get_prices()[i]) < 1.0e-8);
+                }
+            }
+
         }
 
         WHEN("we price a short call") {
@@ -148,6 +335,13 @@ SCENARIO("Pricer computations are correct") {
             THEN("the computed prices of the Vortex::Pricer and tw_pricer() are equal") {
                 REQUIRE(abs(reference_pricer_value + context.get_prices()[0]) < 1.0e-8);
             }
+
+            THEN("all computed prices of tw_pricer() are equal") {
+                for(uint64_t i = 0; i < ALIGN_TO; ++i) {
+                    REQUIRE(abs(reference_pricer_value + context.get_prices()[0]) < 1.0e-8);
+                }
+            }
+
         }
 
         WHEN("we price a long put") {
@@ -161,6 +355,12 @@ SCENARIO("Pricer computations are correct") {
             THEN("the computed prices of the Vortex::Pricer and tw_pricer() are equal ") {
                 REQUIRE(abs(reference_pricer_value - context.get_prices()[0]) < 1.0e-8);
             }
+            THEN("all computed prices of tw_pricer() are equal") {
+                for(uint64_t i = 0; i < ALIGN_TO; ++i) {
+                    REQUIRE(abs(reference_pricer_value - context.get_prices()[0]) < 1.0e-8);
+                }
+            }
+
         }
 
         WHEN("we price a short put"){
@@ -174,433 +374,394 @@ SCENARIO("Pricer computations are correct") {
                 REQUIRE(abs(reference_pricer_value + context.get_prices()[0]) < 1.0e-8);
 
             }
+            THEN("all computed prices of tw_pricer() are equal") {
+                for(uint64_t i = 0; i < ALIGN_TO; ++i) {
+                    REQUIRE(abs(reference_pricer_value + context.get_prices()[0]) < 1.0e-8);
+                }
+            }
         }
+    }
+
+    GIVEN("An instance of the Pricer::pricer_context class of size 12345") {
+
+        Pricer::pricer_context context( 12345 );
+
+        SET_EQUAL_TO(12345, context.get_r(), 0.05)
+        SET_EQUAL_TO(12345, context.get_s(), 81.)
+        SET_EQUAL_TO(12345, context.get_t(), 1.2)
+        SET_EQUAL_TO(12345, context.get_tau(), 1. / 12.)
+        SET_EQUAL_TO(12345, context.get_sigma(), 0.2)
+        SET_EQUAL_TO(12345, context.get_x(), 72.)
+
+        SET_EQUAL_TO(12345, context.get_sigmaA(), 0.)
+        SET_EQUAL_TO(12345, context.get_sigmaA2T2(), 0.)
+        SET_EQUAL_TO(12345, context.get_sigmaAsqrtT(), 0.)
+        SET_EQUAL_TO(12345, context.get_emrt(), 0.)
+        SET_EQUAL_TO(12345, context.get_d2dx2_prep(), 0.)
+
+        SET_EQUAL_TO(12345, context.get_d1(), 0.)
+        SET_EQUAL_TO(12345, context.get_d2(), 0.)
+
+        SET_EQUAL_TO(12345, context.get_prices(), 0.)
+
+
+        Vortex::Pricer p;
+
+
+        p.set_market_data(context.get_sigma()[0], context.get_t()[0], context.get_tau()[0],
+                          context.get_r()[0], context.get_s()[0]);
+
+        init_tw_pricer();
+
+        prepare_tw_pricer(context);
+
+
+        WHEN("we price a long call") {
+            SET_EQUAL_TO(12345, context.get_put_call(), 1)
+            SET_EQUAL_TO(12345, context.get_long_short(), 1)
+            // test long call price
+            tw_pricer(context);
+            FLOAT reference_pricer_value = p.compute_call_price(context.get_x()[0]);
+
+            THEN("the computed prices of Vortex::Pricer and tw_pricer() are equal") {
+                REQUIRE(abs(reference_pricer_value - context.get_prices()[0]) < 1.0e-8);
+            }
+
+            THEN("all computed prices of tw_pricer() are equal") {
+                for(uint64_t i = 0; i < 12345; ++i) {
+                    REQUIRE(abs(reference_pricer_value - context.get_prices()[i]) < 1.0e-8);
+                }
+            }
+
+        }
+
+        WHEN("we price a short call") {
+            SET_EQUAL_TO(12345, context.get_put_call(), 1)
+            SET_EQUAL_TO(12345, context.get_long_short(), -1)
+
+            // compute the short call price
+            tw_pricer(context);
+            FLOAT reference_pricer_value = p.compute_call_price(context.get_x()[0]);
+            THEN("the computed prices of the Vortex::Pricer and tw_pricer() are equal") {
+                REQUIRE(abs(reference_pricer_value + context.get_prices()[0]) < 1.0e-8);
+            }
+
+            THEN("all computed prices of tw_pricer() are equal") {
+                for(uint64_t i = 0; i < 12345; ++i) {
+                    REQUIRE(abs(reference_pricer_value + context.get_prices()[0]) < 1.0e-8);
+                }
+            }
+
+        }
+
+        WHEN("we price a long put") {
+            SET_EQUAL_TO(12345, context.get_put_call(), -1)
+            SET_EQUAL_TO(12345, context.get_long_short(), 1)
+
+            // test long call price
+            tw_pricer(context);
+            FLOAT reference_pricer_value = p.compute_put_price(context.get_x()[0]);
+
+            THEN("the computed prices of the Vortex::Pricer and tw_pricer() are equal ") {
+                REQUIRE(abs(reference_pricer_value - context.get_prices()[0]) < 1.0e-8);
+            }
+            THEN("all computed prices of tw_pricer() are equal") {
+                for(uint64_t i = 0; i < 12345; ++i) {
+                    REQUIRE(abs(reference_pricer_value - context.get_prices()[0]) < 1.0e-8);
+                }
+            }
+
+        }
+
+        WHEN("we price a short put"){
+            SET_EQUAL_TO(12345, context.get_put_call(), -1)
+            SET_EQUAL_TO(12345, context.get_long_short(), -1)
+
+            tw_pricer(context);
+            FLOAT reference_pricer_value = p.compute_put_price(context.get_x()[0]);
+
+            THEN("the computed prices of Vortex::Pricer and tw_pricer() are equal") {
+                REQUIRE(abs(reference_pricer_value + context.get_prices()[0]) < 1.0e-8);
+
+            }
+            THEN("all computed prices of tw_pricer() are equal") {
+                for(uint64_t i = 0; i < 12345; ++i) {
+                    REQUIRE(abs(reference_pricer_value + context.get_prices()[0]) < 1.0e-8);
+                }
+            }
+
+        }
+
+    }
+
+
+}
+
+
+SCENARIO("First derivative computations of pricing function with respect to strike are correct") {
+
+    GIVEN("an instance of a Pricer::ddx_pricer_context class and a correspondingly initialized Vortex::Pricer object") {
+
+        Pricer::ddx_pricer_context context(ALIGN_TO);
+        SET_EQUAL_TO(ALIGN_TO, context.get_r(), 0.01)
+        SET_EQUAL_TO(ALIGN_TO, context.get_s(), 70.)
+        SET_EQUAL_TO(ALIGN_TO, context.get_t(), 1.2)
+        SET_EQUAL_TO(ALIGN_TO, context.get_tau(), 1. / 12.)
+        SET_EQUAL_TO(ALIGN_TO, context.get_sigma(), 0.3)
+        SET_EQUAL_TO(ALIGN_TO, context.get_x(), 72.)
+        SET_EQUAL_TO(ALIGN_TO, context.get_ddx_price(), 0.)
+
+        SET_EQUAL_TO(ALIGN_TO, context.get_sigmaA(), 0.)
+        SET_EQUAL_TO(ALIGN_TO, context.get_sigmaA2T2(), 0.)
+        SET_EQUAL_TO(ALIGN_TO, context.get_sigmaAsqrtT(), 0.)
+        SET_EQUAL_TO(ALIGN_TO, context.get_emrt(), 0.)
+        SET_EQUAL_TO(ALIGN_TO, context.get_d2dx2_prep(), 0.)
+
+        SET_EQUAL_TO(ALIGN_TO, context.get_d1(), 0.)
+        SET_EQUAL_TO(ALIGN_TO, context.get_d2(), 0.)
+
+        SET_EQUAL_TO(ALIGN_TO, context.get_prices(), 0.)
+        SET_EQUAL_TO(ALIGN_TO, context.get_put_call(), 1)
+        SET_EQUAL_TO(ALIGN_TO, context.get_long_short(), 1)
+
+        const FLOAT eps = 1.0e-10;
+        Vortex::Pricer p;
+
+
+        p.set_market_data(context.get_sigma()[0], context.get_t()[0], context.get_tau()[0],
+                          context.get_r()[0], context.get_s()[0]);
+
+        init_tw_pricer();
+        WHEN("we compute the first derivative with respect to the strike of the price-function for a long call") {
+            SET_EQUAL_TO(ALIGN_TO, context.get_put_call(), 1)
+            SET_EQUAL_TO(ALIGN_TO, context.get_long_short(), 1)
+            // test long call price
+            tw_pricer(context);
+
+            prepare_tw_pricer(context);
+
+            // test long call price
+            tw_pricer(context);
+            ddx_tw_pricer(context);
+            FLOAT reference_pricer_value1 = p.compute_call_price(context.get_x()[0]);
+            FLOAT reference_pricer_value2 = p.compute_call_price(context.get_x()[0] + eps);
+
+            THEN("the computed derivative has to be equal to the quotient of differences of the original prices.") {
+                REQUIRE(abs((reference_pricer_value2 - reference_pricer_value1) / eps - context.get_ddx_price()[0]) <
+                        1.0e-4);
+            }
+        }
+
+        WHEN("we compute the first derivative with respect to the strike of the price-function for a short call") {
+            SET_EQUAL_TO(ALIGN_TO, context.get_put_call(), 1)
+            SET_EQUAL_TO(ALIGN_TO, context.get_long_short(), -1)
+            // test long call price
+            tw_pricer(context);
+
+            prepare_tw_pricer(context);
+
+            // test long call price
+            tw_pricer(context);
+            ddx_tw_pricer(context);
+            FLOAT reference_pricer_value1 = p.compute_call_price(context.get_x()[0]);
+            FLOAT reference_pricer_value2 = p.compute_call_price(context.get_x()[0] + eps);
+
+            THEN("the computed derivative has to be equal to the quotient of differences of the original prices.") {
+                REQUIRE(abs((reference_pricer_value2 - reference_pricer_value1) / eps + context.get_ddx_price()[0])
+                        < 1.0e-4);
+
+            }
+        }
+
+
+        WHEN("we compute the first derivative with respect to the strike of the price-function for a long put") {
+            SET_EQUAL_TO(ALIGN_TO, context.get_put_call(), -1)
+            SET_EQUAL_TO(ALIGN_TO, context.get_long_short(), 1)
+            // test long call price
+            tw_pricer(context);
+
+            prepare_tw_pricer(context);
+
+            // test long call price
+            tw_pricer(context);
+            ddx_tw_pricer(context);
+            FLOAT reference_pricer_value1 = p.compute_put_price(context.get_x()[0]);
+            FLOAT reference_pricer_value2 = p.compute_put_price(context.get_x()[0] + eps);
+
+            THEN("the computed derivative has to be equal to the quotient of differences of the original prices.") {
+                REQUIRE(abs((reference_pricer_value2 - reference_pricer_value1) / eps - context.get_ddx_price()[0])
+                    < 1.0e-4);
+            }
+        }
+
+        WHEN("we compute the first derivative with respect to the strike of the price-function for a short put") {
+            SET_EQUAL_TO(ALIGN_TO, context.get_put_call(), -1)
+            SET_EQUAL_TO(ALIGN_TO, context.get_long_short(), -1)
+            // test long call price
+            tw_pricer(context);
+
+            prepare_tw_pricer(context);
+
+            // test long call price
+            tw_pricer(context);
+            ddx_tw_pricer(context);
+            FLOAT reference_pricer_value1 = p.compute_put_price(context.get_x()[0]);
+            FLOAT reference_pricer_value2 = p.compute_put_price(context.get_x()[0] + eps);
+
+            THEN("the computed derivative has to be equal to the quotient of differences of the original prices.") {
+                REQUIRE(abs((reference_pricer_value2 - reference_pricer_value1) / eps + context.get_ddx_price()[0])
+                        < 1.0e-4);
+            }
+        }
+
+    }
+
+}
+
+
+SCENARIO("Second derivative computations of pricing function with respect to strike are correct") {
+
+    GIVEN("an initialized instance of a Pricer::d2dx2_pricer_context class") {
+
+        Pricer::d2dx2_pricer_context context(ALIGN_TO);
+
+        SET_EQUAL_TO(ALIGN_TO, context.get_r(), 0.01)
+        SET_EQUAL_TO(ALIGN_TO, context.get_s(), 70.)
+        SET_EQUAL_TO(ALIGN_TO, context.get_t(), 1.2)
+        SET_EQUAL_TO(ALIGN_TO, context.get_tau(), 1. / 12.)
+        SET_EQUAL_TO(ALIGN_TO, context.get_sigma(), 0.3)
+        SET_EQUAL_TO(ALIGN_TO, context.get_x(), 72.)
+        SET_EQUAL_TO(ALIGN_TO, context.get_ddx_price(), 0.)
+        SET_EQUAL_TO(ALIGN_TO, context.get_d2dx2_price(), 0.)
+
+        SET_EQUAL_TO(ALIGN_TO, context.get_sigmaA(), 0.)
+        SET_EQUAL_TO(ALIGN_TO, context.get_sigmaA2T2(), 0.)
+        SET_EQUAL_TO(ALIGN_TO, context.get_sigmaAsqrtT(), 0.)
+        SET_EQUAL_TO(ALIGN_TO, context.get_emrt(), 0.)
+        SET_EQUAL_TO(ALIGN_TO, context.get_d2dx2_prep(), 0.)
+
+        SET_EQUAL_TO(ALIGN_TO, context.get_d1(), 0.)
+        SET_EQUAL_TO(ALIGN_TO, context.get_d2(), 0.)
+
+        SET_EQUAL_TO(ALIGN_TO, context.get_prices(), 0.)
+
+        const FLOAT eps = 1.0e-4;
+
+        WHEN("we compute the second derivative, f''(x), of the price function with respect to the strike of a long call"
+             "as well as the first derivatives f'(x) and f'(x+eps) for 0<eps<<1") {
+            SET_EQUAL_TO(ALIGN_TO, context.get_put_call(), 1)
+            SET_EQUAL_TO(ALIGN_TO, context.get_long_short(), 1)
+
+            prepare_tw_pricer(context);
+            tw_pricer(context);
+            d2dx2_tw_pricer(context);
+
+            FLOAT reference_pricer_value1;
+            FLOAT reference_pricer_value2;
+
+            tw_pricer(context);
+            ddx_tw_pricer(context);
+            reference_pricer_value1 = context.get_ddx_price()[0];
+
+            for (uint64_t i = 0; i < 64; ++i) context.get_x()[i] += eps;
+            tw_pricer(context);
+            ddx_tw_pricer(context);
+            reference_pricer_value2 = context.get_ddx_price()[0];
+
+            THEN("the value, f''(x), of the second derivative has to be equal to (f'(x+eps)-f'(x))/eps ") {
+                REQUIRE(abs((reference_pricer_value2 - reference_pricer_value1) / eps - context.get_d2dx2_price()[0])
+                    < eps);
+            }
+
+        }
+
+        WHEN("we compute the second derivative, f''(x), of the price function with respect to the strike of a short call"
+             "as well as the first derivatives f'(x) and f'(x+eps) for 0<eps<<1") {
+            SET_EQUAL_TO(ALIGN_TO, context.get_put_call(), 1)
+            SET_EQUAL_TO(ALIGN_TO, context.get_long_short(), -1)
+
+            prepare_tw_pricer(context);
+            tw_pricer(context);
+            d2dx2_tw_pricer(context);
+
+            FLOAT reference_pricer_value1;
+            FLOAT reference_pricer_value2;
+
+            tw_pricer(context);
+            ddx_tw_pricer(context);
+            reference_pricer_value1 = context.get_ddx_price()[0];
+
+            for (uint64_t i = 0; i < 64; ++i) context.get_x()[i] += eps;
+            tw_pricer(context);
+            ddx_tw_pricer(context);
+            reference_pricer_value2 = context.get_ddx_price()[0];
+
+            THEN("the value, f''(x), of the second derivative has to be equal to (f'(x+eps)-f'(x))/eps ") {
+                REQUIRE(abs((reference_pricer_value2 - reference_pricer_value1) / eps - context.get_d2dx2_price()[0])
+                        < eps);
+            }
+
+        }
+
+        WHEN("we compute the second derivative, f''(x), of the price function with respect to the strike of a long put"
+             "as well as the first derivatives f'(x) and f'(x+eps) for 0<eps<<1") {
+            SET_EQUAL_TO(ALIGN_TO, context.get_put_call(), -1)
+            SET_EQUAL_TO(ALIGN_TO, context.get_long_short(), 1)
+
+            prepare_tw_pricer(context);
+            tw_pricer(context);
+            d2dx2_tw_pricer(context);
+
+            FLOAT reference_pricer_value1;
+            FLOAT reference_pricer_value2;
+
+            tw_pricer(context);
+            ddx_tw_pricer(context);
+            reference_pricer_value1 = context.get_ddx_price()[0];
+
+            for (uint64_t i = 0; i < 64; ++i) context.get_x()[i] += eps;
+            tw_pricer(context);
+            ddx_tw_pricer(context);
+            reference_pricer_value2 = context.get_ddx_price()[0];
+
+            THEN("the value, f''(x), of the second derivative has to be equal to (f'(x+eps)-f'(x))/eps ") {
+                REQUIRE(abs((reference_pricer_value2 - reference_pricer_value1) / eps - context.get_d2dx2_price()[0])
+                        < eps);
+            }
+
+        }
+
+        WHEN("we compute the second derivative, f''(x), of the price function with respect to the strike of a short put"
+             "as well as the first derivatives f'(x) and f'(x+eps) for 0<eps<<1") {
+            SET_EQUAL_TO(ALIGN_TO, context.get_put_call(), -1)
+            SET_EQUAL_TO(ALIGN_TO, context.get_long_short(), -1)
+
+            prepare_tw_pricer(context);
+            tw_pricer(context);
+            d2dx2_tw_pricer(context);
+
+            FLOAT reference_pricer_value1;
+            FLOAT reference_pricer_value2;
+
+            tw_pricer(context);
+            ddx_tw_pricer(context);
+            reference_pricer_value1 = context.get_ddx_price()[0];
+
+            for (uint64_t i = 0; i < ALIGN_TO; ++i) context.get_x()[i] += eps;
+            tw_pricer(context);
+            ddx_tw_pricer(context);
+            reference_pricer_value2 = context.get_ddx_price()[0];
+
+            THEN("the value, f''(x), of the second derivative has to be equal to (f'(x+eps)-f'(x))/eps ") {
+                REQUIRE(abs((reference_pricer_value2 - reference_pricer_value1) / eps - context.get_d2dx2_price()[0])
+                        < eps);
+            }
+
+        }
+
     }
 }
 
-
-TEST_CASE("pricer-class equals sleef-pricer (short put)", "[pricer]") {
-
-    Pricer::pricer_context context(PRICER_FLAG_TW_PRICER, ALIGN_TO,0);
-
-    SET_EQUAL_TO(ALIGN_TO, context.get_r(), 0.01)
-    SET_EQUAL_TO(ALIGN_TO, context.get_s(), 70.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_t(), 1.2)
-    SET_EQUAL_TO(ALIGN_TO, context.get_tau(), 1. / 12.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_sigma(), 0.3)
-    SET_EQUAL_TO(ALIGN_TO, context.get_x(), 72.)
-
-    SET_EQUAL_TO(ALIGN_TO, context.get_sigmaA(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_sigmaA2T2(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_sigmaAsqrtT(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_emrt(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_d2dx2_prep(), 0.)
-
-    SET_EQUAL_TO(ALIGN_TO, context.get_d1(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_d2(), 0.)
-
-    SET_EQUAL_TO(ALIGN_TO, context.get_prices(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_put_call(), -1)
-    SET_EQUAL_TO(ALIGN_TO, context.get_long_short(), -1)
-
-
-    Vortex::Pricer p;
-
-
-    p.set_market_data(context.get_sigma()[0], context.get_t()[0], context.get_tau()[0],
-                      context.get_r()[0], context.get_s()[0]);
-
-    init_tw_pricer();
-
-    prepare_tw_pricer(context);
-
-
-
-    // test long call price
-    tw_pricer(context);
-    FLOAT reference_pricer_value = p.compute_put_price(context.get_x()[0]);
-
-    REQUIRE(abs(reference_pricer_value + context.get_prices()[0]) < 1.0e-8);
-
-}
-
-
-TEST_CASE("pricer-class equals ddx-tw-pricer (long call)", "[pricer]") {
-
-    Pricer::pricer_context context(PRICER_FLAG_TW_COMPUTE_DDX, ALIGN_TO,0);
-
-    SET_EQUAL_TO(ALIGN_TO, context.get_r(), 0.01)
-    SET_EQUAL_TO(ALIGN_TO, context.get_s(), 70.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_t(), 1.2)
-    SET_EQUAL_TO(ALIGN_TO, context.get_tau(), 1. / 12.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_sigma(), 0.3)
-    SET_EQUAL_TO(ALIGN_TO, context.get_x(), 72.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_ddx_price(), 0.)
-
-    SET_EQUAL_TO(ALIGN_TO, context.get_sigmaA(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_sigmaA2T2(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_sigmaAsqrtT(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_emrt(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_d2dx2_prep(), 0.)
-
-    SET_EQUAL_TO(ALIGN_TO, context.get_d1(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_d2(), 0.)
-
-    SET_EQUAL_TO(ALIGN_TO, context.get_prices(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_put_call(), 1)
-    SET_EQUAL_TO(ALIGN_TO, context.get_long_short(), 1)
-
-    const FLOAT eps = 1.0e-10;
-    Vortex::Pricer p;
-
-
-    p.set_market_data(context.get_sigma()[0], context.get_t()[0], context.get_tau()[0],
-                      context.get_r()[0], context.get_s()[0]);
-
-    init_tw_pricer();
-
-    prepare_tw_pricer(context);
-
-
-    // test long call price
-    tw_pricer(context);
-    ddx_tw_pricer(context);
-    FLOAT reference_pricer_value1 = p.compute_call_price(context.get_x()[0]);
-    FLOAT reference_pricer_value2 = p.compute_call_price(context.get_x()[0] + eps);
-
-    REQUIRE(abs((reference_pricer_value2 - reference_pricer_value1) / eps - context.get_ddx_price()[0]) < 1.0e-4);
-
-}
-
-
-TEST_CASE("pricer-class equals ddx-tw-pricer (short call)", "[pricer]") {
-
-    Pricer::pricer_context context(PRICER_FLAG_TW_COMPUTE_DDX, ALIGN_TO,0);
-
-    SET_EQUAL_TO(ALIGN_TO, context.get_r(), 0.01)
-    SET_EQUAL_TO(ALIGN_TO, context.get_s(), 70.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_t(), 1.2)
-    SET_EQUAL_TO(ALIGN_TO, context.get_tau(), 1. / 12.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_sigma(), 0.3)
-    SET_EQUAL_TO(ALIGN_TO, context.get_x(), 72.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_ddx_price(), 0.)
-
-    SET_EQUAL_TO(ALIGN_TO, context.get_sigmaA(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_sigmaA2T2(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_sigmaAsqrtT(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_emrt(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_d2dx2_prep(), 0.)
-
-    SET_EQUAL_TO(ALIGN_TO, context.get_d1(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_d2(), 0.)
-
-    SET_EQUAL_TO(ALIGN_TO, context.get_prices(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_put_call(), 1)
-    SET_EQUAL_TO(ALIGN_TO, context.get_long_short(), -1)
-
-    const FLOAT eps = 1.0e-10;
-    Vortex::Pricer p;
-
-
-    p.set_market_data(context.get_sigma()[0], context.get_t()[0], context.get_tau()[0],
-                      context.get_r()[0], context.get_s()[0]);
-
-    init_tw_pricer();
-
-    prepare_tw_pricer(context);
-
-
-    // test long call price
-    tw_pricer(context);
-    ddx_tw_pricer(context);
-    FLOAT reference_pricer_value1 = p.compute_call_price(context.get_x()[0]);
-    FLOAT reference_pricer_value2 = p.compute_call_price(context.get_x()[0] + eps);
-
-    REQUIRE(abs((reference_pricer_value2 - reference_pricer_value1) / eps + context.get_ddx_price()[0]) < 1.0e-4);
-
-}
-
-
-TEST_CASE("pricer-class equals ddx-tw-pricer (long put)", "[pricer]") {
-
-    Pricer::pricer_context context(PRICER_FLAG_TW_COMPUTE_DDX, ALIGN_TO,0);
-
-    SET_EQUAL_TO(ALIGN_TO, context.get_r(), 0.01)
-    SET_EQUAL_TO(ALIGN_TO, context.get_s(), 70.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_t(), 1.2)
-    SET_EQUAL_TO(ALIGN_TO, context.get_tau(), 1. / 12.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_sigma(), 0.3)
-    SET_EQUAL_TO(ALIGN_TO, context.get_x(), 72.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_ddx_price(), 0.)
-
-    SET_EQUAL_TO(ALIGN_TO, context.get_sigmaA(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_sigmaA2T2(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_sigmaAsqrtT(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_emrt(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_d2dx2_prep(), 0.)
-
-    SET_EQUAL_TO(ALIGN_TO, context.get_d1(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_d2(), 0.)
-
-    SET_EQUAL_TO(ALIGN_TO, context.get_prices(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_put_call(), -1)
-    SET_EQUAL_TO(ALIGN_TO, context.get_long_short(), 1)
-
-    const FLOAT eps = 1.0e-10;
-    Vortex::Pricer p;
-
-
-    p.set_market_data(context.get_sigma()[0], context.get_t()[0], context.get_tau()[0],
-                      context.get_r()[0], context.get_s()[0]);
-
-    init_tw_pricer();
-
-    prepare_tw_pricer(context);
-
-
-    // test long call price
-    tw_pricer(context);
-    ddx_tw_pricer(context);
-    FLOAT reference_pricer_value1 = p.compute_put_price(context.get_x()[0]);
-    FLOAT reference_pricer_value2 = p.compute_put_price(context.get_x()[0] + eps);
-
-    REQUIRE(abs((reference_pricer_value2 - reference_pricer_value1) / eps - context.get_ddx_price()[0]) < 1.0e-4);
-
-}
-
-
-TEST_CASE("pricer-class equals ddx-tw-pricer (short put)", "[pricer]") {
-
-    Pricer::pricer_context context(PRICER_FLAG_TW_COMPUTE_DDX, ALIGN_TO,0);
-
-    SET_EQUAL_TO(ALIGN_TO, context.get_r(), 0.01)
-    SET_EQUAL_TO(ALIGN_TO, context.get_s(), 70.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_t(), 1.2)
-    SET_EQUAL_TO(ALIGN_TO, context.get_tau(), 1. / 12.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_sigma(), 0.3)
-    SET_EQUAL_TO(ALIGN_TO, context.get_x(), 72.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_ddx_price(), 0.)
-
-    SET_EQUAL_TO(ALIGN_TO, context.get_sigmaA(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_sigmaA2T2(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_sigmaAsqrtT(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_emrt(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_d2dx2_prep(), 0.)
-
-    SET_EQUAL_TO(ALIGN_TO, context.get_d1(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_d2(), 0.)
-
-    SET_EQUAL_TO(ALIGN_TO, context.get_prices(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_put_call(), -1)
-    SET_EQUAL_TO(ALIGN_TO, context.get_long_short(), -1)
-
-    const FLOAT eps = 1.0e-10;
-    Vortex::Pricer p;
-
-
-    p.set_market_data(context.get_sigma()[0], context.get_t()[0], context.get_tau()[0],
-                      context.get_r()[0], context.get_s()[0]);
-
-    init_tw_pricer();
-
-    prepare_tw_pricer(context);
-
-
-    // test long call price
-    tw_pricer(context);
-    ddx_tw_pricer(context);
-    FLOAT reference_pricer_value1 = p.compute_put_price(context.get_x()[0]);
-    FLOAT reference_pricer_value2 = p.compute_put_price(context.get_x()[0] + eps);
-
-    REQUIRE(abs((reference_pricer_value2 - reference_pricer_value1) / eps + context.get_ddx_price()[0]) < 1.0e-4);
-
-}
-
-
-TEST_CASE("d2dx2_pricer equals ddx-tw-pricer diff-quot (long call)", "[pricer]") {
-
-
-    Pricer::pricer_context context(PRICER_FLAG_TW_COMPUTE_D2DX2, ALIGN_TO,0);
-
-    SET_EQUAL_TO(ALIGN_TO, context.get_r(), 0.01)
-    SET_EQUAL_TO(ALIGN_TO, context.get_s(), 70.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_t(), 1.2)
-    SET_EQUAL_TO(ALIGN_TO, context.get_tau(), 1. / 12.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_sigma(), 0.3)
-    SET_EQUAL_TO(ALIGN_TO, context.get_x(), 72.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_ddx_price(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_d2dx2(), 0.)
-
-    SET_EQUAL_TO(ALIGN_TO, context.get_sigmaA(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_sigmaA2T2(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_sigmaAsqrtT(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_emrt(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_d2dx2_prep(), 0.)
-
-    SET_EQUAL_TO(ALIGN_TO, context.get_d1(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_d2(), 0.)
-
-    SET_EQUAL_TO(ALIGN_TO, context.get_prices(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_put_call(), 1)
-    SET_EQUAL_TO(ALIGN_TO, context.get_long_short(), 1)
-
-    const FLOAT eps = 1.0e-4;
-    Vortex::Pricer p;
-
-
-    p.set_market_data(context.get_sigma()[0], context.get_t()[0], context.get_tau()[0],
-                      context.get_r()[0], context.get_s()[0]);
-
-    init_tw_pricer();
-
-    prepare_tw_pricer(context);
-
-
-    /****************/
-
-    // test long call price
-    tw_pricer(context);
-    d2dx2_tw_pricer(context);
-
-    FLOAT reference_pricer_value1;
-    FLOAT reference_pricer_value2;
-
-    tw_pricer(context);
-    ddx_tw_pricer(context);
-    reference_pricer_value1 = context.get_ddx_price()[0];
-
-    for (UINT64 i = 0; i ^ 64; ++i) context.get_x()[i] += eps;
-    tw_pricer(context);
-    ddx_tw_pricer(context);
-    reference_pricer_value2 = context.get_ddx_price()[0];
-
-
-    REQUIRE(abs((reference_pricer_value2 - reference_pricer_value1) / eps - context.get_d2dx2()[0]) < eps);
-
-}
-
-TEST_CASE("d2dx2_pricer equals ddx-tw-pricer diff-quot (long put)", "[pricer]") {
-
-
-    Pricer::pricer_context context(PRICER_FLAG_TW_COMPUTE_D2DX2, ALIGN_TO,0);
-
-    SET_EQUAL_TO(ALIGN_TO, context.get_r(), 0.01)
-    SET_EQUAL_TO(ALIGN_TO, context.get_s(), 70.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_t(), 1.2)
-    SET_EQUAL_TO(ALIGN_TO, context.get_tau(), 1. / 12.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_sigma(), 0.3)
-    SET_EQUAL_TO(ALIGN_TO, context.get_x(), 72.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_ddx_price(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_d2dx2(), 0.)
-
-    SET_EQUAL_TO(ALIGN_TO, context.get_sigmaA(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_sigmaA2T2(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_sigmaAsqrtT(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_emrt(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_d2dx2_prep(), 0.)
-
-    SET_EQUAL_TO(ALIGN_TO, context.get_d1(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_d2(), 0.)
-
-    SET_EQUAL_TO(ALIGN_TO, context.get_prices(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_put_call(), -1)
-    SET_EQUAL_TO(ALIGN_TO, context.get_long_short(), 1)
-
-    const FLOAT eps = 1.0e-4;
-    Vortex::Pricer p;
-
-
-    p.set_market_data(context.get_sigma()[0], context.get_t()[0], context.get_tau()[0],
-                      context.get_r()[0], context.get_s()[0]);
-
-    init_tw_pricer();
-
-    prepare_tw_pricer(context);
-
-
-    /****************/
-
-    // test long call price
-    tw_pricer(context);
-    d2dx2_tw_pricer(context);
-
-    FLOAT reference_pricer_value1;
-    FLOAT reference_pricer_value2;
-
-    tw_pricer(context);
-    ddx_tw_pricer(context);
-    reference_pricer_value1 = context.get_ddx_price()[0];
-
-    for (UINT64 i = 0; i ^ 64; ++i) context.get_x()[i] += eps;
-    tw_pricer(context);
-    ddx_tw_pricer(context);
-    reference_pricer_value2 = context.get_ddx_price()[0];
-
-
-    REQUIRE(abs((reference_pricer_value2 - reference_pricer_value1) / eps - context.get_d2dx2()[0]) < eps);
-}
-
-
-TEST_CASE("d2dx2_pricer equals ddx-tw-pricer diff-quot (short call)", "[pricer]") {
-
-    Pricer::pricer_context context(PRICER_FLAG_TW_COMPUTE_D2DX2, ALIGN_TO,0);
-
-    SET_EQUAL_TO(ALIGN_TO, context.get_r(), 0.01)
-    SET_EQUAL_TO(ALIGN_TO, context.get_s(), 70.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_t(), 1.2)
-    SET_EQUAL_TO(ALIGN_TO, context.get_tau(), 1. / 12.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_sigma(), 0.3)
-    SET_EQUAL_TO(ALIGN_TO, context.get_x(), 72.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_ddx_price(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_d2dx2(), 0.)
-
-    SET_EQUAL_TO(ALIGN_TO, context.get_sigmaA(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_sigmaA2T2(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_sigmaAsqrtT(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_emrt(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_d2dx2_prep(), 0.)
-
-    SET_EQUAL_TO(ALIGN_TO, context.get_d1(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_d2(), 0.)
-
-    SET_EQUAL_TO(ALIGN_TO, context.get_prices(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_put_call(), 1)
-    SET_EQUAL_TO(ALIGN_TO, context.get_long_short(), -1)
-
-    const FLOAT eps = 1.0e-4;
-    Vortex::Pricer p;
-
-
-    p.set_market_data(context.get_sigma()[0], context.get_t()[0], context.get_tau()[0],
-                      context.get_r()[0], context.get_s()[0]);
-
-    init_tw_pricer();
-
-    prepare_tw_pricer(context);
-
-
-    /****************/
-
-    // test long call price
-    tw_pricer(context);
-    d2dx2_tw_pricer(context);
-
-    FLOAT reference_pricer_value1;
-    FLOAT reference_pricer_value2;
-
-    tw_pricer(context);
-    ddx_tw_pricer(context);
-    reference_pricer_value1 = context.get_ddx_price()[0];
-
-    for (UINT64 i = 0; i ^ 64; ++i) context.get_x()[i] += eps;
-    tw_pricer(context);
-    ddx_tw_pricer(context);
-    reference_pricer_value2 = context.get_ddx_price()[0];
-
-
-    REQUIRE(abs((reference_pricer_value2 - reference_pricer_value1) / eps - context.get_d2dx2()[0]) < eps);
-
-}
 
 TEST_CASE("used architecture", "[pricer]") {
     WARN("THIS WARNING IS SUPPOSED TO APPEAR !!! " <<
@@ -611,9 +772,8 @@ TEST_CASE("used architecture", "[pricer]") {
 
 
 
-TEST_CASE("compute_tw_strikes_from_premiums() --- (1)", "[pricer]") {
-
-    Pricer::pricer_context context(PRICER_FLAG_TW_COMPUTE_STRIKES_OF_MICROHEDGES, ALIGN_TO,ALIGN_TO);
+SCENARIO("Computations of strikes from premiums works") {
+    Pricer::compute_instrument_strikes_from_premiums_context context(ALIGN_TO, ALIGN_TO);
 
     SET_EQUAL_TO(ALIGN_TO, context.get_r(), 0.01)
     SET_EQUAL_TO(ALIGN_TO, context.get_s(), 70.)
@@ -641,92 +801,36 @@ TEST_CASE("compute_tw_strikes_from_premiums() --- (1)", "[pricer]") {
     SET_EQUAL_TO(ALIGN_TO, context.get_prices(), 0)
 
     SET_EQUAL_TO(ALIGN_TO, context.get_premiums(), 5.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_instrument_prices(),0)
-    SET_EQUAL_TO(ALIGN_TO, context.get_instrument_pricesl(),0)
-    SET_EQUAL_TO(ALIGN_TO, context.get_instrument_pricesh(),0)
+    SET_EQUAL_TO(ALIGN_TO, context.get_instrument_prices(), 0)
+    SET_EQUAL_TO(ALIGN_TO, context.get_instrument_pricesl(), 0)
+    SET_EQUAL_TO(ALIGN_TO, context.get_instrument_pricesh(), 0)
 
-    SET_EQUAL_TO(ALIGN_TO, context.get_xl_(),1)
-    SET_EQUAL_TO(ALIGN_TO, context.get_xh_(),1000)
-    SET_EQUAL_TO(ALIGN_TO, context.get_x_(),500)
+    SET_EQUAL_TO(ALIGN_TO, context.get_xl_(), 1)
+    SET_EQUAL_TO(ALIGN_TO, context.get_xh_(), 1000)
+    SET_EQUAL_TO(ALIGN_TO, context.get_x_(), 500)
 
-    
 
     init_tw_pricer();
-    prepare_tw_pricer(context);
 
-    for(int32_t i = 0; i < 64; ++i) {
-        context.get_to_structure()[i] = i;
+    WHEN("we compute the strikes of long calls with premium equal to 5") {
+        prepare_tw_pricer(context);
+
+        for (int32_t i = 0; i < ALIGN_TO; ++i) {
+            context.get_to_structure()[i] = i;
+        }
+
+        compute_tw_strikes_from_premiums(context);
+
+        THEN("the resulting call cost a premium of 5") {
+            REQUIRE(abs(context.get_instrument_prices()[0] - context.get_premiums()[0]) < 1.0e-4);
+        }
     }
 
-    compute_tw_strikes_from_premiums(context);
-
-    REQUIRE(abs(context.get_instrument_prices()[0] - context.get_premiums()[0]) < 1.0e-4);
-    // REQUIRE(abs(context.get_instrument_pricesh()[0] - context.get_premiums()[0]) < 1.0e-4);
-
 }
 
 
-TEST_CASE("d2dx2_pricer equals ddx-tw-pricer diff-quot (short put)", "[pricer]") {
 
-
-    Pricer::pricer_context context(PRICER_FLAG_TW_COMPUTE_D2DX2, ALIGN_TO,0);
-
-    SET_EQUAL_TO(ALIGN_TO, context.get_r(), 0.01)
-    SET_EQUAL_TO(ALIGN_TO, context.get_s(), 70.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_t(), 1.2)
-    SET_EQUAL_TO(ALIGN_TO, context.get_tau(), 1. / 12.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_sigma(), 0.3)
-    SET_EQUAL_TO(ALIGN_TO, context.get_x(), 72.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_ddx_price(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_d2dx2(), 0.)
-
-    SET_EQUAL_TO(ALIGN_TO, context.get_sigmaA(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_sigmaA2T2(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_sigmaAsqrtT(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_emrt(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_d2dx2_prep(), 0.)
-
-    SET_EQUAL_TO(ALIGN_TO, context.get_d1(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_d2(), 0.)
-
-    SET_EQUAL_TO(ALIGN_TO, context.get_prices(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_put_call(), -1)
-    SET_EQUAL_TO(ALIGN_TO, context.get_long_short(), -1)
-
-    const FLOAT eps = 1.0e-4;
-    Vortex::Pricer p;
-
-
-    p.set_market_data(context.get_sigma()[0], context.get_t()[0], context.get_tau()[0],
-                      context.get_r()[0], context.get_s()[0]);
-
-    init_tw_pricer();
-
-    prepare_tw_pricer(context);
-
-
-    /****************/
-
-    // test long call price
-    tw_pricer(context);
-    d2dx2_tw_pricer(context);
-
-    FLOAT reference_pricer_value1;
-    FLOAT reference_pricer_value2;
-
-    tw_pricer(context);
-    ddx_tw_pricer(context);
-    reference_pricer_value1 = context.get_ddx_price()[0];
-
-    for (UINT64 i = 0; i ^ 64; ++i) context.get_x()[i] += eps;
-    tw_pricer(context);
-    ddx_tw_pricer(context);
-    reference_pricer_value2 = context.get_ddx_price()[0];
-
-
-    REQUIRE(abs((reference_pricer_value2 - reference_pricer_value1) / eps - context.get_d2dx2()[0]) < eps);
-}
-
+/*
 
 TEST_CASE("full-tw-pricer-test", "[pricer]") {
 
@@ -766,8 +870,6 @@ TEST_CASE("full-tw-pricer-test", "[pricer]") {
 
     prepare_tw_pricer(context);
 
-
-    /****************/
 
 
     SECTION("long-call-test") {
@@ -928,3 +1030,4 @@ TEST_CASE("full-tw-pricer-test", "[pricer]") {
     }
 }
 
+*/

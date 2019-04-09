@@ -77,6 +77,33 @@ namespace Pricer {
 
     }
 
+    void compute_prices_of_instruments_context::alloc_mem(uint64_t n, uint64_t m) {
+        MEM_ALLOC(int32_t , n, m__to_structure)
+        MEM_ALLOC(FLOAT, m, m__instrument_prices)
+    }
+
+    void compute_instrument_strikes_from_premiums_context::alloc_mem(uint64_t n, uint64_t m) {
+        MEM_ALLOC(FLOAT, n, m__offsets)
+
+        MEM_ALLOC(FLOAT, m, m__premiums)
+        MEM_ALLOC(FLOAT, m, m__instrument_pricesl)
+        MEM_ALLOC(FLOAT, m, m__instrument_pricesh)
+        MEM_ALLOC(FLOAT, m, m__x_)
+        MEM_ALLOC(FLOAT, m, m__xl_)
+        MEM_ALLOC(FLOAT, m, m__xh_)
+    }
+
+    void compute_instrument_strikes_from_premiums_context::dealloc_mem() {
+        MEM_DEALLOC(FLOAT, m__offsets)
+
+        MEM_DEALLOC(FLOAT, m__premiums)
+        MEM_DEALLOC(FLOAT, m__instrument_pricesl)
+        MEM_DEALLOC(FLOAT, m__instrument_pricesh)
+        MEM_DEALLOC(FLOAT, m__x_)
+        MEM_DEALLOC(FLOAT, m__xl_)
+        MEM_DEALLOC(FLOAT, m__xh_)
+    }
+
     void ddx_pricer_context::dealloc_mem() {
         MEM_DEALLOC(FLOAT, m__ddx_price)
     }
@@ -84,6 +111,12 @@ namespace Pricer {
     void d2dx2_pricer_context::dealloc_mem() {
         MEM_DEALLOC(FLOAT, m__d2dx2_price)
     }
+
+    void compute_prices_of_instruments_context::dealloc_mem() {
+        MEM_DEALLOC(int32_t , m__to_structure)
+        MEM_DEALLOC(FLOAT, m__instrument_prices)
+    }
+
 
     void pricer_context::dealloc_mem() {
         MEM_DEALLOC(FLOAT, m__s)
@@ -111,59 +144,6 @@ namespace Pricer {
         */
     }
 
-    void ddx_pricer_context::realloc_mem(uint64_t n) {
-
-        pricer_context::realloc_mem(n);
-
-        uint64_t n_max_old = get_n_max();
-
-        MEM_REALLOC(FLOAT, Real_Ptr, m__ddx_price)
-
-        init_memory( n_max_old, get_n_max());
-
-    }
-
-    void d2dx2_pricer_context::realloc_mem(uint64_t n) {
-
-        ddx_pricer_context::realloc_mem(n);
-
-        uint64_t n_max_old = get_n_max();
-
-        MEM_REALLOC(FLOAT, Real_Ptr, m__d2dx2_price)
-
-        init_memory( n_max_old, get_n_max());
-
-    }
-
-    void pricer_context::realloc_mem(uint64_t n) {
-        uint64_t n_max_old = m__n_max;
-     //   uint64_t m_max_old = m__m_max;
-
-        MEM_REALLOC(FLOAT, Real_Ptr , m__s)
-        MEM_REALLOC(FLOAT, Real_Ptr , m__sigma)
-        MEM_REALLOC(FLOAT, Real_Ptr , m__t)
-        MEM_REALLOC(FLOAT, Real_Ptr , m__tau)
-        MEM_REALLOC(FLOAT, Real_Ptr , m__r)
-        MEM_REALLOC(FLOAT, Real_Ptr , m__sigmaA)
-        MEM_REALLOC(FLOAT, Real_Ptr , m__sigmaA2T2)
-        MEM_REALLOC(FLOAT, Real_Ptr , m__sigmaAsqrtT)
-        MEM_REALLOC(FLOAT, Real_Ptr , m__emrt)
-        MEM_REALLOC(FLOAT, Real_Ptr , m__long_short)
-        MEM_REALLOC(FLOAT, Real_Ptr , m__put_call)
-        MEM_REALLOC(FLOAT, Real_Ptr , m__d2dx2_prep)
-
-        MEM_REALLOC(FLOAT, Real_Ptr , m__d1)
-        MEM_REALLOC(FLOAT, Real_Ptr , m__d2)
-        MEM_REALLOC(FLOAT, Real_Ptr , m__prices)
-        MEM_REALLOC(FLOAT, Real_Ptr , m__x)
-
-        /*
-        COND_MEM_REALLOC(PRICER_FLAG_TW_COMPUTE_DDX, FLOAT, Real_Ptr, m__ddx_price)
-
-        COND_MEM_REALLOC(PRICER_FLAG_TW_COMPUTE_D2DX2, FLOAT, Real_Ptr, m__d2dx2)
-*/
-        init_memory(n_max_old, m__n_max);
-    }
 
     void ddx_pricer_context::init_memory(uint64_t n1, uint64_t n2) {
         pricer_context::init_memory(n1, n2);
@@ -178,6 +158,38 @@ namespace Pricer {
 
         for (uint64_t n = n1; n < n2; ++n) {
             MEM_INIT(m__d2dx2_price, n, 0.)
+        }
+    }
+
+    void compute_prices_of_instruments_context::init_memory(uint64_t n1, uint64_t n2, uint64_t m1, uint64_t m2) {
+        pricer_context::init_memory(n1, n2);
+
+        for(uint64_t i = n1; i < n2; ++i) {
+            MEM_INIT(m__to_structure, i, m2-1)
+        }
+
+        for(uint64_t i = m1; i < m2; ++i) {
+            MEM_INIT(m__instrument_prices, i, 0.)
+        }
+
+    }
+
+    void compute_instrument_strikes_from_premiums_context::init_memory(uint64_t n1, uint64_t n2, uint64_t m1, uint64_t m2) {
+
+        compute_prices_of_instruments_context::init_memory(n1, n2, m1, m2);
+        d2dx2_pricer_context::init_memory(n1, n2);
+
+        for(uint64_t i = n1; i < n2; ++i) {
+            MEM_INIT(m__offsets, i, 0.)
+        }
+
+        for(uint64_t i = m1; i < m2; ++i) {
+            MEM_INIT(m__premiums, i, 0.)
+            MEM_INIT(m__instrument_pricesl, i, 0.)
+            MEM_INIT(m__instrument_pricesh, i, 0.)
+            MEM_INIT(m__x_, i, 0.)
+            MEM_INIT(m__xl_, i, 0.)
+            MEM_INIT(m__xh_, i, 0.)
         }
     }
 

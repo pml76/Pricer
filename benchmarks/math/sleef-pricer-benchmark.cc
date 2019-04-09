@@ -33,7 +33,7 @@ typedef double *__restrict__ __attribute__((aligned(ALIGN_TO))) Real_Ptr;
 
 static void BM_Pricer_Sleef(benchmark::State &state) {
 
-    Pricer::pricer_context context(PRICER_FLAG_TW_PRICER, state.range(0));
+    Pricer::pricer_context context( state.range(0));
 
 
     // First create an instance of an engine.
@@ -110,7 +110,7 @@ BENCHMARK(BM_Pricer_Sleef)->Arg(1 << 20)->Arg(1 << 21)->Arg(1 << 22);
 static void BM_Pricer_Full_Sleef(benchmark::State &state) {
 
 
-    Pricer::pricer_context context(PRICER_FLAG_TW_COMPUTE_D2DX2, state.range(0));
+    Pricer::d2dx2_pricer_context context( state.range(0));
 
 
     // First create an instance of an engine.
