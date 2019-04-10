@@ -577,30 +577,8 @@ void compute_tw_prices_of_instruments( Pricer::compute_prices_of_instruments_con
     }
 }
 
-void compute_tw_strikes_from_premiums( Pricer::compute_instrument_strikes_from_premiums_context &context ) {
 
-/*
-        UINT64 n,
-        Real_Ptr long_short_,        // 1 == long option // -1 == short option
-        Real_Ptr put_call_,          // -1 == put // 1 == call
-        Real_Ptr s_,
-        Real_Ptr sigmaA2T2_,
-        Real_Ptr sigmaAsqrtT_,
-        Real_Ptr emrt_,
-        Int32_Ptr to_structure,
-        Real_Ptr offsets_,
-        Real_Ptr prices_,
-        Real_Ptr x_tmp_,
-        uint64_t m,
-        Real_Ptr premiums_,
-        Real_Ptr instrument_prices_,
-        Real_Ptr instrument_pricesl_,
-        Real_Ptr instrument_pricesh_,
-        Real_Ptr x_,
-        Real_Ptr xl_,
-        Real_Ptr xh_) {
-*/
-
+void compute_tw_upper_and_lower_bounds(Pricer::compute_instrument_strikes_from_premiums_context &context) {
     ASSUME(context.get_n_max() % 64 == 0)
     ASSUME(context.get_m_max() % 64 == 0)
 
@@ -622,9 +600,6 @@ void compute_tw_strikes_from_premiums( Pricer::compute_instrument_strikes_from_p
     ASSUME_ALIGNED(Real_Ptr ,context.get_x_())
     ASSUME_ALIGNED(Real_Ptr ,context.get_xh_())
     ASSUME_ALIGNED(Real_Ptr ,context.get_xl_())
-
-    vdouble err;
-    double buffer[sizeof(vdouble)/ sizeof(double)] __attribute__((aligned(ALIGN_TO)));
 
     /// fill the instrument_priceh and instrument_pricel arrays with the prices evaluated at xh_ and xl_,
     /// respectively.
@@ -740,6 +715,126 @@ void compute_tw_strikes_from_premiums( Pricer::compute_instrument_strikes_from_p
 
     }
 
+
+}
+
+
+
+bool check_if_roots_are_breaketed( Pricer::compute_instrument_strikes_from_premiums_context &context, uint64_t*no_breaketed, uint64_t *no_unbreaketed) {
+    ASSUME(context.get_n_max() % 64 == 0)
+    ASSUME(context.get_m_max() % 64 == 0)
+
+    ASSUME_ALIGNED(Real_Ptr ,context.get_long_short())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_put_call())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_s())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_sigmaA2T2())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_sigmaAsqrtT())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_emrt())
+    ASSUME_ALIGNED(Int32_Ptr,context.get_to_structure())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_offsets())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_prices())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_x())
+
+    ASSUME_ALIGNED(Real_Ptr ,context.get_premiums())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_instrument_prices())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_instrument_pricesh())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_instrument_pricesl())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_x_())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_xh_())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_xl_())
+
+    bool ret = true;
+    if(no_breaketed) *no_breaketed=0;
+    if(no_unbreaketed) *no_unbreaketed=0;
+
+    compute_tw_upper_and_lower_bounds(context);
+
+#pragma omp parallel
+    {
+
+        bool ret2 = true;
+        uint64_t no_breaketed2, no_unbreaketed2;
+
+#pragma omp for schedule(static)
+        for (uint64_t i = 0; i < context.get_n_max(); ++i) {
+            if (context.get_instrument_pricesl()[i]*context.get_instrument_pricesh()[i] < 0.) {
+                no_breaketed2++;
+            } else {
+                no_unbreaketed2++;
+                ret2 = false;
+            }
+        }
+
+#pragma omp atomic update
+        ret &= ret2;
+        if(no_breaketed) {
+#pragma omp atomic update
+            *no_breaketed += no_breaketed2;
+        }
+        if(no_unbreaketed) {
+#pragma omp atomic update
+            *no_unbreaketed += no_unbreaketed2;
+        }
+    }
+
+    return ret;
+
+}
+
+
+
+void compute_tw_strikes_from_premiums( Pricer::compute_instrument_strikes_from_premiums_context &context ) {
+
+/*
+        UINT64 n,
+        Real_Ptr long_short_,        // 1 == long option // -1 == short option
+        Real_Ptr put_call_,          // -1 == put // 1 == call
+        Real_Ptr s_,
+        Real_Ptr sigmaA2T2_,
+        Real_Ptr sigmaAsqrtT_,
+        Real_Ptr emrt_,
+        Int32_Ptr to_structure,
+        Real_Ptr offsets_,
+        Real_Ptr prices_,
+        Real_Ptr x_tmp_,
+        uint64_t m,
+        Real_Ptr premiums_,
+        Real_Ptr instrument_prices_,
+        Real_Ptr instrument_pricesl_,
+        Real_Ptr instrument_pricesh_,
+        Real_Ptr x_,
+        Real_Ptr xl_,
+        Real_Ptr xh_) {
+*/
+
+    ASSUME(context.get_n_max() % 64 == 0)
+    ASSUME(context.get_m_max() % 64 == 0)
+
+    ASSUME_ALIGNED(Real_Ptr ,context.get_long_short())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_put_call())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_s())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_sigmaA2T2())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_sigmaAsqrtT())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_emrt())
+    ASSUME_ALIGNED(Int32_Ptr,context.get_to_structure())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_offsets())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_prices())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_x())
+
+    ASSUME_ALIGNED(Real_Ptr ,context.get_premiums())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_instrument_prices())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_instrument_pricesh())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_instrument_pricesl())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_x_())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_xh_())
+    ASSUME_ALIGNED(Real_Ptr ,context.get_xl_())
+
+    vdouble err;
+    double buffer[sizeof(vdouble)/ sizeof(double)] __attribute__((aligned(ALIGN_TO)));
+
+
+
+    compute_tw_upper_and_lower_bounds(context);
 
     /*
      *  Main loop starts here.
