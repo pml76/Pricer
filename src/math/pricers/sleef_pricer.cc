@@ -604,7 +604,7 @@ void compute_tw_upper_and_lower_bounds(Pricer::compute_instrument_strikes_from_p
     /// fill the instrument_priceh and instrument_pricel arrays with the prices evaluated at xh_ and xl_,
     /// respectively.
 
-    //#pragma omp parallel
+    #pragma omp parallel
     {
         vdouble tmp, tmp1, tmp2, tmp3, tmp4, x, s, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price;
         vdouble long_short, put_call;
@@ -628,7 +628,7 @@ void compute_tw_upper_and_lower_bounds(Pricer::compute_instrument_strikes_from_p
             vstore_v_p_vd(&context.get_instrument_pricesl()[i], tmp);
         }
 
-#pragma omp barrier
+        #pragma omp barrier
 
         for (uint64_t i = n_begin; i < n_end; i += sizeof(vdouble) / sizeof(double)) {
 
