@@ -753,7 +753,7 @@ bool check_if_roots_are_breaketed( Pricer::compute_instrument_strikes_from_premi
     {
 
         bool ret2 = true;
-        uint64_t no_breaketed2, no_unbreaketed2;
+        uint64_t no_breaketed2 = 0, no_unbreaketed2 = 0;
 
 #pragma omp for schedule(static)
         for (uint64_t i = 0; i < context.get_n_max(); ++i) {
@@ -767,14 +767,17 @@ bool check_if_roots_are_breaketed( Pricer::compute_instrument_strikes_from_premi
 
 #pragma omp atomic update
         ret &= ret2;
+
         if(no_breaketed) {
 #pragma omp atomic update
             *no_breaketed += no_breaketed2;
         }
+
         if(no_unbreaketed) {
 #pragma omp atomic update
             *no_unbreaketed += no_unbreaketed2;
         }
+
     }
 
     return ret;
