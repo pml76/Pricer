@@ -1296,64 +1296,126 @@ TEST_CASE("used architecture", "[pricer]") {
 }
 
 
+SCENARIO("Computation of upper and lower bound works") {
+    GIVEN("a compute_insrtument_form_premiums_context of length (ALIGN_TO, ALIGN_TO)") {
+
+        Pricer::compute_instrument_strikes_from_premiums_context context(ALIGN_TO, ALIGN_TO);
+
+        SET_EQUAL_TO(ALIGN_TO, context.get_r(), 0.01)
+        SET_EQUAL_TO(ALIGN_TO, context.get_s(), 70.)
+        SET_EQUAL_TO(ALIGN_TO, context.get_t(), 1.2)
+        SET_EQUAL_TO(ALIGN_TO, context.get_tau(), 1. / 12.)
+        SET_EQUAL_TO(ALIGN_TO, context.get_sigma(), 0.3)
+        SET_EQUAL_TO(ALIGN_TO, context.get_x(), 72.)
+
+        SET_EQUAL_TO(ALIGN_TO, context.get_sigmaA(), 0.)
+        SET_EQUAL_TO(ALIGN_TO, context.get_sigmaA2T2(), 0.)
+        SET_EQUAL_TO(ALIGN_TO, context.get_sigmaAsqrtT(), 0.)
+        SET_EQUAL_TO(ALIGN_TO, context.get_emrt(), 0.)
+        SET_EQUAL_TO(ALIGN_TO, context.get_d2dx2_prep(), 0.)
+
+        SET_EQUAL_TO(ALIGN_TO, context.get_d1(), 0.)
+        SET_EQUAL_TO(ALIGN_TO, context.get_d2(), 0.)
+
+        SET_EQUAL_TO(ALIGN_TO, context.get_prices(), 0.)
+        SET_EQUAL_TO(ALIGN_TO, context.get_put_call(), 1)
+        SET_EQUAL_TO(ALIGN_TO, context.get_long_short(), 1)
+
+
+        SET_EQUAL_TO(ALIGN_TO, context.get_to_structure(), 0)
+        SET_EQUAL_TO(ALIGN_TO, context.get_offsets(), 0)
+        SET_EQUAL_TO(ALIGN_TO, context.get_prices(), 0)
+
+        SET_EQUAL_TO(ALIGN_TO, context.get_premiums(), 5.)
+        SET_EQUAL_TO(ALIGN_TO, context.get_instrument_prices(), 0)
+        SET_EQUAL_TO(ALIGN_TO, context.get_instrument_pricesl(), 0)
+        SET_EQUAL_TO(ALIGN_TO, context.get_instrument_pricesh(), 0)
+
+        SET_EQUAL_TO(ALIGN_TO, context.get_xl_(), 1)
+        SET_EQUAL_TO(ALIGN_TO, context.get_xh_(), 1000)
+        SET_EQUAL_TO(ALIGN_TO, context.get_x_(), 500)
+
+
+        init_tw_pricer();
+
+        WHEN("we compute the strikes of long calls with premium equal to 5") {
+            prepare_tw_pricer(context);
+
+            for (int32_t i = 0; i < ALIGN_TO; ++i) {
+                context.get_to_structure()[i] = i;
+            }
+
+            compute_tw_upper_and_lower_bounds(context);
+
+            THEN("The upper and lower bounds are priced correct") {
+
+            }
+
+
+        }
+    }
+}
 
 SCENARIO("Computations of strikes from premiums works") {
 
-    Pricer::compute_instrument_strikes_from_premiums_context context(ALIGN_TO, ALIGN_TO);
+    GIVEN("a compute_insrtument_form_premiums_context of length (ALIGN_TO, ALIGN_TO)") {
 
-    SET_EQUAL_TO(ALIGN_TO, context.get_r(), 0.01)
-    SET_EQUAL_TO(ALIGN_TO, context.get_s(), 70.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_t(), 1.2)
-    SET_EQUAL_TO(ALIGN_TO, context.get_tau(), 1. / 12.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_sigma(), 0.3)
-    SET_EQUAL_TO(ALIGN_TO, context.get_x(), 72.)
+        Pricer::compute_instrument_strikes_from_premiums_context context(ALIGN_TO, ALIGN_TO);
 
-    SET_EQUAL_TO(ALIGN_TO, context.get_sigmaA(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_sigmaA2T2(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_sigmaAsqrtT(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_emrt(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_d2dx2_prep(), 0.)
+        SET_EQUAL_TO(ALIGN_TO, context.get_r(), 0.01)
+        SET_EQUAL_TO(ALIGN_TO, context.get_s(), 70.)
+        SET_EQUAL_TO(ALIGN_TO, context.get_t(), 1.2)
+        SET_EQUAL_TO(ALIGN_TO, context.get_tau(), 1. / 12.)
+        SET_EQUAL_TO(ALIGN_TO, context.get_sigma(), 0.3)
+        SET_EQUAL_TO(ALIGN_TO, context.get_x(), 72.)
 
-    SET_EQUAL_TO(ALIGN_TO, context.get_d1(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_d2(), 0.)
+        SET_EQUAL_TO(ALIGN_TO, context.get_sigmaA(), 0.)
+        SET_EQUAL_TO(ALIGN_TO, context.get_sigmaA2T2(), 0.)
+        SET_EQUAL_TO(ALIGN_TO, context.get_sigmaAsqrtT(), 0.)
+        SET_EQUAL_TO(ALIGN_TO, context.get_emrt(), 0.)
+        SET_EQUAL_TO(ALIGN_TO, context.get_d2dx2_prep(), 0.)
 
-    SET_EQUAL_TO(ALIGN_TO, context.get_prices(), 0.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_put_call(), 1)
-    SET_EQUAL_TO(ALIGN_TO, context.get_long_short(), 1)
+        SET_EQUAL_TO(ALIGN_TO, context.get_d1(), 0.)
+        SET_EQUAL_TO(ALIGN_TO, context.get_d2(), 0.)
 
-
-    SET_EQUAL_TO(ALIGN_TO, context.get_to_structure(), 0)
-    SET_EQUAL_TO(ALIGN_TO, context.get_offsets(), 0)
-    SET_EQUAL_TO(ALIGN_TO, context.get_prices(), 0)
-
-    SET_EQUAL_TO(ALIGN_TO, context.get_premiums(), 5.)
-    SET_EQUAL_TO(ALIGN_TO, context.get_instrument_prices(), 0)
-    SET_EQUAL_TO(ALIGN_TO, context.get_instrument_pricesl(), 0)
-    SET_EQUAL_TO(ALIGN_TO, context.get_instrument_pricesh(), 0)
-
-    SET_EQUAL_TO(ALIGN_TO, context.get_xl_(), 1)
-    SET_EQUAL_TO(ALIGN_TO, context.get_xh_(), 1000)
-    SET_EQUAL_TO(ALIGN_TO, context.get_x_(), 500)
+        SET_EQUAL_TO(ALIGN_TO, context.get_prices(), 0.)
+        SET_EQUAL_TO(ALIGN_TO, context.get_put_call(), 1)
+        SET_EQUAL_TO(ALIGN_TO, context.get_long_short(), 1)
 
 
-    init_tw_pricer();
+        SET_EQUAL_TO(ALIGN_TO, context.get_to_structure(), 0)
+        SET_EQUAL_TO(ALIGN_TO, context.get_offsets(), 0)
+        SET_EQUAL_TO(ALIGN_TO, context.get_prices(), 0)
 
-    WHEN("we compute the strikes of long calls with premium equal to 5") {
-        prepare_tw_pricer(context);
+        SET_EQUAL_TO(ALIGN_TO, context.get_premiums(), 5.)
+        SET_EQUAL_TO(ALIGN_TO, context.get_instrument_prices(), 0)
+        SET_EQUAL_TO(ALIGN_TO, context.get_instrument_pricesl(), 0)
+        SET_EQUAL_TO(ALIGN_TO, context.get_instrument_pricesh(), 0)
 
-        for (int32_t i = 0; i < ALIGN_TO; ++i) {
-            context.get_to_structure()[i] = i;
-        }
+        SET_EQUAL_TO(ALIGN_TO, context.get_xl_(), 1)
+        SET_EQUAL_TO(ALIGN_TO, context.get_xh_(), 1000)
+        SET_EQUAL_TO(ALIGN_TO, context.get_x_(), 500)
 
-        compute_tw_strikes_from_premiums(context);
 
-        THEN("the resulting call cost a premium of 5") {
-            // REQUIRE(abs(context.get_instrument_prices()[0] - context.get_premiums()[0]) < 1.0e-4);
-        }
+        init_tw_pricer();
 
-        THEN("the resulting calls evaluate to 5") {
-            // compute_tw_prices_of_instruments(context);
-            // REQUIRE(abs(context.get_instrument_prices()[0] - context.get_premiums()[0]) < 1.0e-4);
+        WHEN("we compute the strikes of long calls with premium equal to 5") {
+            prepare_tw_pricer(context);
+
+            for (int32_t i = 0; i < ALIGN_TO; ++i) {
+                context.get_to_structure()[i] = i;
+            }
+
+            compute_tw_strikes_from_premiums(context);
+
+            THEN("the resulting call cost a premium of 5") {
+                REQUIRE(abs(context.get_instrument_prices()[0] - context.get_premiums()[0]) < 1.0e-4);
+            }
+
+            THEN("the resulting calls evaluate to 5") {
+                compute_tw_prices_of_instruments(context);
+                REQUIRE(abs(context.get_instrument_prices()[0] - context.get_premiums()[0]) < 1.0e-4);
+            }
         }
     }
 

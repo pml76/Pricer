@@ -551,6 +551,10 @@ void compute_tw_prices_of_instruments( Pricer::compute_prices_of_instruments_con
     ASSUME_ALIGNED(Real_Ptr ,context.get_instrument_prices())
     ASSUME_ALIGNED(Real_Ptr ,context.get_prices())
     ASSUME_ALIGNED(Int32_Ptr,context.get_to_structure())
+    ASSUME_ALIGNED(Real_Ptr, context.get_x())
+    ASSUME_ALIGNED(Real_Ptr, context.get_offsets())
+    ASSUME_ALIGNED(Real_Ptr, context.get_x_())
+
 
     tw_pricer(context);
 

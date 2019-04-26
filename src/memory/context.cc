@@ -152,10 +152,12 @@ namespace Pricer {
 
         for(uint64_t i = n1; i < n2; ++i) {
             MEM_INIT(m__to_structure, i, m2-1)
+            MEM_INIT(m__offsets, i, 0.)
         }
 
         for(uint64_t i = m1; i < m2; ++i) {
             MEM_INIT(m__instrument_prices, i, 0.)
+            MEM_INIT(m__x_, i, 0.)
         }
 
     }
@@ -165,15 +167,11 @@ namespace Pricer {
         compute_prices_of_instruments_context::init_memory(n1, n2, m1, m2);
         d2dx2_pricer_context::init_memory(n1, n2);
 
-        for(uint64_t i = n1; i < n2; ++i) {
-            MEM_INIT(m__offsets, i, 0.)
-        }
 
         for(uint64_t i = m1; i < m2; ++i) {
             MEM_INIT(m__premiums, i, 0.)
             MEM_INIT(m__instrument_pricesl, i, 0.)
             MEM_INIT(m__instrument_pricesh, i, 0.)
-            MEM_INIT(m__x_, i, 0.)
             MEM_INIT(m__xl_, i, 0.)
             MEM_INIT(m__xh_, i, 0.)
         }

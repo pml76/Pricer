@@ -238,6 +238,8 @@ namespace Pricer {
 
     public:
         DEFINE_VARIABLE(Int32_Ptr, to_structure)     /// [input]
+        DEFINE_VARIABLE(Real_Ptr, offsets)             /// [input]
+        DEFINE_VARIABLE(Real_Ptr, x_)                  /// [input]
 
         DEFINE_VARIABLE(uint64_t, m_max)             ///
         DEFINE_VARIABLE(Real_Ptr, instrument_prices) /// [output]
@@ -268,12 +270,12 @@ namespace Pricer {
 
     public:
 
-        DEFINE_VARIABLE(Real_Ptr, offsets)             /// [input]
+        // DEFINE_VARIABLE(Real_Ptr, x_)                  /// [output]
+
 
         DEFINE_VARIABLE(Real_Ptr, premiums)            /// [input]
         DEFINE_VARIABLE(Real_Ptr, instrument_pricesl)  /// [internal use]
         DEFINE_VARIABLE(Real_Ptr, instrument_pricesh)  /// [internal use]
-        DEFINE_VARIABLE(Real_Ptr, x_)                  /// [output]
         DEFINE_VARIABLE(Real_Ptr, xl_)                 /// [internal use]
         DEFINE_VARIABLE(Real_Ptr, xh_)                 /// [internal use]
     };
