@@ -19,7 +19,7 @@
 #define PRICER_MEMORY_H
 
 #include <cstdint>
-#include <cstdlib>
+#include <stdlib.h>
 #include <math/pricers/pricer-base.h>
 
 namespace Pricer {
@@ -35,8 +35,11 @@ namespace Pricer {
             } else {
                 size = length - (length % ALIGN_TO) + ALIGN_TO;
             }
+#ifdef __WIN64
+            *ptr = static_cast<T *>(_aligned_malloc(size * sizeof(T), ALIGN_TO));
+#else
             *ptr = static_cast<T *>(aligned_alloc(ALIGN_TO, size * sizeof(T)));
-
+#endif
             if (*ptr)
                 return size;
             else
