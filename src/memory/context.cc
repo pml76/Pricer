@@ -67,30 +67,31 @@ namespace Pricer {
     void compute_prices_of_instruments_context::alloc_mem(uint64_t n, uint64_t m) {
         MEM_ALLOC(int32_t , n, m__to_structure)
         MEM_ALLOC(FLOAT, m, m__instrument_prices)
+        MEM_ALLOC(FLOAT, n, m__offsets)
+        MEM_ALLOC(FLOAT, m, m__x_)
 
         init_memory(0, get_n_max(), 0, get_m_max());
     }
 
     void compute_instrument_strikes_from_premiums_context::alloc_mem(uint64_t n, uint64_t m) {
-        MEM_ALLOC(FLOAT, n, m__offsets)
+
 
         MEM_ALLOC(FLOAT, m, m__premiums)
         MEM_ALLOC(FLOAT, m, m__instrument_pricesl)
         MEM_ALLOC(FLOAT, m, m__instrument_pricesh)
-        MEM_ALLOC(FLOAT, m, m__x_)
+
         MEM_ALLOC(FLOAT, m, m__xl_)
         MEM_ALLOC(FLOAT, m, m__xh_)
 
         init_memory(0, get_n_max(), 0, get_m_max());
     }
 
+
     void compute_instrument_strikes_from_premiums_context::dealloc_mem() {
-        MEM_DEALLOC(FLOAT, m__offsets)
 
         MEM_DEALLOC(FLOAT, m__premiums)
         MEM_DEALLOC(FLOAT, m__instrument_pricesl)
         MEM_DEALLOC(FLOAT, m__instrument_pricesh)
-        MEM_DEALLOC(FLOAT, m__x_)
         MEM_DEALLOC(FLOAT, m__xl_)
         MEM_DEALLOC(FLOAT, m__xh_)
     }
@@ -106,6 +107,8 @@ namespace Pricer {
     void compute_prices_of_instruments_context::dealloc_mem() {
         MEM_DEALLOC(int32_t , m__to_structure)
         MEM_DEALLOC(FLOAT, m__instrument_prices)
+        MEM_DEALLOC(FLOAT, m__offsets)
+        MEM_DEALLOC(FLOAT, m__x_)
     }
 
 
@@ -192,7 +195,6 @@ namespace Pricer {
             MEM_INIT(m__long_short,n,1.)
             MEM_INIT(m__put_call,n,1.)
             MEM_INIT(m__d2dx2_prep,n,0)
-
         }
 
     }

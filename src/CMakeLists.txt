@@ -1,15 +1,16 @@
 
+if( ${CMAKE_BUILD_TYPE} MATCHES "Debug" )
+    find_package(MKL REQUIRED)
 
-find_package(MKL REQUIRED)
 
+    set(TARGET_PRICER_MKL_SOURCES
+            math/pricers/mkl_pricer.c)
 
-set(TARGET_PRICER_MKL_SOURCES
-        math/pricers/mkl_pricer.c)
-
-set(TARGET_PRICER_MKL_HEADERS
-        math/pricers/pricer-base.h
-        math/pricers/mkl_pricer.h
-        )
+    set(TARGET_PRICER_MKL_HEADERS
+            math/pricers/pricer-base.h
+            math/pricers/mkl_pricer.h
+            )
+endif()
 
 set(TARGET_PRICER_SOURCES
         math/pricers/sleef_pricer.cc )
@@ -289,20 +290,5 @@ foreach(SIMD ${PRICER_SUPPORTED_EXTENSIONS})
     endif()
 endforeach()
 
-# target_link_libraries(${TARGET_LIBPRICER} ${TARGET_ASMLIB})
-
-
-
-
-#add_compile_definitions(ENABLE_AVX=1)
-#add_compile_definitions(DORENAME =1)
-#include_directories(
-#        ./
-#        $ENV{SPACK_TRANSITIVE_INCLUDE_PATH}
-#        ${MKL_INCLUDE_DIRS}
-#        ${CMAKE_SOURCE_DIR}/3rdParty/sleef/src/arch
-#        ${CMAKE_SOURCE_DIR}/3rdParty/sleef/src/common
-#        ${CMAKE_SOURCE_DIR}/3rdParty/sleef/src/libm
-#        ${CMAKE_BINARY_DIR}/3rdParty/sleef/src/libm/include)
 
 
