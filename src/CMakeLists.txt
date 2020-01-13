@@ -1,5 +1,4 @@
 
-find_package(R REQUIRED)
 
 if( ${CMAKE_BUILD_TYPE} MATCHES "Debug" )
     find_package(MKL REQUIRED)
