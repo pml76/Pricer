@@ -14,7 +14,7 @@ set(TARGET_PRICER_BENCHMARK_SOURCES
 
 include_directories(
         ./
-        ./include
+        ./include/
         ../src/
         ${CMAKE_BINARY_DIR}
         $ENV{SPACK_TRANSITIVE_INCLUDE_PATH}
