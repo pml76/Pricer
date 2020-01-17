@@ -192,7 +192,7 @@ namespace Pricer {
 
 
 
-    class compute_prices_of_instruments_context : virtual public pricer_context {
+    class compute_prices_of_instruments_context : public pricer_context {
     public:
         compute_prices_of_instruments_context(uint64_t n_max, uint64_t m_max) : pricer_context( n_max ){
                 alloc_mem( n_max, m_max );
@@ -219,13 +219,11 @@ namespace Pricer {
     };
 
 
-    class compute_instrument_strikes_from_premiums_context : virtual public d2dx2_pricer_context
-                                                , virtual public compute_prices_of_instruments_context {
+    class compute_instrument_strikes_from_premiums_context : public compute_prices_of_instruments_context {
 
     public:
         compute_instrument_strikes_from_premiums_context(uint64_t n_max, uint64_t m_max)
-            : pricer_context(n_max),  d2dx2_pricer_context( n_max )
-            , compute_prices_of_instruments_context(n_max, m_max) {
+            : compute_prices_of_instruments_context(n_max, m_max) {
             alloc_mem( n_max, m_max );
         }
 
@@ -253,69 +251,6 @@ namespace Pricer {
         DEFINE_VARIABLE(Real_Ptr, xh_)                 /// [internal use]
     };
 
-/*
-    class pricer_context {
-
-    public:
-        pricer_context(uint64_t flags, uint64_t n_max, uint64_t m_max = 0) :
-                m__flags(flags),
-                m__n(n_max), m__m(m_max), m__m_max(0), m__n_max(0) {
-            alloc_mem(n_max, m_max);
-        }
-
-        ~pricer_context() {
-            dealloc_mem();
-        };
-
-        void realloc_mem(uint64_t n);
-
-    private:
-
-        void alloc_mem(uint64_t n, uint64_t m);
-        void dealloc_mem();
-        void init_memory(uint64_t n1, uint64_t n2, uint64_t m1, uint64_t m2);
-
-    public:
-
-    DEFINE_VARIABLE(uint64_t,flags)
-    DEFINE_VARIABLE(uint64_t, n_max)
-    DEFINE_VARIABLE(uint64_t, n)
-
-    DEFINE_VARIABLE(Real_Ptr, prices)
-    DEFINE_VARIABLE(Real_Ptr, d1)
-    DEFINE_VARIABLE(Real_Ptr, d2)
-    DEFINE_VARIABLE(Real_Ptr, long_short)
-    DEFINE_VARIABLE(Real_Ptr, put_call)
-    DEFINE_VARIABLE(Real_Ptr, x)
-    DEFINE_VARIABLE(Real_Ptr, s)
-    DEFINE_VARIABLE(Real_Ptr, sigma)
-    DEFINE_VARIABLE(Real_Ptr, t)
-    DEFINE_VARIABLE(Real_Ptr, tau)
-    DEFINE_VARIABLE(Real_Ptr, r)
-    DEFINE_VARIABLE(Real_Ptr, sigmaA)
-    DEFINE_VARIABLE(Real_Ptr, sigmaA2T2)
-    DEFINE_VARIABLE(Real_Ptr, sigmaAsqrtT)
-    DEFINE_VARIABLE(Real_Ptr, emrt)
-    DEFINE_VARIABLE(Real_Ptr, d2dx2_prep)
-    DEFINE_VARIABLE(Real_Ptr, ddx_price)
-    DEFINE_VARIABLE(Real_Ptr, d2dx2)
-
-    DEFINE_VARIABLE(Int32_Ptr, to_structure)
-    DEFINE_VARIABLE(Real_Ptr, offsets)
-
-    DEFINE_VARIABLE(uint64_t, m)
-    DEFINE_VARIABLE(uint64_t, m_max)
-    DEFINE_VARIABLE(Real_Ptr, premiums)
-    DEFINE_VARIABLE(Real_Ptr, instrument_prices)
-    DEFINE_VARIABLE(Real_Ptr, instrument_pricesl)
-    DEFINE_VARIABLE(Real_Ptr, instrument_pricesh)
-    DEFINE_VARIABLE(Real_Ptr, x_)
-    DEFINE_VARIABLE(Real_Ptr, xl_)
-    DEFINE_VARIABLE(Real_Ptr, xh_)
-
-
-    };
-*/
 
 }
 

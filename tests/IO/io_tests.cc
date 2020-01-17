@@ -12,8 +12,8 @@ SCENARIO("Import from CSV") {
 
     GIVEN("A good CSV ") {
         std::stringstream s;
-        s << "market_price,volatility,interest_rate,trade_date,begin_period,end_period" << std::endl;
-        s << "70.5,0.34,0.01,2012-01-01,2012-12-1,2012-12-31" << std::endl;
+        s << "market_price,volatility,interest_rate,trade_date,begin_period,end_period,premium" << std::endl;
+        s << "70.5,0.34,0.01,2012-01-01,2012-12-1,2012-12-31,3.14" << std::endl;
         std::istringstream f(s.str());
 
         THEN("the routine should not throw an exception") {
@@ -41,6 +41,11 @@ SCENARIO("Import from CSV") {
             THEN("The interest_rate equals 0.01") {
                 REQUIRE((m->getInterestRates()[0] - 0.01) < 1.0e-12);
             }
+
+            THEN("The premium equals 3.14") {
+                REQUIRE((m->getPremiums()[0] - 3.14) < 1.0e-12);
+            }
+
 
             THEN("The trade_date equals 2012-01-01") {
                 double d1 = m->getTradeDates()[0];
@@ -83,8 +88,8 @@ SCENARIO("Import from CSV") {
 
     GIVEN("A CSV without a 'market_price' - field") {
         std::stringstream s;
-        s << "market_price1,volatility,interest_rate,trade_date,begin_period,end_period" << std::endl;
-        s << "70.5,0.34,0.01,2012-01-01,2012-12-1,2012-12-31" << std::endl;
+        s << "market_price1,volatility,interest_rate,trade_date,begin_period,end_period,premium" << std::endl;
+        s << "70.5,0.34,0.01,2012-01-01,2012-12-1,2012-12-31,3.14" << std::endl;
         std::istringstream f(s.str());
 
         THEN("throw runtime-error") {
@@ -94,8 +99,8 @@ SCENARIO("Import from CSV") {
 
     GIVEN("A CSV without a 'volatility' - field") {
         std::stringstream s;
-        s << "market_price,volatility1,interest_rate,trade_date,begin_period,end_period" << std::endl;
-        s << "70.5,0.34,0.01,2012-01-01,2012-12-1,2012-12-31" << std::endl;
+        s << "market_price,volatility1,interest_rate,trade_date,begin_period,end_period,premium" << std::endl;
+        s << "70.5,0.34,0.01,2012-01-01,2012-12-1,2012-12-31,3.14" << std::endl;
         std::istringstream f(s.str());
 
         THEN("throw runtime-error") {
@@ -105,8 +110,8 @@ SCENARIO("Import from CSV") {
 
     GIVEN("A CSV without a 'interest_rate' - field") {
         std::stringstream s;
-        s << "market_price,volatility,interest_rate1,trade_date,begin_period,end_period" << std::endl;
-        s << "70.5,0.34,0.01,2012-01-01,2012-12-1,2012-12-31" << std::endl;
+        s << "market_price,volatility,interest_rate1,trade_date,begin_period,end_period,premium" << std::endl;
+        s << "70.5,0.34,0.01,2012-01-01,2012-12-1,2012-12-31,3.14" << std::endl;
         std::istringstream f(s.str());
 
         THEN("throw runtime-error") {
@@ -116,8 +121,8 @@ SCENARIO("Import from CSV") {
 
     GIVEN("A CSV without a 'trade_date' - field") {
         std::stringstream s;
-        s << "market_price,volatility,interest_rate,trade_date1,begin_period,end_period" << std::endl;
-        s << "70.5,0.34,0.01,2012-01-01,2012-12-1,2012-12-31" << std::endl;
+        s << "market_price,volatility,interest_rate,trade_date1,begin_period,end_period,premium" << std::endl;
+        s << "70.5,0.34,0.01,2012-01-01,2012-12-1,2012-12-31,3.14" << std::endl;
         std::istringstream f(s.str());
 
         THEN("throw runtime-error") {
@@ -127,8 +132,8 @@ SCENARIO("Import from CSV") {
 
     GIVEN("A CSV without a 'begin_period' - field") {
         std::stringstream s;
-        s << "market_price,volatility,interest_rate,trade_date,begin_period1,end_period" << std::endl;
-        s << "70.5,0.34,0.01,2012-01-01,2012-12-1,2012-12-31" << std::endl;
+        s << "market_price,volatility,interest_rate,trade_date,begin_period1,end_period,premium" << std::endl;
+        s << "70.5,0.34,0.01,2012-01-01,2012-12-1,2012-12-31,3.14" << std::endl;
         std::istringstream f(s.str());
 
         THEN("throw runtime-error") {
@@ -138,8 +143,8 @@ SCENARIO("Import from CSV") {
 
     GIVEN("A CSV without a 'end_period' - field") {
         std::stringstream s;
-        s << "market_price,volatility,interest_rate,trade_date,begin_period,end_period1" << std::endl;
-        s << "70.5,0.34,0.01,2012-01-01,2012-12-1,2012-12-31" << std::endl;
+        s << "market_price,volatility,interest_rate,trade_date,begin_period,end_period1,premium" << std::endl;
+        s << "70.5,0.34,0.01,2012-01-01,2012-12-1,2012-12-31,3.14" << std::endl;
         std::istringstream f(s.str());
 
         THEN("throw runtime-error") {
@@ -147,10 +152,22 @@ SCENARIO("Import from CSV") {
         }
     }
 
+    GIVEN("A CSV without a 'premium' - field") {
+        std::stringstream s;
+        s << "market_price,volatility,interest_rate,trade_date,begin_period,end_period,premium1" << std::endl;
+        s << "70.5,0.34,0.01,2012-01-01,2012-12-1,2012-12-31,3.14" << std::endl;
+        std::istringstream f(s.str());
+
+        THEN("throw runtime-error") {
+            REQUIRE_THROWS_AS(read_market_data_from_csv(f,','), std::runtime_error);
+        }
+    }
+
+
     GIVEN("A CSV with invalid numbers") {
         std::stringstream s;
-        s << "market_price,volatility,interest_rate,trade_date,begin_period,end_period" << std::endl;
-        s << "x70.5,x0.34,v0.01,v2012-01-01,2012-v12-01,2012-12-v31" << std::endl;
+        s << "market_price,volatility,interest_rate,trade_date,begin_period,end_period,premium" << std::endl;
+        s << "x70.5,x0.34,v0.01,v2012-01-01,2012-v12-01,2012-12-v31,v3.14" << std::endl;
         std::istringstream f(s.str());
 
         MarketData *m = read_market_data_from_csv(f, ',');
@@ -162,6 +179,7 @@ SCENARIO("Import from CSV") {
             REQUIRE(std::isnan(m->getTradeDates()[0])==true);
             REQUIRE(std::isnan(m->getBeginPeriods()[0])==true);
             REQUIRE(std::isnan(m->getEndPeriods()[0])==true);
+            REQUIRE(std::isnan(m->getPremiums()[0])==true);
 
             REQUIRE(checkIfAllDataWasReadSuccessful(m) == false);
 

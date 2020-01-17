@@ -168,7 +168,6 @@ namespace Pricer {
     void compute_instrument_strikes_from_premiums_context::init_memory(uint64_t n1, uint64_t n2, uint64_t m1, uint64_t m2) {
 
         compute_prices_of_instruments_context::init_memory(n1, n2, m1, m2);
-        d2dx2_pricer_context::init_memory(n1, n2);
 
 
         for(uint64_t i = m1; i < m2; ++i) {

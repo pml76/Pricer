@@ -26,6 +26,7 @@ bool checkIfAllDataWasReadSuccessful(const MarketData *m) {
         if(std::isnan(m->getTradeDates()[i])) return false;
         if(std::isnan(m->getBeginPeriods()[i])) return false;
         if(std::isnan(m->getEndPeriods()[i])) return false;
+        if(std::isnan(m->getPremiums()[i])) return false;
     }
 
     return true;
@@ -64,6 +65,7 @@ uint64_t getMonthsBetween( jd_t t1, jd_t t2) {
  *              double market_price  --- price @ which the market trades
  *              double volatility    --- volatility of market_price
  *              double interest_rate --- the interest_rate for the end of the tenor of market_price
+ *              double premiums      --- the premiums to be spent
  *              
  *              std::string trade_date   --- date of this trade in YYYY-MM-DD format
  *              std::string begin_period --- begin of settlement-period in YYYY—MM-DD format (i.e., the begin of the 
@@ -94,6 +96,7 @@ MarketData *read_market_data_from_csv(std::istream &file, char delimiter) {
     unsigned int market_price_idx  = getIndex("market_price", column_map);
     unsigned int volatility_idx    = getIndex( "volatility", column_map);
     unsigned int interest_rate_idx = getIndex( "interest_rate", column_map);
+    unsigned int premiums_idx      = getIndex( "premium", column_map);
 
     unsigned int trade_date_idx    = getIndex( "trade_date", column_map);
     unsigned int begin_period_idx  = getIndex( "begin_period", column_map);
@@ -112,6 +115,7 @@ MarketData *read_market_data_from_csv(std::istream &file, char delimiter) {
         double market_price  = getDoubleValue(market_price_idx, v);
         double volatility    = getDoubleValue(volatility_idx, v);
         double interest_rate = getDoubleValue(interest_rate_idx, v);
+        double premium       = getDoubleValue(premiums_idx, v);
 
         jd_t trade_date      = getJD(trade_date_idx, v);
         jd_t begin_period    = getJD(begin_period_idx, v);
@@ -119,7 +123,7 @@ MarketData *read_market_data_from_csv(std::istream &file, char delimiter) {
 
         uint64_t term_month  = getMonthsBetween(begin_period, trade_date);
         
-        m->add_entry(market_price, volatility, interest_rate, trade_date, begin_period, end_period, term_month);
+        m->add_entry(market_price, volatility, interest_rate, premium, trade_date, begin_period, end_period, term_month);
     }
 
     return m;

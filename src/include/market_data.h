@@ -15,6 +15,7 @@ class MarketData {
     double * __restrict__ market_prices;
     double * __restrict__ volatilities;
     double * __restrict__ interest_rates;
+    double * __restrict__ premiums;
 
     jd_t * __restrict__ trade_dates;
     jd_t * __restrict__ begin_periods;
@@ -30,6 +31,7 @@ class MarketData {
         Pricer::Private::reallocate_memory(2*number_of_alloceted_entries, number_of_alloceted_entries, &market_prices);
         Pricer::Private::reallocate_memory(2*number_of_alloceted_entries, number_of_alloceted_entries, &volatilities);
         Pricer::Private::reallocate_memory(2*number_of_alloceted_entries, number_of_alloceted_entries, &interest_rates);
+        Pricer::Private::reallocate_memory(2*number_of_alloceted_entries, number_of_alloceted_entries, &premiums);
 
         Pricer::Private::reallocate_memory(2*number_of_alloceted_entries, number_of_alloceted_entries, &trade_dates);
         Pricer::Private::reallocate_memory(2*number_of_alloceted_entries, number_of_alloceted_entries, &begin_periods);
@@ -46,6 +48,7 @@ public:
         auto n = Pricer::Private::allocate_memory<double>(number_of_entries_p, &market_prices);
         Pricer::Private::allocate_memory<double>(number_of_entries_p, &volatilities);
         Pricer::Private::allocate_memory<double>(number_of_entries_p, &interest_rates);
+        Pricer::Private::allocate_memory<double>(number_of_entries_p, &premiums);
 
         Pricer::Private::allocate_memory<jd_t>(number_of_entries_p, &trade_dates);
         Pricer::Private::allocate_memory<jd_t>(number_of_entries_p, &begin_periods);
@@ -61,6 +64,8 @@ public:
         Pricer::Private::deallocate_memory<double>(market_prices);
         Pricer::Private::deallocate_memory<double>(volatilities);
         Pricer::Private::deallocate_memory<double>(interest_rates);
+        Pricer::Private::deallocate_memory<double>(premiums);
+
 
         Pricer::Private::deallocate_memory<jd_t>(trade_dates);
         Pricer::Private::deallocate_memory<jd_t>(begin_periods);
@@ -69,7 +74,7 @@ public:
         Pricer::Private::deallocate_memory<uint64_t>(term_months);
     }
 
-    void add_entry( double market_price_p, double volatility_p, double interest_rate_p,
+    void add_entry( double market_price_p, double volatility_p, double interest_rate_p, double premium_p,
             jd_t trade_date_p, jd_t begin_period_p, jd_t end_period_p, uint64_t term_month_p) {
 
 
@@ -80,6 +85,7 @@ public:
         market_prices[number_of_entries]  = market_price_p;
         volatilities[number_of_entries]   = volatility_p;
         interest_rates[number_of_entries] = interest_rate_p;
+        premiums[number_of_entries]       = premium_p;
         trade_dates[number_of_entries]    = trade_date_p;
         begin_periods[number_of_entries]  = begin_period_p;
         end_periods[number_of_entries]    = end_period_p;
@@ -120,6 +126,9 @@ public:
         return number_of_entries;
     }
 
+    double *getPremiums() const {
+        return premiums;
+    }
 };
 
 
