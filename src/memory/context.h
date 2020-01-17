@@ -18,42 +18,12 @@
 #ifndef PRICER_MEMORY_H
 #define PRICER_MEMORY_H
 
-#include <cstdint>
-#include <stdlib.h>
 #include <math/pricers/pricer-base.h>
+
+#include "allocate.h"
 
 namespace Pricer {
 
-    namespace Private {
-
-        template <typename T> inline
-        uint64_t allocate_memory( int64_t length, T * __restrict__* ptr ) {
-
-            size_t size;
-            if((length % ALIGN_TO) == 0 ) {
-                size = length;
-            } else {
-                size = length - (length % ALIGN_TO) + ALIGN_TO;
-            }
-#ifdef __WIN64
-            *ptr = static_cast<T *>(_aligned_malloc(size * sizeof(T), ALIGN_TO));
-#else
-            *ptr = static_cast<T *>(aligned_alloc(ALIGN_TO, size * sizeof(T)));
-#endif
-            if (*ptr)
-                return size;
-            else
-                return 0;
-        }
-
-        template <typename T> inline
-        void deallocate_memory(T *ptr) {
-            if(ptr) {
-                free(ptr);
-            }
-            ptr = nullptr;
-        }
-    }
 
 #define DEFINE_VARIABLE(type,x) private:type m__ ## x; public:inline type& INLINE get_ ## x() {return m__ ## x;}
 
@@ -66,7 +36,7 @@ namespace Pricer {
      *
      * When computing prices the workflow is
      *    1. to call init_tw_pricer(),
-     *    2. to fill to fill the necessary arrays contained in this class,
+     *    2. to fill the necessary arrays contained in this class,
      *    3. to call prep_tw_pricer(),
      *    4. do call tw_pricer().
      *

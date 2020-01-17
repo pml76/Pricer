@@ -1,17 +1,19 @@
 
 
-if( ${CMAKE_BUILD_TYPE} MATCHES "Debug" )
-    find_package(MKL REQUIRED)
+find_package(MKL REQUIRED)
 
+include_directories( math/include/ )
 
-    set(TARGET_PRICER_MKL_SOURCES
-            math/pricers/mkl_pricer.c)
+set(IO_SOURCES math/IO/CSV/io_csv.cpp)
+set(IO_HEADERS math/IO/CSV/io_csv.h math/include/market_data.h memory/allocate.h)
 
-    set(TARGET_PRICER_MKL_HEADERS
-            math/pricers/pricer-base.h
-            math/pricers/mkl_pricer.h
-            )
-endif()
+set(TARGET_PRICER_MKL_SOURCES
+        math/pricers/mkl_pricer.c)
+
+set(TARGET_PRICER_MKL_HEADERS
+        math/pricers/pricer-base.h
+        math/pricers/mkl_pricer.h
+        )
 
 set(TARGET_PRICER_SOURCES
         math/pricers/sleef_pricer.cc )
@@ -19,7 +21,8 @@ set(TARGET_PRICER_SOURCES
 set(TARGET_PRICER_HEADERS
         math/pricers/pricer-base.h
         math/pricers/sleef_pricer.h
-        memory/context.h )
+        memory/context.h
+        memory/allocate.h)
 
 
 set(FUNCTION_NAMES
@@ -55,7 +58,7 @@ set( D2DX2_TW_PRICER_ARGUMENT_TYPES
 
 set( FULL_TW_PRICER_ARGUMENT_TYPES
         void
-        Pricer::d2dx2_pricer_context& )
+        Pricer::ddx_pricer_context& )
 
 set( COMPUTE_TW_STRIKES_FROM_PREMIUMS_ARGUMENT_TYPES
         void
@@ -271,7 +274,9 @@ add_library(${TARGET_LIBPRICER}
         ${TARGET_PRICER_MKL_HEADERS}
         ${MEMORY_SOURCES}
         ${MEMORY_HEADERS}
-        ${ASMLIB_SOURCES})
+        ${ASMLIB_SOURCES}
+        ${IO_SOURCES}
+        ${IO_HEADERS})
 target_include_directories(${TARGET_LIBPRICER} PRIVATE
         ./
         $ENV{SPACK_TRANSITIVE_INCLUDE_PATH}

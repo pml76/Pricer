@@ -112,7 +112,7 @@ static void BM_Pricer_MKL(benchmark::State &state) {
         std::generate(taus, &taus[state.range(0)], taus_gen);
         std::generate(flags, &flags[state.range(0)], flags_gen);
 
-        for (UINT64 i = 0; i < state.range(0); ++i) {
+        for (UINT64 i = 0; i < (UINT64) state.range(0); ++i) {
             ts[i] += taus[i];
         }
 

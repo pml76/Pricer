@@ -31,7 +31,9 @@ target_link_libraries(${TARGET_PRICER_BENCHMARK}
         ${Arb_LIBRARIES}
         sleef
         ${TARGET_LIBPRICER}
-        ${benchmark_LIBRARIES})
+        stdc++
+        ${benchmark_LIBRARIES}
+        stdc++)
 
 if ("${CMAKE_SYSTEM_NAME}" MATCHES "Windows")
     target_link_libraries(Pricer-Benchmark Shlwapi)

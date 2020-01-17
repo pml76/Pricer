@@ -308,7 +308,7 @@ void tw_pricer( Pricer::pricer_context &context ) {
     ASSUME_ALIGNED(Real_Ptr ,context.get_long_short())
     ASSUME_ALIGNED(Real_Ptr ,context.get_put_call())
 
-// #pragma omp parallel
+ #pragma omp parallel
     {
         vdouble tmp1, tmp2, tmp3, tmp4, x, s, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price;
         vdouble long_short, put_call;
@@ -452,7 +452,7 @@ void d2dx2_tw_pricer( Pricer::d2dx2_pricer_context &context ) {
 
 }
 
-void full_tw_pricer( Pricer::d2dx2_pricer_context &context ) {
+void full_tw_pricer( Pricer::ddx_pricer_context &context ) {
 
 /*        UINT64 n,
         Real_Ptr long_short_,     // 1 == long option // -1 == short option
@@ -479,8 +479,8 @@ void full_tw_pricer( Pricer::d2dx2_pricer_context &context ) {
     ASSUME_ALIGNED(Real_Ptr ,context.get_long_short())
     ASSUME_ALIGNED(Real_Ptr ,context.get_put_call())
     ASSUME_ALIGNED(Real_Ptr ,context.get_ddx_price())
-    ASSUME_ALIGNED(Real_Ptr ,context.get_d2dx2_price())
-    ASSUME_ALIGNED(Real_Ptr ,context.get_d2dx2_prep())
+//    ASSUME_ALIGNED(Real_Ptr ,context.get_d2dx2_price())
+//    ASSUME_ALIGNED(Real_Ptr ,context.get_d2dx2_prep())
 
 #pragma omp parallel
     {
@@ -488,7 +488,7 @@ void full_tw_pricer( Pricer::d2dx2_pricer_context &context ) {
         vdouble tmp1, tmp2, tmp3, tmp4, x, s, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price;
         vdouble long_short, put_call;
         vdouble ddx_price;
-        vdouble d2dx2, d2dx2_prep;
+  //      vdouble d2dx2, d2dx2_prep;
 
         uint64_t n2 = context.get_n_max() / (64 / sizeof(double));
         uint64_t tid = omp_get_thread_num();
@@ -505,7 +505,7 @@ void full_tw_pricer( Pricer::d2dx2_pricer_context &context ) {
             emrt = vload_vd_p(&context.get_emrt()[i]);
             long_short = vload_vd_p(&context.get_long_short()[i]);
             put_call = vload_vd_p(&context.get_put_call()[i]);
-            d2dx2_prep = vload_vd_p(&context.get_d2dx2_prep()[i]);
+    //        d2dx2_prep = vload_vd_p(&context.get_d2dx2_prep()[i]);
 
             tmp2 = xlog(vdiv_vd_vd_vd(s, x));
             d1 = vdiv_vd_vd_vd(vadd_vd_vd_vd(tmp2, sigmaA2T2), vmul_vd_vd_vd(sigmaAsqrtT, msqrt2));
@@ -527,12 +527,12 @@ void full_tw_pricer( Pricer::d2dx2_pricer_context &context ) {
             ddx_price = vmul_vd_vd_vd(vmul_vd_vd_vd(emrt, long_short), ddx_price);
 
 
-            d2dx2 = xlog(vdiv_vd_vd_vd(s, x));
-            d2dx2 = xexp(vneg_vd_vd(vdiv_vd_vd_vd(vmul_vd_vd_vd(d2dx2, d2dx2), vmul_vd_vd_vd(four, sigmaA2T2))));
-            d2dx2 = vdiv_vd_vd_vd(vmul_vd_vd_vd(d2dx2, d2dx2_prep), xsqrt(vmul_vd_vd_vd(vmul_vd_vd_vd(x, x), x)));
-            d2dx2 = vmul_vd_vd_vd(d2dx2, long_short);
+            // d2dx2 = xlog(vdiv_vd_vd_vd(s, x));
+            // d2dx2 = xexp(vneg_vd_vd(vdiv_vd_vd_vd(vmul_vd_vd_vd(d2dx2, d2dx2), vmul_vd_vd_vd(four, sigmaA2T2))));
+            // d2dx2 = vdiv_vd_vd_vd(vmul_vd_vd_vd(d2dx2, d2dx2_prep), xsqrt(vmul_vd_vd_vd(vmul_vd_vd_vd(x, x), x)));
+            // d2dx2 = vmul_vd_vd_vd(d2dx2, long_short);
 
-            vstore_v_p_vd(&context.get_d2dx2_price()[i], d2dx2);
+            // vstore_v_p_vd(&context.get_d2dx2_price()[i], d2dx2);
             vstore_v_p_vd(&context.get_ddx_price()[i], ddx_price);
             vstore_v_p_vd(&context.get_prices()[i], price);
 
