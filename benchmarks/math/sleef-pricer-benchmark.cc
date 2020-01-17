@@ -24,7 +24,7 @@
 #include <functional>
 
 
-#include <math/pricers/sleef_pricer.h>
+#include <include/sleef_pricer.h>
 
 #include <pricer-dispatcher.h>
 

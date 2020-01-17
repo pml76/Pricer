@@ -261,7 +261,7 @@ void mkl_pricer(
 
     ASSUME(n % 64 == 0)
 
-    ASSUME_ALIGNED(Real_Ptr ,flags)
+    ASSUME_ALIGNED(Uint64_Ptr,flags)
     ASSUME_ALIGNED(Real_Ptr ,x)
     ASSUME_ALIGNED(Real_Ptr ,s)
     ASSUME_ALIGNED(Real_Ptr ,sigmaA2T2)
@@ -340,7 +340,7 @@ void ddx_mkl_pricer(
 
     ASSUME(n % 64 == 0)
 
-    ASSUME_ALIGNED(Real_Ptr ,flags)
+    ASSUME_ALIGNED(Uint64_Ptr,flags)
     ASSUME_ALIGNED(Real_Ptr ,d2)
     ASSUME_ALIGNED(Real_Ptr ,emrt)
     ASSUME_ALIGNED(Real_Ptr ,ddx_price)
@@ -382,7 +382,7 @@ void d2dx2_mkl_pricer(
 
     ASSUME(n % 64 == 0)
 
-    ASSUME_ALIGNED(Real_Ptr ,flags)
+    ASSUME_ALIGNED(Uint64_Ptr,flags)
     ASSUME_ALIGNED(Real_Ptr ,s)
     ASSUME_ALIGNED(Real_Ptr ,x)
     ASSUME_ALIGNED(Real_Ptr ,d2dx2_prep)

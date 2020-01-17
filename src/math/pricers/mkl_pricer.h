@@ -23,7 +23,7 @@
 
 #include <mkl.h>
 
-#include <math/pricers/pricer-base.h>
+#include <include/pricer-base.h>
 
 #ifdef __cplusplus
 #define restrict

@@ -17,10 +17,10 @@
  */
 
 #include <catch2/catch.hpp>
-#include <math/pricers/sleef_pricer.h>
+#include <include/sleef_pricer.h>
 #include <math/pricers/Pricer.h>
 #include <pricer-dispatcher.h>
-#include <memory/context.h>
+#include <include/context.h>
 
 #define SET_EQUAL_TO(n, x, y) \
    for(uint64_t i=0;i<n;i++) x[i]=y;

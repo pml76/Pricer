@@ -7,7 +7,7 @@
 
 
 #include <c++/9.2.0/cstdint>
-#include "memory/allocate.h"
+#include "allocate.h"
 
 typedef double jd_t;
 
@@ -82,7 +82,8 @@ public:
         interest_rates[number_of_entries] = interest_rate_p;
         trade_dates[number_of_entries]    = trade_date_p;
         begin_periods[number_of_entries]  = begin_period_p;
-        end_periods[number_of_entries++]  = end_period_p;
+        end_periods[number_of_entries]    = end_period_p;
+        term_months[number_of_entries++]  = term_month_p;
 
     }
 

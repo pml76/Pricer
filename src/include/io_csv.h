@@ -8,6 +8,7 @@
 #include "market_data.h"
 
 
-MarketData *read_market_data_from_csv(std::istream &file);
+MarketData *read_market_data_from_csv(std::istream &file, char delimiter = ',');
+bool checkIfAllDataWasReadSuccessful(const MarketData *m);
 
 #endif //PRICER_IO_CSV_H

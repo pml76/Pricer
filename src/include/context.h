@@ -18,7 +18,7 @@
 #ifndef PRICER_MEMORY_H
 #define PRICER_MEMORY_H
 
-#include <math/pricers/pricer-base.h>
+#include <include/pricer-base.h>
 
 #include "allocate.h"
 

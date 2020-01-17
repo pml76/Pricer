@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <cstring>
 
-#include <math/pricers/pricer-base.h>
+#include <include/pricer-base.h>
 
 namespace Pricer {
 

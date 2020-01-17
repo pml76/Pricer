@@ -16,8 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <memory/context.h>
-#include <iostream>
 
 extern "C" {
 
@@ -162,7 +160,11 @@ extern const double rempitabdp[];
 }
 //
 
-#include <math/pricers/pricer-base.h>
+
+#include <context.h>
+#include <iostream>
+
+#include <pricer-base.h>
 #include <pricer-renamer.h>
 #include <tgmath.h>
 
