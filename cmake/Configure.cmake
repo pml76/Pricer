@@ -149,6 +149,7 @@ if (COMPILER_SUPPORTS_AVX512F)
     message(STATUS "AVX512F supported")
 endif ()
 
+
 if (COMPILER_SUPPORTS_OPENMP)
     message(STATUS "OPENMP supported")
     list(APPEND CMAKE_C_FLAGS ${OpenMP_C_FLAGS})

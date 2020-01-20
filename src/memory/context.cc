@@ -39,7 +39,7 @@ namespace Pricer {
         MEM_ALLOC(FLOAT, n, m__emrt)
         MEM_ALLOC(FLOAT, n, m__long_short)
         MEM_ALLOC(FLOAT, n, m__put_call)
-        MEM_ALLOC(FLOAT, n, m__d2dx2_prep)
+//        MEM_ALLOC(FLOAT, n, m__d2dx2_prep)
 
         MEM_ALLOC(FLOAT, n, m__d1)
         MEM_ALLOC(FLOAT, n, m__d2)
@@ -124,7 +124,7 @@ namespace Pricer {
         MEM_DEALLOC(FLOAT, m__emrt)
         MEM_DEALLOC(FLOAT, m__long_short)
         MEM_DEALLOC(FLOAT, m__put_call)
-        MEM_DEALLOC(FLOAT, m__d2dx2_prep)
+//        MEM_DEALLOC(FLOAT, m__d2dx2_prep)
 
         MEM_DEALLOC(FLOAT, m__d1)
         MEM_DEALLOC(FLOAT, m__d2)
@@ -193,7 +193,7 @@ namespace Pricer {
             MEM_INIT(m__emrt,n,1.)
             MEM_INIT(m__long_short,n,1.)
             MEM_INIT(m__put_call,n,1.)
-            MEM_INIT(m__d2dx2_prep,n,0)
+//            MEM_INIT(m__d2dx2_prep,n,0)
         }
 
     }

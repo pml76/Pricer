@@ -225,15 +225,16 @@ void prepare_tw_pricer( Pricer::pricer_context &context ) {
     ASSUME_ALIGNED(Real_Ptr ,context.get_sigmaA2T2())
     ASSUME_ALIGNED(Real_Ptr ,context.get_sigmaAsqrtT())
     ASSUME_ALIGNED(Real_Ptr ,context.get_emrt())
-    ASSUME_ALIGNED(Real_Ptr ,context.get_d2dx2_prep())
+    // ASSUME_ALIGNED(Real_Ptr ,context.get_d2dx2_prep())
 
 
-
+#ifdef NDEBUG
 #pragma omp parallel
+#endif
     {
         vdouble tmp1, tmp2, tmp3, tmp4, tmp5;
         vdouble tt1, tt3;
-        vdouble s, sigma, t, tau, r, sigmaA, sigmaA2T2, sigmaAsqrtT, emrt, d2dx2_prep;
+        vdouble s, sigma, t, tau, r, sigmaA, sigmaA2T2, sigmaAsqrtT, emrt; // , d2dx2_prep;
 
         uint64_t n2 = context.get_n_max() / (64 / sizeof(double));
         uint64_t tid = omp_get_thread_num();
@@ -268,13 +269,13 @@ void prepare_tw_pricer( Pricer::pricer_context &context ) {
             sigmaAsqrtT = vmul_vd_vd_vd(sigmaA, tmp1);
             tmp2 = xexp(vneg_vd_vd(vdiv_vd_vd_vd(sigmaA2T2, four)));
             tmp1 = vdiv_vd_vd_vd(vmul_vd_vd_vd(two, s), vmul_vd_vd_vd(pi2, sigmaA2T2));
-            d2dx2_prep = vmul_vd_vd_vd(xsqrt(tmp1), vmul_vd_vd_vd(tmp2, emrt));
+            // d2dx2_prep = vmul_vd_vd_vd(xsqrt(tmp1), vmul_vd_vd_vd(tmp2, emrt));
 
             vstore_v_p_vd(&context.get_sigmaA()[i], sigmaA);
             vstore_v_p_vd(&context.get_emrt()[i], emrt);
             vstore_v_p_vd(&context.get_sigmaA2T2()[i], sigmaA2T2);
             vstore_v_p_vd(&context.get_sigmaAsqrtT()[i], sigmaAsqrtT);
-            vstore_v_p_vd(&context.get_d2dx2_prep()[i], d2dx2_prep);
+            // vstore_v_p_vd(&context.get_d2dx2_prep()[i], d2dx2_prep);
 
         }
     }
@@ -310,7 +311,9 @@ void tw_pricer( Pricer::pricer_context &context ) {
     ASSUME_ALIGNED(Real_Ptr ,context.get_long_short())
     ASSUME_ALIGNED(Real_Ptr ,context.get_put_call())
 
- #pragma omp parallel
+    #ifdef NDEBUG
+    #pragma omp parallel
+    #endif
     {
         vdouble tmp1, tmp2, tmp3, tmp4, x, s, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price;
         vdouble long_short, put_call;
@@ -375,7 +378,9 @@ void ddx_tw_pricer( Pricer::ddx_pricer_context &context ) {
     ASSUME_ALIGNED(Real_Ptr ,context.get_emrt())
     ASSUME_ALIGNED(Real_Ptr ,context.get_ddx_price())
 
-#pragma omp parallel
+#ifdef NDEBUG
+    #pragma omp parallel
+#endif
     {
         vdouble long_short, put_call, d2, emrt, ddx_price;
 
@@ -403,18 +408,9 @@ void ddx_tw_pricer( Pricer::ddx_pricer_context &context ) {
 }
 
 
+
+/*
 void d2dx2_tw_pricer( Pricer::d2dx2_pricer_context &context ) {
-
-/*        UINT64 n,
-        Real_Ptr long_short_,
-        Real_Ptr s_,
-        Real_Ptr x_,
-        Real_Ptr d2dx2_prep_,
-        Real_Ptr sigmaA2T2_,
-        Real_Ptr d2dx2_
-) {
-
- */
 
     ASSUME(context.get_n_max() % 64 == 0)
 
@@ -425,7 +421,9 @@ void d2dx2_tw_pricer( Pricer::d2dx2_pricer_context &context ) {
     ASSUME_ALIGNED(Real_Ptr ,context.get_sigmaA2T2())
     ASSUME_ALIGNED(Real_Ptr ,context.get_d2dx2_price())
 
-#pragma omp parallel
+#ifdef NDEBUG
+    #pragma omp parallel
+#endif
     {
         vdouble long_short, s, x, d2dx2_prep, sigmaA2T2, d2dx2;
 
@@ -454,21 +452,11 @@ void d2dx2_tw_pricer( Pricer::d2dx2_pricer_context &context ) {
 
 }
 
+ */
+
+
 void full_tw_pricer( Pricer::ddx_pricer_context &context ) {
 
-/*        UINT64 n,
-        Real_Ptr long_short_,     // 1 == long option // -1 == short option
-        Real_Ptr put_call_,       // -1 == put // 1 == call
-        Real_Ptr s_,                /// [in] stock price
-        Real_Ptr x_,                /// [in] strike
-        Real_Ptr sigmaA2T2_,        /// [in] sigmaA^2t/2
-        Real_Ptr sigmaAsqrtT_,      /// [in] sigmaA*sqrt(t)
-        Real_Ptr emrt_,
-        Real_Ptr d2dx2_prep_,
-        Real_Ptr price_,
-        Real_Ptr ddx_price_,
-        Real_Ptr d2dx2_) {
-*/
 
     ASSUME(context.get_n_max() % 64 == 0)
 
@@ -484,7 +472,9 @@ void full_tw_pricer( Pricer::ddx_pricer_context &context ) {
 //    ASSUME_ALIGNED(Real_Ptr ,context.get_d2dx2_price())
 //    ASSUME_ALIGNED(Real_Ptr ,context.get_d2dx2_prep())
 
-#pragma omp parallel
+#ifdef NDEBUG
+    #pragma omp parallel
+#endif
     {
 
         vdouble tmp1, tmp2, tmp3, tmp4, x, s, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price;
@@ -557,10 +547,28 @@ void compute_tw_prices_of_instruments( Pricer::compute_prices_of_instruments_con
     ASSUME_ALIGNED(Real_Ptr, context.get_offsets())
     ASSUME_ALIGNED(Real_Ptr, context.get_x_())
 
+#ifdef NDEBUG
+    #pragma omp parallel
+#endif
+    {
+#ifdef NDEBUG
+    #pragma omp for schedule(static)
+#endif
+        for (uint64_t i = 0; i < context.get_n_max(); ++i) {
+#ifdef NDEBUG
+        #pragma omp atomic update
+#endif
+            context.get_x()[context.get_to_structure()[i]] = context.get_x_()[context.get_to_structure()[i]] + context.get_offsets()[i];
+        }
+
+    }
+
 
     tw_pricer(context);
 
-#pragma omp parallel
+#ifdef NDEBUG
+    #pragma omp parallel
+#endif
     {
         uint64_t m2 =context.get_m_max() / (64 / sizeof(double));
         uint64_t tid = omp_get_thread_num();
@@ -571,12 +579,17 @@ void compute_tw_prices_of_instruments( Pricer::compute_prices_of_instruments_con
         for(uint64_t i = m_begin; i < m_end; i += sizeof(vdouble) / sizeof(double)) {
             vstore_v_p_vd(&context.get_instrument_prices()[i], zero);
         }
+#ifdef NDEBUG
+    #pragma omp barrier
+#endif
 
-#pragma omp barrier
-
-#pragma omp for schedule(static)
+#ifdef NDEBUG
+        #pragma omp for schedule(static)
+#endif
         for (uint64_t i = 0; i < context.get_n_max(); ++i) {
-#pragma omp atomic update
+#ifdef NDEBUG
+            #pragma omp atomic update
+#endif
             context.get_instrument_prices()[context.get_to_structure()[i]] += context.get_prices()[i];
         }
 
@@ -610,7 +623,9 @@ void compute_tw_upper_and_lower_bounds(Pricer::compute_instrument_strikes_from_p
     /// fill the instrument_priceh and instrument_pricel arrays with the prices evaluated at xh_ and xl_,
     /// respectively.
 
+#ifdef NDEBUG
     #pragma omp parallel
+#endif
     {
         vdouble tmp, tmp1, tmp2, tmp3, tmp4, x, s, sigmaA2T2, sigmaAsqrtT, emrt, d1, d2, price;
         vdouble long_short, put_call;
@@ -633,9 +648,9 @@ void compute_tw_upper_and_lower_bounds(Pricer::compute_instrument_strikes_from_p
             vstore_v_p_vd(&context.get_instrument_pricesh()[i], tmp);
             vstore_v_p_vd(&context.get_instrument_pricesl()[i], tmp);
         }
-
+#ifdef NDEBUG
         #pragma omp barrier
-
+#endif
         for (uint64_t i = n_begin; i < n_end; i += sizeof(vdouble) / sizeof(double)) {
 
             s = vload_vd_p(&context.get_s()[i]);
@@ -665,16 +680,20 @@ void compute_tw_upper_and_lower_bounds(Pricer::compute_instrument_strikes_from_p
             vstore_v_p_vd(&context.get_prices()[i], price);
 
         }
-#pragma omp barrier
-
+#ifdef NDEBUG
+        #pragma omp barrier
+#endif
         ///
         /// aggregate the prices into instrument_pricesh.
         ///
         double d;
-
-#pragma omp for schedule(static)
+#ifdef NDEBUG
+        #pragma omp for schedule(static)
+#endif
         for (uint64_t i = 0; i < context.get_n_max(); ++i) {
-#pragma omp atomic update
+#ifdef NDEBUG
+        #pragma omp atomic update
+#endif
             context.get_instrument_pricesh()[context.get_to_structure()[i]] += context.get_prices()[i];
         }
 
@@ -709,14 +728,19 @@ void compute_tw_upper_and_lower_bounds(Pricer::compute_instrument_strikes_from_p
             vstore_v_p_vd(&context.get_prices()[i], price);
 
         }
-#pragma omp barrier
-
+#ifdef NDEBUG
+        #pragma omp barrier
+#endif
         ///
         /// aggregate the prices into instrument_pricesl.
         ///
-#pragma omp for schedule(static)
+#ifdef NDEBUG
+        #pragma omp for schedule(static)
+#endif
         for (uint64_t i = 0; i < context.get_n_max(); ++i) {
-#pragma omp atomic update
+#ifdef NDEBUG
+            #pragma omp atomic update
+#endif
             context.get_instrument_pricesl()[context.get_to_structure()[i]] += context.get_prices()[i];
         }
 
@@ -756,13 +780,17 @@ bool check_if_roots_are_breaketed( Pricer::compute_instrument_strikes_from_premi
 
     compute_tw_upper_and_lower_bounds(context);
 
-#pragma omp parallel
+#ifdef NDEBUG
+    #pragma omp parallel
+#endif
     {
 
         bool ret2 = true;
         uint64_t no_breaketed2 = 0, no_unbreaketed2 = 0;
 
-#pragma omp for schedule(static)
+#ifdef NDEBUG
+        #pragma omp for schedule(static)
+#endif
         for (uint64_t i = 0; i < context.get_n_max(); ++i) {
             if (context.get_instrument_pricesl()[i]*context.get_instrument_pricesh()[i] < 0.) {
                 no_breaketed2++;
@@ -772,16 +800,22 @@ bool check_if_roots_are_breaketed( Pricer::compute_instrument_strikes_from_premi
             }
         }
 
-#pragma omp atomic update
+#ifdef NDEBUG
+        #pragma omp atomic update
+#endif
         ret &= ret2;
 
         if(no_breaketed) {
-#pragma omp atomic update
+#ifdef NDEBUG
+        #pragma omp atomic update
+#endif
             *no_breaketed += no_breaketed2;
         }
 
         if(no_unbreaketed) {
-#pragma omp atomic update
+#ifdef NDEBUG
+        #pragma omp atomic update
+#endif
             *no_unbreaketed += no_unbreaketed2;
         }
 
@@ -851,7 +885,9 @@ void compute_tw_strikes_from_premiums( Pricer::compute_instrument_strikes_from_p
      */
     do {
         err = zero;
-#pragma omp parallel
+#ifdef NDEBUG
+        #pragma omp parallel
+#endif
         {
 
             vdouble err1 = zero;
@@ -913,28 +949,34 @@ void compute_tw_strikes_from_premiums( Pricer::compute_instrument_strikes_from_p
                 tmp = vload_vd_p(&context.get_premiums()[i]);
                 vstore_v_p_vd(&context.get_instrument_prices()[i], vneg_vd_vd(tmp));
             }
-
-#pragma omp barrier
+#ifdef NDEBUG
+    #pragma omp barrier
+#endif
 
             ///
             /// aggregate the prices and its first two derivatives
             ///
             double d;
-
-#pragma omp for schedule(static)
+#ifdef NDEBUG
+    #pragma omp for schedule(static)
+#endif
             for (uint64_t i = 0; i < context.get_n_max(); ++i) {
 
                 d = context.get_x()[i]-context.get_offsets()[i];
-
-#pragma omp atomic update
+#ifdef NDEBUG
+    #pragma omp atomic update
+#endif
                 context.get_instrument_prices()[context.get_to_structure()[i]] += context.get_prices()[i];
 
-#pragma omp atomic write
+#ifdef NDEBUG
+    #pragma omp atomic write
+#endif
                 context.get_x_()[context.get_to_structure()[i]] = d;
 
             }
-
-#pragma omp barrier
+#ifdef NDEBUG
+    #pragma omp barrier
+#endif
 
             for (uint64_t i = m_begin; i < m_end; i += sizeof(vdouble) / sizeof(double)) {
 
@@ -994,8 +1036,9 @@ void compute_tw_strikes_from_premiums( Pricer::compute_instrument_strikes_from_p
                 err1 = vadd_vd_vd_vd(err1,vmul_vd_vd_vd(tmp,tmp));
 
             }
-
+#ifdef NDEBUG
 #pragma omp critical
+#endif
             {
                 err = vadd_vd_vd_vd(err, err1);
             }
@@ -1014,8 +1057,9 @@ void compute_tw_strikes_from_premiums( Pricer::compute_instrument_strikes_from_p
     //
     // Prepare the output.
     //
-
-#pragma omp parallel
+#ifdef NDEBUG
+    #pragma omp parallel
+#endif
     {
         uint64_t m2 = context.get_m_max() / (64 / sizeof(double));
         uint64_t tid = omp_get_thread_num();

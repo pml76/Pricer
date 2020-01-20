@@ -90,7 +90,7 @@ namespace Pricer {
         DEFINE_VARIABLE(Real_Ptr, sigmaA2T2)        /// [internal use].
         DEFINE_VARIABLE(Real_Ptr, sigmaAsqrtT)      /// [internal use].
         DEFINE_VARIABLE(Real_Ptr, emrt)             /// [internal use].
-        DEFINE_VARIABLE(Real_Ptr, d2dx2_prep)       /// [internal use].
+        // DEFINE_VARIABLE(Real_Ptr, d2dx2_prep)       /// [internal use].
 
     };
 
@@ -115,7 +115,7 @@ namespace Pricer {
      * After modifying the input data, steps 3. to 5. have to be repeated to ensure that everything
      * in upto date.
      */
-    class ddx_pricer_context : virtual public pricer_context {
+    class ddx_pricer_context : public pricer_context {
 
     public:
         ddx_pricer_context(uint64_t n_max) : pricer_context( n_max ){
@@ -167,7 +167,7 @@ namespace Pricer {
     class d2dx2_pricer_context : public ddx_pricer_context {
 
     public:
-        d2dx2_pricer_context(uint64_t n_max) : pricer_context(n_max), ddx_pricer_context( n_max ){
+        d2dx2_pricer_context(uint64_t n_max) : ddx_pricer_context( n_max ){
             alloc_mem( n_max);
         }
 
@@ -192,6 +192,9 @@ namespace Pricer {
 
 
 
+    /**
+     * Memory for m_max instruments with a total of at most n…max legs.
+     */
     class compute_prices_of_instruments_context : public pricer_context {
     public:
         compute_prices_of_instruments_context(uint64_t n_max, uint64_t m_max) : pricer_context( n_max ){
@@ -211,12 +214,13 @@ namespace Pricer {
 
     public:
         DEFINE_VARIABLE(Int32_Ptr, to_structure)     /// [input]
-        DEFINE_VARIABLE(Real_Ptr, offsets)             /// [input]
-        DEFINE_VARIABLE(Real_Ptr, x_)                  /// [input]
+        DEFINE_VARIABLE(Real_Ptr, offsets)           /// [input]
+        DEFINE_VARIABLE(Real_Ptr, x_)                /// [input]
 
         DEFINE_VARIABLE(uint64_t, m_max)             ///
         DEFINE_VARIABLE(Real_Ptr, instrument_prices) /// [output]
     };
+
 
 
     class compute_instrument_strikes_from_premiums_context : public compute_prices_of_instruments_context {
