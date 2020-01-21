@@ -29,7 +29,7 @@ namespace Pricer {
 #else
             *ptr = static_cast<T *>(aligned_alloc(ALIGN_TO, size * sizeof(T)));
 #endif
-            if (*ptr)
+            if (LIKELY(*ptr != nullptr ))
                 return size;
             else
                 return 0;
@@ -38,7 +38,7 @@ namespace Pricer {
         template<typename T>
         inline
         void deallocate_memory(T *ptr) {
-            if (ptr) {
+            if (LIKELY(ptr != nullptr)) {
                 free(ptr);
             }
             ptr = nullptr;
@@ -49,7 +49,7 @@ namespace Pricer {
         uint64_t reallocate_memory(uint64_t new_length, uint64_t old_length, T *__restrict__ *ptr) {
             T *__restrict__ p;
             auto n = allocate_memory<T>(new_length, &p);
-            if (n > 0) {
+            if (LIKELY(n > 0)) {
                 memcpy(p, *ptr, old_length * sizeof(T));
                 deallocate_memory(*ptr);
                 *ptr = p;

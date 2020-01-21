@@ -362,6 +362,8 @@ SCENARIO("Compute prices of instruments") {
         SET_EQUAL_TO(100, context.get_tau(), 1. / 12.)
         SET_EQUAL_TO(100, context.get_sigma(), 0.3)
         SET_EQUAL_TO(100, context.get_x(), 72.)
+        SET_EQUAL_TO( 100, context.get_x_(), 72.)
+        SET_EQUAL_TO( 100, context.get_offsets(), 0.)
 
         SET_EQUAL_TO(100, context.get_sigmaA(), 0.)
         SET_EQUAL_TO(100, context.get_sigmaA2T2(), 0.)

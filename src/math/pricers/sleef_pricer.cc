@@ -551,18 +551,18 @@ void compute_tw_prices_of_instruments( Pricer::compute_prices_of_instruments_con
     #pragma omp parallel
 #endif
     {
-#ifdef NDEBUG
-    #pragma omp for schedule(static)
-#endif
-        for (uint64_t i = 0; i < context.get_n_max(); ++i) {
-#ifdef NDEBUG
-        #pragma omp atomic update
-#endif
-            context.get_x()[context.get_to_structure()[i]] = context.get_x_()[context.get_to_structure()[i]] + context.get_offsets()[i];
+        uint64_t m2 =context.get_m_max() / (64 / sizeof(double));
+        uint64_t tid = omp_get_thread_num();
+        uint64_t num_threads = omp_get_num_threads();
+        uint64_t m_begin = ((tid * m2) / num_threads) * (64 / sizeof(double));
+        uint64_t m_end = (((tid + 1) * m2) / num_threads) * (64 / sizeof(double));
+
+        for(uint64_t i = m_begin; i < m_end; i += sizeof(vdouble) / sizeof(double)) {
+            // context.get_x()[context.get_to_structure()[i]] = context.get_x_()[context.get_to_structure()[i]] + context.get_offsets()[i];
+            vstore_v_p_vd( &context.get_x()[i], vadd_vd_vd_vd( vgather_vd_p_vi(context.get_x_(),vloadu_vi_p(&context.get_to_structure()[i])), vload_vd_p(&context.get_offsets()[i])));
         }
 
     }
-
 
     tw_pricer(context);
 
