@@ -46,17 +46,17 @@ namespace Pricer {
         friend class ddx_pricer_context;
         friend class compute_prices_of_instruments_context;
     public:
-        pricer_context(uint64_t n_max) :
+        pricer_context(uint64_t n_max = 1024 * 64) :
                 m__n_act(0), m__n_max(0) {
                 alloc_mem(n_max);
         }
 
-        ~pricer_context() {
+        virtual ~pricer_context() {
             dealloc_mem();
         };
 
         inline
-        void add_entry(double x_p, double s_p, double sigma_p, double r_p, double t_p, double tau_p, double put_call_p, double long_short_p) {
+        uint64_t add_entry(double tradedate_p, double x_p, double s_p, double sigma_p, double r_p, double t_p, double tau_p, double put_call_p, double long_short_p) {
 
             if(UNLIKELY(get_n_act() >= get_n_max())) {
                 realloc_mem(2*get_n_max());
@@ -69,18 +69,22 @@ namespace Pricer {
             get_t()[get_n_act()] = t_p;
             get_tau()[get_n_act()] = tau_p;
             get_put_call()[get_n_act()] = put_call_p;
-            get_long_short()[get_n_act()++] = long_short_p;
+            get_long_short()[get_n_act()] = long_short_p;
+            get_tradedate()[get_n_act()] = tradedate_p;
+
+            return get_n_act()++;
 
         }
 
     private:
 
-        void alloc_mem(uint64_t n);
-        void realloc_mem(uint64_t n_p);
-        void dealloc_mem();
+        virtual void alloc_mem(uint64_t n);
+        virtual void realloc_mem(uint64_t n_p);
+        virtual void dealloc_mem();
 
     public:
 
+        DEFINE_VARIABLE(Real_Ptr, tradedate);
         DEFINE_VARIABLE(uint64_t, n_act);
 
         DEFINE_VARIABLE(uint64_t, n_max) /// the maximum number of entries in the arrays managed by this class.
@@ -138,37 +142,25 @@ namespace Pricer {
     class ddx_pricer_context : public pricer_context {
         friend class d2dx2_pricer_context;
     public:
-        ddx_pricer_context(uint64_t n_max) : pricer_context( n_max ){
+        ddx_pricer_context(uint64_t n_max  = 1024 * 64) : pricer_context( n_max ){
             alloc_mem( n_max);
         }
 
-        ~ddx_pricer_context() {
+        virtual ~ddx_pricer_context() {
             dealloc_mem();
         };
 
         inline
-        void add_entry(double x_p, double s_p, double sigma_p, double r_p, double t_p, double tau_p, double put_call_p, double long_short_p) {
+        uint64_t  add_entry(double tradedate_p, double x_p, double s_p, double sigma_p, double r_p, double t_p, double tau_p, double put_call_p, double long_short_p) {
 
-            if(UNLIKELY(get_n_act() >= get_n_max())) {
-                realloc_mem(2*get_n_max());
-            }
-
-            get_x()[get_n_act()] = x_p;
-            get_s()[get_n_act()] = s_p;
-            get_sigma()[get_n_act()] = sigma_p;
-            get_r()[get_n_act()] = r_p;
-            get_t()[get_n_act()] = t_p;
-            get_tau()[get_n_act()] = tau_p;
-            get_put_call()[get_n_act()] = put_call_p;
-            get_long_short()[get_n_act()++] = long_short_p;
-
+            return pricer_context::add_entry(tradedate_p, x_p, s_p, sigma_p, r_p, t_p, tau_p, put_call_p, long_short_p);
         }
 
     private:
 
-        void alloc_mem(uint64_t n);
-        void realloc_mem(uint64_t n_p);
-        void dealloc_mem();
+        virtual void alloc_mem(uint64_t n) override ;
+        virtual void realloc_mem(uint64_t n_p) override ;
+        virtual void dealloc_mem() override ;
 
     public:
 
@@ -204,37 +196,25 @@ namespace Pricer {
     class d2dx2_pricer_context : public ddx_pricer_context {
 
     public:
-        d2dx2_pricer_context(uint64_t n_max) : ddx_pricer_context( n_max ){
+        d2dx2_pricer_context(uint64_t n_max = 1024 * 64) : ddx_pricer_context( n_max ){
             alloc_mem( n_max);
         }
 
-        ~d2dx2_pricer_context() {
+        virtual ~d2dx2_pricer_context() {
             dealloc_mem();
         };
 
         inline
-        void add_entry(double x_p, double s_p, double sigma_p, double r_p, double t_p, double tau_p, double put_call_p, double long_short_p) {
+        uint64_t  add_entry(double tradedate_p, double x_p, double s_p, double sigma_p, double r_p, double t_p, double tau_p, double put_call_p, double long_short_p) {
 
-            if(UNLIKELY(get_n_act() >= get_n_max())) {
-                realloc_mem(2*get_n_max());
-            }
-
-            get_x()[get_n_act()] = x_p;
-            get_s()[get_n_act()] = s_p;
-            get_sigma()[get_n_act()] = sigma_p;
-            get_r()[get_n_act()] = r_p;
-            get_t()[get_n_act()] = t_p;
-            get_tau()[get_n_act()] = tau_p;
-            get_put_call()[get_n_act()] = put_call_p;
-            get_long_short()[get_n_act()++] = long_short_p;
-
+            return ddx_pricer_context::add_entry(tradedate_p, x_p, s_p, sigma_p, r_p, t_p, tau_p, put_call_p, long_short_p);
         }
 
     private:
 
-        void alloc_mem(uint64_t n);
-        void realloc_mem(uint64_t n_p);
-        void dealloc_mem();
+        virtual void alloc_mem(uint64_t n) override ;
+        virtual void realloc_mem(uint64_t n_p) override ;
+        virtual void dealloc_mem() override ;
 
 
     public:
@@ -252,12 +232,12 @@ namespace Pricer {
     class compute_prices_of_instruments_context : public pricer_context {
         friend class compute_instrument_strikes_from_premiums_context;
     public:
-        compute_prices_of_instruments_context(uint64_t n_max, uint64_t m_max) : pricer_context( n_max ){
+        compute_prices_of_instruments_context(uint64_t n_max  = 1024 * 64, uint64_t m_max = 1024 * 64) : pricer_context( n_max ){
                 alloc_mem( n_max, m_max );
                 get_m_act() = 0;
         }
 
-        ~compute_prices_of_instruments_context() {
+        virtual ~compute_prices_of_instruments_context() {
             dealloc_mem();
         };
 
@@ -272,33 +252,19 @@ namespace Pricer {
 
         }
 
-        uint64_t add_leg(double x_p, double s_p, double sigma_p, double r_p, double t_p, double tau_p, double put_call_p, double long_short_p, uint64_t structure_p) {
+        inline
+        uint64_t  add_leg(double tradedate_p, double x_p, double s_p, double sigma_p, double r_p, double t_p, double tau_p, double put_call_p, double long_short_p, uint64_t structure_p) {
 
-            if(UNLIKELY(get_n_act() >= get_n_max())) {
-                realloc_mem(2*get_n_max(), get_m_max());
-            }
 
-            get_x()[get_n_act()] = x_p;
-            get_s()[get_n_act()] = s_p;
-            get_sigma()[get_n_act()] = sigma_p;
-            get_r()[get_n_act()] = r_p;
-            get_t()[get_n_act()] = t_p;
-            get_tau()[get_n_act()] = tau_p;
-            get_put_call()[get_n_act()] = put_call_p;
-            get_long_short()[get_n_act()] = long_short_p;
             get_to_structure()[get_n_act()] = structure_p;
-
-            return get_n_act()++;
-
+            return pricer_context::add_entry(tradedate_p, x_p, s_p, sigma_p, r_p, t_p, tau_p, put_call_p, long_short_p);
         }
-
-
 
     private:
 
-        void alloc_mem(uint64_t n, uint64_t m);
-        void realloc_mem(uint64_t n_p, uint64_t m_p);
-        void dealloc_mem();
+        virtual void alloc_mem(uint64_t n, uint64_t m);
+        virtual void realloc_mem(uint64_t n_p, uint64_t m_p);
+        virtual void dealloc_mem() override;
 
     public:
         DEFINE_VARIABLE(Int32_Ptr, to_structure)     /// [input]
@@ -315,53 +281,31 @@ namespace Pricer {
     class compute_instrument_strikes_from_premiums_context : public compute_prices_of_instruments_context {
 
     public:
-        compute_instrument_strikes_from_premiums_context(uint64_t n_max, uint64_t m_max)
+        compute_instrument_strikes_from_premiums_context(uint64_t n_max = 1024 * 64, uint64_t m_max = 1024 * 64)
             : compute_prices_of_instruments_context(n_max, m_max) {
             alloc_mem( n_max, m_max );
         }
 
-        ~compute_instrument_strikes_from_premiums_context() {
+        virtual ~compute_instrument_strikes_from_premiums_context() {
             dealloc_mem();
         };
 
 
         uint64_t add_structure(double x_p, double premium_p ) {
-            if(UNLIKELY(get_m_act() >= get_m_max() - 1)) {
-                realloc_mem(get_n_max(), 2*get_m_max());
-            }
+            compute_prices_of_instruments_context::add_structure(x_p);
 
-            get_x_()[get_m_act()] = x_p;
             get_premiums()[get_m_act()] = premium_p;
             return get_m_act()++;
 
         }
 
-        uint64_t add_leg(double x_p, double s_p, double sigma_p, double r_p, double t_p, double tau_p, double put_call_p, double long_short_p, uint64_t structure_p) {
-
-            if(UNLIKELY(get_n_act() >= get_n_max())) {
-                realloc_mem(2*get_n_max(), get_m_max());
-            }
-
-            get_x()[get_n_act()] = x_p;
-            get_s()[get_n_act()] = s_p;
-            get_sigma()[get_n_act()] = sigma_p;
-            get_r()[get_n_act()] = r_p;
-            get_t()[get_n_act()] = t_p;
-            get_tau()[get_n_act()] = tau_p;
-            get_put_call()[get_n_act()] = put_call_p;
-            get_long_short()[get_n_act()] = long_short_p;
-            get_to_structure()[get_n_act()] = structure_p;
-
-            return get_n_act()++;
-
-        }
 
 
     private:
 
-        void alloc_mem(uint64_t n, uint64_t m);
-        void realloc_mem(__uint64_t n_p, uint64_t m_p);
-        void dealloc_mem();
+        virtual void alloc_mem(uint64_t n, uint64_t m) override ;
+        virtual void realloc_mem(__uint64_t n_p, uint64_t m_p) override ;
+        virtual void dealloc_mem() override ;
 
 
     public:

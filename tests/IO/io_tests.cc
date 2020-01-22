@@ -8,6 +8,60 @@
 #include <erfa.h>
 
 
+SCENARIO("Export to CSV") {
+    GIVEN("Some Trades") {
+
+        Pricer::compute_instrument_strikes_from_premiums_context context(1,1);
+        uint64_t structure = context.add_structure(72, 5);
+        double d1, d2, b1,b2,e1,e2;
+        eraCal2jd(2012,1,1,&d1,&d2);
+        eraCal2jd(2012,6,1,&b1,&b2);
+        eraCal2jd(2012,6,30,&e1,&e2);
+        context.add_leg(d1+d2, 60, 70, 0.03, 0.01, (e1+e2)-(d1+d2), (e1+e2)-(b1+b2)+1, -1., -1., structure);
+        context.add_leg(d1+d2, 60, 70, 0.03, 0.01, (e1+e2)-(d1+d2), (e1+e2)-(b1+b2)+1, 1., -1., structure);
+        std::stringstream s;
+
+
+        const char *const header = "tradedate,tradedate_year,tradedate_month,tradedate_day,tradedate_jd,structure_id,premium_per_structure,underlying,volatility,interest_rate,long_short,put_call,price,strike,period_begin,period_begin_year,period_begin_month,period_begin_day,period_begin_jd,period_end,period_end_year,period_end_month,period_end_day,period_end_jd";
+
+        THEN("the output is correct when context is a Pricer::compute_instrument_strikes_from_premiums_context") {
+            write_csv(context, s);
+
+            std::string line;
+            std::getline(s,line);
+            REQUIRE(line == header);
+
+            std::getline(s, line);
+            const char *const put_line = "2012-01-01,2012,1,1,2.45593e+06,1,5,70,0.03,0.01,Short,Put,0,60,2012-06-01,2012,6,1,2.45608e+06,2012-06-30,2012,6,30,2.45611e+06";
+            REQUIRE(line == put_line);
+
+            std::getline(s, line);
+            const char *const call_line = "2012-01-01,2012,1,1,2.45593e+06,1,5,70,0.03,0.01,Short,Call,0,60,2012-06-01,2012,6,1,2.45608e+06,2012-06-30,2012,6,30,2.45611e+06";
+            REQUIRE(line == call_line);
+
+        }
+
+        THEN("the output is correct when the context is a Pricer::compute_prices_of_instruments_context ") {
+            write_csv(static_cast<Pricer::compute_prices_of_instruments_context &>(context), s);
+
+            std::string line;
+            std::getline(s,line);
+            REQUIRE(line == header);
+
+            std::getline(s, line);
+            const char *const put_line = "2012-01-01,2012,1,1,2.45593e+06,1,NaN,70,0.03,0.01,Short,Put,0,60,2012-06-01,2012,6,1,2.45608e+06,2012-06-30,2012,6,30,2.45611e+06";
+            REQUIRE(line == put_line);
+
+            std::getline(s, line);
+            const char *const call_line = "2012-01-01,2012,1,1,2.45593e+06,1,NaN,70,0.03,0.01,Short,Call,0,60,2012-06-01,2012,6,1,2.45608e+06,2012-06-30,2012,6,30,2.45611e+06";
+            REQUIRE(line == call_line);
+
+        }
+
+
+    }
+}
+
 SCENARIO("Import from CSV") {
 
     GIVEN("A good CSV ") {

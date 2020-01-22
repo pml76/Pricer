@@ -27,7 +27,8 @@ namespace Pricer {
 
     void pricer_context::realloc_mem(uint64_t n_p) {
         uint64_t n_old = get_n_max();
-        
+
+        MEM_REALLOC(FLOAT, n, n_old, n_p, m__tradedate, 0.);
         MEM_REALLOC(FLOAT, n, n_old, n_p, m__s, 70.);
         MEM_REALLOC(FLOAT, n, n_old, n_p, m__sigma,0.3)
         MEM_REALLOC(FLOAT, n, n_old, n_p, m__t,1.)
@@ -50,7 +51,7 @@ namespace Pricer {
 
     void pricer_context::alloc_mem(uint64_t n) {
 
-
+        MEM_ALLOC(FLOAT, n, m__tradedate, 0.)
         MEM_ALLOC(FLOAT, n, m__s, 70.)
         MEM_ALLOC(FLOAT, n, m__sigma, 0.3)
         MEM_ALLOC(FLOAT, n, m__t, 1.)
@@ -72,6 +73,7 @@ namespace Pricer {
     }
 
     void pricer_context::dealloc_mem() {
+        MEM_DEALLOC(FLOAT, m__tradedate)
         MEM_DEALLOC(FLOAT, m__s)
         MEM_DEALLOC(FLOAT, m__sigma)
         MEM_DEALLOC(FLOAT, m__t)

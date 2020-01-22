@@ -2,6 +2,8 @@
 // Created by peter on 1/17/20.
 //
 
+#include "context.h"
+
 #include <fstream>
 #include "io_csv.h"
 #include <string>
