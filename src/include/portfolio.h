@@ -31,7 +31,7 @@ public:
     Portfolio(const MarketData &market_data_p, const PortfolioGeneratorInterface &generator_p) :
         market_data(market_data_p), generator(generator_p) {}
 
-    void do_compute();
+    void do_compute(double xl, double xh);
 };
 
 #endif //PRICER_PORTFOLIO_H

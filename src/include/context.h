@@ -54,6 +54,21 @@ namespace Pricer {
         virtual ~pricer_context() {
             dealloc_mem();
         };
+        
+        inline
+        void overwrite_entry(uint64_t i, pricer_context *p, uint64_t j ) {
+            
+            get_x()[j] = p->get_x()[i];
+            get_s()[j] = p->get_s()[i];
+            get_sigma()[j] = p->get_sigma()[i];
+            get_r()[j] = p->get_r()[i];
+            get_t()[j] = p->get_t()[i];
+            get_tau()[j] = p->get_tau()[i];
+            get_put_call()[j] = p->get_put_call()[i];
+            get_long_short()[j] = p->get_long_short()[i];
+            get_tradedate()[j] = p->get_tradedate()[i];
+
+        }
 
         inline
         uint64_t add_entry(double tradedate_p, double x_p, double s_p, double sigma_p, double r_p, double t_p, double tau_p, double put_call_p, double long_short_p) {
@@ -150,6 +165,15 @@ namespace Pricer {
             dealloc_mem();
         };
 
+
+        inline
+        void overwrite_entry(uint64_t i, ddx_pricer_context *p, uint64_t j ) {
+
+            pricer_context::add_entry(i, p, j);
+
+        }
+
+
         inline
         uint64_t  add_entry(double tradedate_p, double x_p, double s_p, double sigma_p, double r_p, double t_p, double tau_p, double put_call_p, double long_short_p) {
 
@@ -205,6 +229,14 @@ namespace Pricer {
         };
 
         inline
+        void overwrite_entry(uint64_t i, d2dx2_pricer_context *p, uint64_t j ) {
+
+            ddx_pricer_context::add_entry(i, p, j);
+
+        }
+
+
+        inline
         uint64_t  add_entry(double tradedate_p, double x_p, double s_p, double sigma_p, double r_p, double t_p, double tau_p, double put_call_p, double long_short_p) {
 
             return ddx_pricer_context::add_entry(tradedate_p, x_p, s_p, sigma_p, r_p, t_p, tau_p, put_call_p, long_short_p);
@@ -253,10 +285,26 @@ namespace Pricer {
         }
 
         inline
-        uint64_t  add_leg(double tradedate_p, double x_p, double s_p, double sigma_p, double r_p, double t_p, double tau_p, double put_call_p, double long_short_p, uint64_t structure_p) {
+        void overwrite_structure(uint64_t i, compute_prices_of_instruments_context *p, uint64_t j ) {
+            get_x_()[j] = p->get_x_()[i];
+        }
+
+
+        inline
+        void overwrite_leg(uint64_t i, compute_prices_of_instruments_context *p, uint64_t j ) {
+
+            get_to_structure()[j] = p->get_to_structure()[i];
+            pricer_context::overwrite_entry(i, p, j);
+
+        }
+
+
+        inline
+        uint64_t  add_leg(double tradedate_p, double x_p, double s_p, double sigma_p, double r_p, double t_p, double tau_p, double put_call_p, double long_short_p, double offset_p, uint64_t structure_p) {
 
 
             get_to_structure()[get_n_act()] = structure_p;
+            get_offsets()[get_n_act()] = offset_p;
             return pricer_context::add_entry(tradedate_p, x_p, s_p, sigma_p, r_p, t_p, tau_p, put_call_p, long_short_p);
         }
 

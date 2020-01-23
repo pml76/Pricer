@@ -72,7 +72,7 @@ void write_csv(Pricer::compute_instrument_strikes_from_premiums_context &context
         o << ((context.get_put_call()[i]==1.)?"Call":((context.get_put_call()[i]==-1.)?"Put":"N/A")) << delimiter;
         o << context.get_prices()[i] << delimiter;
 
-        o << context.get_x()[i] << delimiter;
+        o << context.get_x()[i] + context.get_offsets()[i] << delimiter;
 
         eraJd2cal(context.get_tradedate()[i] + context.get_t()[i]-context.get_tau()[i]+1,0,&y,&m,&d,&dd);
         o << y <<"-" << ((m<10)?"0":"") << m << "-" << ((d<10)?"0":"") << d << delimiter;
@@ -120,7 +120,7 @@ void write_csv(Pricer::compute_prices_of_instruments_context &context, S &o,
         o << ((context.get_put_call()[i]==1.)?"Call":((context.get_put_call()[i]==-1.)?"Put":"N/A")) << delimiter;
         o << context.get_prices()[i] << delimiter;
 
-        o << context.get_x()[i] << delimiter;
+        o << context.get_x()[i] + context.get_offsets()[i] << delimiter;
 
         eraJd2cal(context.get_tradedate()[i] + context.get_t()[i]-context.get_tau()[i]+1,0,&y,&m,&d,&dd);
         o << y <<"-" << ((m<10)?"0":"") << m << "-" << ((d<10)?"0":"") << d << delimiter;
