@@ -17,8 +17,8 @@ SCENARIO("Export to CSV") {
         eraCal2jd(2012,1,1,&d1,&d2);
         eraCal2jd(2012,6,1,&b1,&b2);
         eraCal2jd(2012,6,30,&e1,&e2);
-        context.add_leg(d1+d2, 60, 70, 0.03, 0.01, (e1+e2)-(d1+d2), (e1+e2)-(b1+b2)+1, -1., -1., structure);
-        context.add_leg(d1+d2, 60, 70, 0.03, 0.01, (e1+e2)-(d1+d2), (e1+e2)-(b1+b2)+1, 1., -1., structure);
+        context.add_leg(d1+d2, 60, 70, 0.03, 0.01, (e1+e2)-(d1+d2), (e1+e2)-(b1+b2)+1, -1., -1., 0., structure);
+        context.add_leg(d1+d2, 60, 70, 0.03, 0.01, (e1+e2)-(d1+d2), (e1+e2)-(b1+b2)+1, 1., -1., 0., structure);
         std::stringstream s;
 
 

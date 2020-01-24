@@ -178,7 +178,7 @@ namespace Pricer {
     void compute_instrument_strikes_from_premiums_context::alloc_mem(uint64_t n, uint64_t m) {
 
         MEM_ALLOC(FLOAT, m, m__premium_modifier, 0.)
-        MEM_ALLOC(FLOAT, m, m__premiums, 0.)
+        MEM_ALLOC(FLOAT, m, m__premiums, 5.)
         MEM_ALLOC(FLOAT, m, m__instrument_pricesl, 0.)
         MEM_ALLOC(FLOAT, m, m__instrument_pricesh, 0.)
 
@@ -193,7 +193,7 @@ namespace Pricer {
         if( get_m_max() != m_p) {
             m_p++;
             MEM_REALLOC(FLOAT, m, m_old, m_p, m__premium_modifier, 0.)
-            MEM_REALLOC(FLOAT, m, m_old, m_p, m__premiums, 0.)
+            MEM_REALLOC(FLOAT, m, m_old, m_p, m__premiums, 5.)
             MEM_REALLOC(FLOAT, m, m_old, m_p, m__instrument_pricesl, 0.)
             MEM_REALLOC(FLOAT, m, m_old, m_p, m__instrument_pricesh, 0.)
 

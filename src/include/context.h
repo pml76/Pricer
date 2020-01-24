@@ -55,18 +55,28 @@ namespace Pricer {
             dealloc_mem();
         };
         
-        inline
-        void overwrite_entry(uint64_t i, pricer_context *p, uint64_t j ) {
+
+        inline void copy_entry(uint64_t i, pricer_context *p, uint64_t j ) {
             
-            get_x()[j] = p->get_x()[i];
-            get_s()[j] = p->get_s()[i];
-            get_sigma()[j] = p->get_sigma()[i];
-            get_r()[j] = p->get_r()[i];
-            get_t()[j] = p->get_t()[i];
-            get_tau()[j] = p->get_tau()[i];
-            get_put_call()[j] = p->get_put_call()[i];
-            get_long_short()[j] = p->get_long_short()[i];
-            get_tradedate()[j] = p->get_tradedate()[i];
+            get_x()[j]           = p->get_x()[i];
+            get_s()[j]           = p->get_s()[i];
+            get_sigma()[j]       = p->get_sigma()[i];
+            get_r()[j]           = p->get_r()[i];
+            get_t()[j]           = p->get_t()[i];
+            get_tau()[j]         = p->get_tau()[i];
+            get_put_call()[j]    = p->get_put_call()[i];
+            get_long_short()[j]  = p->get_long_short()[i];
+            get_tradedate()[j]   = p->get_tradedate()[i];
+
+            get_sigmaA()[j]      = p->get_sigmaA()[i];
+            get_sigmaA2T2()[j]   = p->get_sigmaA2T2()[i];
+            get_sigmaAsqrtT()[j] = p->get_sigmaAsqrtT()[i];
+            get_emrt()[j]        = p->get_emrt()[i];
+            get_tradedate()[j]   = p->get_tradedate()[i];
+            get_prices()[j]      = p->get_prices()[i];
+            get_d1()[j]          = p->get_d1()[i];
+            get_d2()[j]          = p->get_d2()[i];
+
 
         }
 
@@ -165,20 +175,12 @@ namespace Pricer {
             dealloc_mem();
         };
 
-
         inline
-        void overwrite_entry(uint64_t i, ddx_pricer_context *p, uint64_t j ) {
-
-            pricer_context::add_entry(i, p, j);
-
+        void copy_entry(uint64_t i, ddx_pricer_context *p, uint64_t j ) {
+            pricer_context::copy_entry(i, p, j);
+            get_ddx_price()[j] = p->get_ddx_price()[i];
         }
 
-
-        inline
-        uint64_t  add_entry(double tradedate_p, double x_p, double s_p, double sigma_p, double r_p, double t_p, double tau_p, double put_call_p, double long_short_p) {
-
-            return pricer_context::add_entry(tradedate_p, x_p, s_p, sigma_p, r_p, t_p, tau_p, put_call_p, long_short_p);
-        }
 
     private:
 
@@ -229,17 +231,9 @@ namespace Pricer {
         };
 
         inline
-        void overwrite_entry(uint64_t i, d2dx2_pricer_context *p, uint64_t j ) {
-
-            ddx_pricer_context::add_entry(i, p, j);
-
-        }
-
-
-        inline
-        uint64_t  add_entry(double tradedate_p, double x_p, double s_p, double sigma_p, double r_p, double t_p, double tau_p, double put_call_p, double long_short_p) {
-
-            return ddx_pricer_context::add_entry(tradedate_p, x_p, s_p, sigma_p, r_p, t_p, tau_p, put_call_p, long_short_p);
+        void copy_entry(uint64_t i, d2dx2_pricer_context *p, uint64_t j ) {
+            ddx_pricer_context::copy_entry(i, p, j);
+            get_d2dx2_price()[j] = p->get_d2dx2_price()[i];
         }
 
     private:
@@ -274,6 +268,22 @@ namespace Pricer {
         };
 
 
+        void shrink_n_max_to_actual() {
+            if(get_n_act() % 64 == 0 ) {
+                get_n_max() = get_n_act();
+            } else {
+                get_n_max() = ((get_n_act() / 64)+1)*64;
+            }
+        }
+
+        void shrink_m_max_to_actual() {
+            if(get_m_act() % 64 == 0 ) {
+                get_m_max() = get_m_act();
+            } else {
+                get_m_max() = ((get_m_act() / 64)+1)*64;
+            }
+        }
+
         uint64_t add_structure(double x_p ) {
             if(UNLIKELY(get_m_act() >= get_m_max() - 1)) {
                 realloc_mem(get_n_max(), 2*get_m_max());
@@ -285,16 +295,18 @@ namespace Pricer {
         }
 
         inline
-        void overwrite_structure(uint64_t i, compute_prices_of_instruments_context *p, uint64_t j ) {
+        void copy_structure(uint64_t i, compute_prices_of_instruments_context *p, uint64_t j ) {
             get_x_()[j] = p->get_x_()[i];
+            get_instrument_prices()[j] = p->get_instrument_prices()[i];
         }
 
 
         inline
-        void overwrite_leg(uint64_t i, compute_prices_of_instruments_context *p, uint64_t j ) {
+        void copy_leg(uint64_t i, compute_prices_of_instruments_context *p, uint64_t j ) {
 
             get_to_structure()[j] = p->get_to_structure()[i];
-            pricer_context::overwrite_entry(i, p, j);
+            get_offsets()[j]      = p->get_offsets()[i];
+            pricer_context::copy_entry(i, p, j);
 
         }
 
@@ -344,6 +356,21 @@ namespace Pricer {
 
             get_premiums()[get_m_act()] = premium_p;
             return get_m_act()++;
+
+        }
+
+
+        inline
+        void copy_structure(uint64_t i, compute_instrument_strikes_from_premiums_context *p, uint64_t j ) {
+
+            compute_prices_of_instruments_context::copy_structure(i, p, j);
+
+            get_premium_modifier()[j]    = p->get_premium_modifier()[i];
+            get_premiums()[j]            = p->get_premiums()[i];
+            get_instrument_pricesl()[j]  = p->get_instrument_pricesl()[i];
+            get_instrument_pricesh()[j]  = p->get_instrument_pricesh()[i];
+            get_xl_()[j]                 = p->get_xl_()[i];
+            get_xh_()[j]                 = p->get_xh_()[i];
 
         }
 
