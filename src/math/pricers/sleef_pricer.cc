@@ -171,7 +171,7 @@ extern const double rempitabdp[];
 #include <omp.h>
 
 static vdouble ln_of_2, msqrt2;
-vdouble one, two, four, pi2, mone, zero;
+vdouble one, two, four, pi2, mone, zero, one_div_two, nans;
 
 
 extern "C" {
@@ -194,6 +194,8 @@ void init_tw_pricer() {
     pi2 = vmul_vd_vd_vd(two, vcast_vd_d(M_PI));
     mone = vcast_vd_d(-1.);
     zero = vcast_vd_d(0.);
+    one_div_two = vcast_vd_d(0.5);
+    nans = vcast_vd_d(std::nan(""));
 
 }
 
@@ -791,7 +793,7 @@ bool check_if_roots_are_breaketed( Pricer::compute_instrument_strikes_from_premi
 #ifdef NDEBUG
         #pragma omp for schedule(static)
 #endif
-        for (uint64_t i = 0; i < context.get_n_max(); ++i) {
+        for (uint64_t i = 0; i < context.get_m_max(); ++i) {
             if (context.get_instrument_pricesl()[i]*context.get_instrument_pricesh()[i] < 0.) {
                 no_breaketed2++;
             } else {
@@ -878,16 +880,51 @@ void compute_tw_strikes_from_premiums( Pricer::compute_instrument_strikes_from_p
 
 
 
+    // ensure that there is a root to be computed
     compute_tw_upper_and_lower_bounds(context);
+
+#ifdef NDEBUG
+    #pragma omp parallel
+#endif
+    {
+        vdouble pricel, priceh, tmp, tmp2, premium;
+        vopmask op;
+
+        uint64_t m2 =context.get_m_max() / (64 / sizeof(double));
+        uint64_t tid = omp_get_thread_num();
+        uint64_t num_threads = omp_get_num_threads();
+        uint64_t m_begin = ((tid * m2) / num_threads) * (64 / sizeof(double));
+        uint64_t m_end = (((tid + 1) * m2) / num_threads) * (64 / sizeof(double));
+
+        for (uint64_t i = m_begin; i < m_end; i += sizeof(vdouble) / sizeof(double)) {
+            priceh = vload_vd_p(&context.get_instrument_pricesh()[i]);
+            pricel = vload_vd_p(&context.get_instrument_pricesl()[i]);
+            premium = vload_vd_p(&context.get_premiums()[i]);
+
+            tmp  = vmul_vd_vd_vd(pricel, priceh);
+            tmp2 = vmul_vd_vd_vd(vadd_vd_vd_vd(pricel, priceh), one_div_two);
+            op  = vlt_vo_vd_vd(tmp, zero);
+            tmp = vsel_vd_vo_vd_vd(op, zero, tmp2);
+
+            premium = vadd_vd_vd_vd(premium, tmp);
+            priceh  = vadd_vd_vd_vd(priceh, tmp);
+            pricel  = vadd_vd_vd_vd(pricel, tmp);
+
+            vstore_v_p_vd(&context.get_premiums()[i], premium);
+            vstore_v_p_vd(&context.get_instrument_pricesh()[i], priceh);
+            vstore_v_p_vd(&context.get_instrument_pricesl()[i], pricel);
+            vstore_v_p_vd(&context.get_premium_modifier()[i], tmp);
+
+        }
+
+    }
+
 
     /*
      *  Main loop starts here.
      */
     do {
         err = zero;
-#ifdef NDEBUG
-        #pragma omp parallel
-#endif
         {
 
             vdouble err1 = zero;
@@ -1061,6 +1098,9 @@ void compute_tw_strikes_from_premiums( Pricer::compute_instrument_strikes_from_p
     #pragma omp parallel
 #endif
     {
+        vopmask op;
+        vdouble tmp;
+
         uint64_t m2 = context.get_m_max() / (64 / sizeof(double));
         uint64_t tid = omp_get_thread_num();
         uint64_t num_threads = omp_get_num_threads();
@@ -1068,14 +1108,16 @@ void compute_tw_strikes_from_premiums( Pricer::compute_instrument_strikes_from_p
         uint64_t m_end = (((tid + 1) * m2) / num_threads) * (64 / sizeof(double));
 
         for (uint64_t i = m_begin; i < m_end; i += sizeof(vdouble) / sizeof(double)) {
+            op = veq_vo_vd_vd(vload_vd_p(&context.get_premium_modifier()[i]), zero);
+
             vstore_v_p_vd(
                     &context.get_instrument_prices()[i],
-                    vadd_vd_vd_vd(
+                    vsel_vd_vo_vd_vd(op, vadd_vd_vd_vd(
                             vload_vd_p(&context.get_instrument_pricesl()[i]),
-                            vload_vd_p(&context.get_premiums()[i])
-                    )
-            );
-            vstore_v_p_vd(&context.get_x_()[i], vload_vd_p(&context.get_xl_()[i]));
+                            vload_vd_p(&context.get_premiums()[i])), nans)
+                            );
+
+            vstore_v_p_vd(&context.get_x_()[i], vsel_vd_vo_vd_vd(op, vload_vd_p(&context.get_xl_()[i]), nans));
         }
     }
 

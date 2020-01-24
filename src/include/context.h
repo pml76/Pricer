@@ -359,6 +359,7 @@ namespace Pricer {
     public:
 
 
+        DEFINE_VARIABLE(Real_Ptr, premium_modifier)    /// [internal use]
         DEFINE_VARIABLE(Real_Ptr, premiums)            /// [input]
         DEFINE_VARIABLE(Real_Ptr, instrument_pricesl)  /// [internal use]
         DEFINE_VARIABLE(Real_Ptr, instrument_pricesh)  /// [internal use]
