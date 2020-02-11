@@ -272,7 +272,7 @@ add_library(${TARGET_LIBPRICER}
         ${MEMORY_HEADERS}
         ${ASMLIB_SOURCES}
         ${IO_SOURCES}
-        ${IO_HEADERS} interface/portfolio.cc include/portfolio.h)
+        ${IO_HEADERS} interface/portfolio.cc include/portfolio.h math/pricers/my_pricer.cc include/my_pricer.h)
 
 target_include_directories(${TARGET_LIBPRICER} PRIVATE
         ./

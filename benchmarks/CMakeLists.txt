@@ -11,7 +11,7 @@ find_package(CLI11 CONFIG REQUIRED)
 set(TARGET_PRICER_BENCHMARK_SOURCES
         math/mkl-pricer-benchmark.cc
         math/sleef-pricer-benchmark.cc
-        main.cc)
+        main.cc math/my-pricer-benchmark.cc)
 
 include_directories(
         ./

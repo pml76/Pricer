@@ -170,6 +170,8 @@ extern const double rempitabdp[];
 
 #include <omp.h>
 
+#undef NDEBUG
+
 static vdouble ln_of_2, msqrt2;
 vdouble one, two, four, pi2, mone, zero, one_div_two, nans;
 
